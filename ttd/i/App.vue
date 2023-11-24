@@ -1,10 +1,10 @@
 <script setup>
-import FunctionList from './FunctionList.vue/FunctionList.vue';
+import FunctionList from './FunctionList/FunctionList.vue';
 </script>
 
 <template>
   <div class="main flex flex-row grow h-full w-full">
-    <FunctionList :functionList="funcitonList"/>
+    <FunctionList :functionList="functionList"/>
     <div class="server flex flex-row w-full">
       <div class="toollist flex flex-auto bg-orange-100"></div>
       <div class="tooldetail flex grow basis-full bg-orange-50 w-full"></div>
@@ -16,7 +16,7 @@ import FunctionList from './FunctionList.vue/FunctionList.vue';
 export default {
   data() {
     return {
-      funtionList: {
+      functionList: {
         directMessages: [
           { imageSrc: '../../src/assets/main/sffgurus.webp' },
           // Add more objects with image sources for direct messages
@@ -60,10 +60,6 @@ export default {
       margin-top: 12px;
     }
 
-    .delimeter {
-      background-color: #35363c;
-      border-radius: 1px;
-    }
   }
 
   .serverlist::-webkit-scrollbar {

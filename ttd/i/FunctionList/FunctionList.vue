@@ -4,7 +4,7 @@
         <!-- Direct Message icons -->
         <div class="sublist flex-1 mx-0 grow-0">
         <div class="flex flex-col w-full">
-            <div class="h-12 relative flex mx-auto mb-2" v-for="(message, index) in directMessages" :key="index">
+            <div class="h-12 relative flex mx-auto mb-2" v-for="(message, index) in functionList.directMessages" :key="index">
             <div>
                 
             </div>
@@ -24,9 +24,8 @@
         <!-- User's joined servers icons -->
         <div class="sublist flex-1 mx-0 grow-0">
         <div class="flex flex-col w-full">
-            <div class="h-12 relative flex mx-auto mb-2"  v-for="(server, index) in joinedServers" :key="index">
-            <div class="absolute w-0.5 h-2 white block left-0 inset-y-auto">
-
+            <div class="h-12 relative flex mx-auto mb-2"  v-for="(server, index) in functionList.joinedServers" :key="index">
+              <div class="absolute w-0.5 h-2 white block left-0 inset-y-auto">
             </div>
             <!-- Your joined servers icons here -->
             <span class="icon inline-block w-12">
@@ -45,7 +44,7 @@
         <!-- Placeholder icons -->
         <div class="sublist flex-1 mx-0 grow-0">
         <div class="flex flex-col w-full">
-            <div class="h-12 relative flex mx-auto mb-2"  v-for="(func, index) in placeholderCount" :key="index">
+            <div class="h-12 relative flex mx-auto mb-2"  v-for="(func, index) in functionList.placeholderCount" :key="index">
             <!-- Your placeholder icons here -->
             <span class="icon inline-block w-12">
                 <img :src="func.imageSrc" alt="Direct Message" class="icon relative mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out" />
@@ -59,7 +58,7 @@
 
 <script setup>
 const props = defineProps({
-    funtionList: Object,
+    functionList: Object,
 })
 
 </script>
@@ -82,6 +81,11 @@ const props = defineProps({
 
     >:first-child {
       margin-top: 12px;
+    }
+
+    .delimeter {
+      background-color: #35363c;
+      border-radius: 1px;
     }
   }
 
