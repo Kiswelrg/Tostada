@@ -1,10 +1,10 @@
 <script setup>
-import ServerList from './ServerList.vue/ServerList.vue';
+import FunctionList from './FunctionList.vue/FunctionList.vue';
 </script>
 
 <template>
   <div class="main flex flex-row grow h-full w-full">
-    <ServerList></ServerList>
+    <FunctionList :functionList="funcitonList"/>
     <div class="server flex flex-row w-full">
       <div class="toollist flex flex-auto bg-orange-100"></div>
       <div class="tooldetail flex grow basis-full bg-orange-50 w-full"></div>
@@ -16,22 +16,24 @@ import ServerList from './ServerList.vue/ServerList.vue';
 export default {
   data() {
     return {
-      directMessages: [
-        { imageSrc: '../../src/assets/main/sffgurus.webp' },
-        // Add more objects with image sources for direct messages
-      ],
-      joinedServers: [
-        { imageSrc: '../../src/assets/main/myserver.webp' },
-        { imageSrc: '../../src/assets/main/sffgurus.webp' },
-        { imageSrc: '../../src/assets/main/mj.webp' },
-        { imageSrc: '../../src/assets/main/mj.webp' },
-        { imageSrc: '../../src/assets/main/mj.webp' },
-        // Add more objects with image sources for joined servers
-      ],
-      placeholderCount: [
-        { imageSrc: '../../src/assets/main/myserver.webp' },
-        { imageSrc: '../../src/assets/main/sffgurus.webp' },
-      ]
+      funtionList: {
+        directMessages: [
+          { imageSrc: '../../src/assets/main/sffgurus.webp' },
+          // Add more objects with image sources for direct messages
+        ],
+        joinedServers: [
+          { imageSrc: '../../src/assets/main/myserver.webp' },
+          { imageSrc: '../../src/assets/main/sffgurus.webp' },
+          { imageSrc: '../../src/assets/main/mj.webp' },
+          { imageSrc: '../../src/assets/main/mj.webp' },
+          { imageSrc: '../../src/assets/main/mj.webp' },
+          // Add more objects with image sources for joined servers
+        ],
+        placeholderCount: [
+          { imageSrc: '../../src/assets/main/myserver.webp' },
+          { imageSrc: '../../src/assets/main/sffgurus.webp' },
+        ]
+      }
     };
   }
   // You can fetch data or set your icons' image sources within the directMessages and joinedServers arrays.
