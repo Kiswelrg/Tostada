@@ -1,14 +1,12 @@
 <script setup>
 import FunctionList from './FunctionList/FunctionList.vue';
+import Server from './FunctionDetail/Server/Server.vue';
 </script>
 
 <template>
   <div class="main flex flex-row grow h-full w-full">
     <FunctionList :functionList="functionList"/>
-    <div class="server flex flex-row w-full">
-      <div class="toollist flex flex-auto bg-orange-100"></div>
-      <div class="tooldetail flex grow basis-full bg-orange-50 w-full"></div>
-    </div>
+    <Server />
   </div>
 </template>
 
@@ -64,17 +62,6 @@ export default {
 
   .serverlist::-webkit-scrollbar {
     display: none;
-  }
-
-  .server {
-    .toollist {
-      background-color: #2b2d31;
-      width: 240px;
-    }
-
-    .tooldetail {
-      background-color: #313338;
-    }
   }
 }
 
