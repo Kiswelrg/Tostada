@@ -22,7 +22,7 @@
                 <div class="introwrapper flex flex-col items-left">
                     <span class="text-sm text-left">this is an introduction</span>
                     <span class="text-sm text-left text-2s">小炒计算器(1)、clash config合成器(2+)、</span>
-                    <span class="text-sm text-left text-2s">this is an introduction</span>
+                    <span class="text-sm text-left text-2s">云盘（1）</span>
                     
                 </div>
             </div>
@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-import InputKing from '../../../../InputKing/InputKing.vue'
+import InputKing from '@/../i/InputKing/InputKing.vue'
 </script>
 
 <style lang="scss" scoped>
