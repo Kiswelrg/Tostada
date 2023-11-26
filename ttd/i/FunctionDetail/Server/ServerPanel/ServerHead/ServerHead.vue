@@ -6,7 +6,7 @@
                 <img class="h-full" src="@/assets/thumb.svg" alt="">
             </div>
             <div class="servername text-start h-6 w-full pl-1">
-                <span class="text-xs text-white">Some Server</span>
+                <span class="text-xs text-white truncate">Some Server</span>
             </div>
             <div class="h-6 w-6">
                 <div class="dropdownarror h-5 w-5 relative mb-0 mr-0"></div>
@@ -25,7 +25,7 @@
 
 <style lang="scss" scoped>
 .serverhead {
-    box-shadow: 0 0 2px 0 rgb(0,0,0 / 0.5);
+    box-shadow: 0 0 2px 0 rgba(0,0,0,0.5);
 }
 
 .dropdownarror {

@@ -17,7 +17,7 @@
             </div>
             <div v-for="sub in section.subsec" :key="section.id" @click="selectSubSection(sub.id)" class="toolbutton text-white flex ml-3 mr-2 p-1 hover:bg-hui-700 rounded" :class="{'bg-hui-700': selectedSubSection == sub.id}">
                 <div class="h-2 w-2 my-auto mx-1">
-                    <img class="downsvg" src="@/assets/hashtag-solid.svg" alt="" />
+                    <img class="hashsvg" src="@/assets/hashtag-solid.svg" alt="" />
                 </div>
                 <div class="uppercase">
                     {{ sub.name }}
@@ -68,17 +68,18 @@ const sections = ref([
   }
 ])
 
-function selectSubSection(id){
+function selectSubSection(id) {
     selectedSubSection.value = id
 }
 
-
+function checkIsSelected(id) {
+}
 
 </script>
 
 <style lang="scss" scoped>
 
-.downsvg {
+.downsvg, .hashsvg {
     filter: invert(100%) sepia(3%) saturate(7453%) hue-rotate(138deg) brightness(111%) contrast(104%);
 }
 
