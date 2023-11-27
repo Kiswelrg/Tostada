@@ -1,5 +1,6 @@
 <template>
 <div class="serverhead w-full h-12">
+    
     <div class="wrapper m-0 w-full h-full">
         <div class="flex flex-row px-4 py-3">
             <div class="h-6 w-6 my-auto">
@@ -11,11 +12,14 @@
             <div class="h-6 w-6">
                 <div class="dropdownarror h-5 w-5 relative mb-0 mr-0"></div>
             </div>
-
+            
             <!-- someting else-->
             <div class="some thing else"></div>
         </div>
     </div>
+
+    <!-- someting else-->
+    <div class="wrapper"></div>
 </div>
 </template>
 

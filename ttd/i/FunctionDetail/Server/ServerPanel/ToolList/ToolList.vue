@@ -1,6 +1,6 @@
 <template>
     <!-- something else-->
-    <div class="h-full">
+    <div class="">
         <div class="seomthingelse">
 
         </div>
