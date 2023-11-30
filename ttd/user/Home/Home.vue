@@ -1,12 +1,11 @@
 <template>
 <div class="text-[#000000]">
-    Home Page
+    Homd Page
 </div>
 </template>
 
 <script setup>
-import Header from '../Header/Header.vue'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 
 </script>
