@@ -1,5 +1,5 @@
 <template>
-<div class="flex h-[53px] grow-0 shrink-0 mb-px w-full pr-2 pl-[6px] bg-userbar-bg items-center">
+<div class="flex z-[2] h-[53px] grow-0 shrink-0 mb-px w-full pr-2 pl-[6px] bg-userbar-bg items-center">
 
     <div class="flex min-w-[120px] h-[42px] mr-2 pl-0.5 bg-userbar-hoverbg rounded-md items-center">
         <div class="h-8 w-8 shrink-0 rounded-full bg-hui-800 cursor-pointer"></div>

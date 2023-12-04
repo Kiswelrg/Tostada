@@ -1,8 +1,7 @@
 <template>
     <!-- something else-->
-    <div class="">
+    <div class="toollist h-full overflow-y-scroll">
         <div class="seomthingelse">
-
         </div>
 
         <div v-for="(section,index) in sections" class="section text-hui-800 text-sm w-full min-h-10 pt-4">
@@ -30,7 +29,7 @@
 </template>
 
 <script setup>
-import {ref} from 'vue'
+import { ref } from 'vue'
 let selectedSubSection = ref(-1)
 const sections = ref([
   {
@@ -78,7 +77,22 @@ function checkIsSelected(id) {
 </script>
 
 <style lang="scss" scoped>
-
+.toollist {
+    
+    &::-webkit-scrollbar {
+        background-color: transparent;
+        width: 8px;
+        height: 100%;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: rgb(27, 27, 27);
+        // border: 4px solid #2b2d31;
+        border: 2px solid rgba(0,0,0,0);
+        background-clip: padding-box;
+        border-radius: 4px;
+    }
+    
+}
 .downsvg, .hashsvg {
     filter: invert(100%) sepia(3%) saturate(7453%) hue-rotate(138deg) brightness(111%) contrast(104%);
 }

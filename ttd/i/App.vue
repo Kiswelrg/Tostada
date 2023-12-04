@@ -25,6 +25,9 @@ export default {
           { imageSrc: '../../src/assets/main/mj.webp' },
           { imageSrc: '../../src/assets/main/mj.webp' },
           { imageSrc: '../../src/assets/main/mj.webp' },
+          { imageSrc: '../../src/assets/main/mj.webp' },
+          { imageSrc: '../../src/assets/main/mj.webp' },
+          { imageSrc: '../../src/assets/main/mj.webp' },
           // Add more objects with image sources for joined servers
         ],
         placeholderCount: [
@@ -41,6 +44,7 @@ export default {
 <style scoped lang="scss">
 .main {
   height: 100%;
+  overflow: hidden;
 
   .serverlist {
     background-color: #1e1f22;

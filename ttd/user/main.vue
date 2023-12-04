@@ -32,5 +32,7 @@ const tabs = ref({
 </script>
 
 <style lang="scss" setup>
-
+.main {
+    overflow: hidden;
+}
 </style>
