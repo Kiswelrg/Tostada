@@ -1,16 +1,25 @@
 <template>
-    <div class="tooltypical flex flex-col justify-between h-full w-full text-white">
+    <div class="tooltypical z-[2] flex flex-col justify-between h-full w-full text-white">
         
-        <div class="toolbody">
+        <div class="toolbody flex flex-col h-[calc(100%-53px)]">
             <ToolHead :title="tool.title" :intro="tool.intro"/>
-            <div class="introduction">
-                <div class="introwrapper flex flex-col items-left">
-                    <span class="text-sm text-left text-2s">小炒计算器(1)、clash config合成器(2+)、</span>
-                    <span class="text-sm text-left text-2s">便利贴</span>
+            <div class="belly overflow-y-auto">
+                <div class="introduction">
+                    <div class="introwrapper flex flex-col items-left text-center">
+                        <div v-for="i in 2" class="">
+                            <span class="text-sm text-left text-2s">小炒计算器(1)、clash config合成器(2+)、</span>
+                            <span class="text-sm text-left text-2s">便利贴(big)</span>
+                        </div>
 
+                    </div>
+                </div>
+                <div class="toolmenu"></div>
+                <div class="prompts">
+                    <div class="prompt-wrapper text-left">
+
+                    </div>
                 </div>
             </div>
-            <div class="toolmenu"></div>
         </div>
         
         <InputKing />

@@ -1,5 +1,5 @@
 <template>
-    <div class="inputking flex flex-col px-2 h-[53px] w-full grow-0 shrink-0">
+    <div class="inputking flex flex-col px-2 h-[53px] w-full grow-0 shrink-0 bg-[#313338]">
         <div class="wrapper flex justify-between mb-1 bg-[#383a40] w-full h-full rounded-lg">
             <div class="left-buttons h-full flex items-center ml-2">
                 <div>
