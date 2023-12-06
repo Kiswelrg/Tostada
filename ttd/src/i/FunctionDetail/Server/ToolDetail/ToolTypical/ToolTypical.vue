@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import InputKing from '@/../i/Global/InputKing/InputKing.vue'
+import InputKing from '@/i/Global/InputKing/InputKing.vue'
 import ToolHead from '../ToolHead/ToolHead.vue'
 import { ref } from 'vue'
 const tool = ref({

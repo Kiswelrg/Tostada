@@ -11,8 +11,9 @@ const count = ref(0)
 <template>
   <div class="flex m-auto w-fit gap-4">
       <a href="/">Home</a>
-      <a href="/i/">Tostada</a>
-      <a href="/blablabla/">Broken link</a>
+      <a href="/i/">Tool</a>
+      <a href="/user/">User</a>
+      <a href="/blablabla/">..</a>
   </div>
 </template>
 

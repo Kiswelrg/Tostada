@@ -25,6 +25,7 @@ export default {
         'hoverbg': '#3d3e45',
       },
       'white': '#ffffff',
+      'black': '#000000',
       'delimeter': {
         'toolhead': '#3f4147',
         'serverpanel': '#2b2d31',

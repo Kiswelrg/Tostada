@@ -27,7 +27,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import ToolBarTR from '@/../i/Global/ToolBarTR/ToolBarTR.vue'
+import ToolBarTR from '@/i/Global/ToolBarTR/ToolBarTR.vue'
 const props = defineProps({
     title: String,
     intro: String

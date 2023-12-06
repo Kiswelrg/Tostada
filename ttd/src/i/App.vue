@@ -31,8 +31,7 @@ export default {
           // Add more objects with image sources for joined servers
         ],
         placeholderCount: [
-          { imageSrc: '../../src/assets/main/myserver.webp' },
-          { imageSrc: '../../src/assets/main/sffgurus.webp' },
+          { imageSrc: '/tostada.svg' }
         ]
       }
     };

@@ -11,7 +11,7 @@
 <script setup>
 import ServerHead from "./ServerHead/ServerHead.vue"
 import ToolList from "./ToolList/ToolList.vue"
-import UserBar from "@/../i/Global/UserBar/UserBar.vue"
+import UserBar from "@/i/Global/UserBar/UserBar.vue"
 
 </script>
 
