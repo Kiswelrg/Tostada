@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="flex w-full h-full justify-center">
     Login Page
 
 </div>

@@ -1,10 +1,17 @@
 <script setup>
+import Notification from './components/Notification.vue'
+defineProps({
+  hideNotification: Boolean,
+})
 
 </script>
 
 <template>
-  <div class="main h-full w-full bg-teal-100">
+  <div class="main flex flex-col h-full w-full bg-teal-100">
     <!-- <router-link to="/user/">Go to U</router-link> -->
+    <div class="notification w-full" :class="{hidden: hideNotification}">
+      <Notification></Notification>
+    </div>
     <router-view></router-view>
   </div>
 </template>

@@ -2,15 +2,19 @@
     <div class="main h-full w-full flex flex-col bg-white">
         <Header />
         <!-- Component changes when currentTab changes -->
-        <keep-alive>
-            <component :is="currentTab" class="text-black grow"></component>
+        <div class="user-body flex h-full w-full justify-between">
+            <div class="h-full"></div>
+            <component :is="currentTab" class="text-black flex w-[300px] h-full">
+            </component>
+            <div class="h-full"></div>
+
+        </div>
         
-        </keep-alive>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, defineProps } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Header from './Header/Header.vue'
 import Home from './Home/Home.vue'
 import Login from './Login/Login.vue'

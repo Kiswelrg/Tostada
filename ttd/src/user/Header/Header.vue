@@ -34,11 +34,7 @@
                     Signup
                 </a>
             </div>
-            <!-- <div class="flex items-center w-16 h-full mx-1 shrink-0 rounded-sm">
-                <button class="text-[12px] font-bold h-full w-16 mx-auto bg-[#616161] py-0">
-                    注册
-                </button>
-            </div> -->
+
         </div>
     </div>
 </template>
