@@ -1,5 +1,5 @@
 <template>
-<div class="text-[#000000]">
+<div class="text-[#000000] flex w-full justify-center">
     Homd Page
 </div>
 </template>
