@@ -13,7 +13,7 @@ urlpatterns = [
 	# path('signin/', views.signin, name = 'sign-in'),
 	# path('forgetpassword/',views.forgetpassword, name = 'forget-pwd'),
 	# path('resetPwd/',views.resetPwd, name = 'reset-pwd'),
-	# path('Token/',views.getToken),
+	path('Token/',views.getToken),
 	# path('getUsername/',views.getUsername),
 	# path('Vcode/',views.Vcode, name = 'Vcode'),
 	# re_path(r'^search/(?:(?P<page>[0-9]{1,3})(?:[&=\w]+)/)?$',views.Search, name = 'search'),

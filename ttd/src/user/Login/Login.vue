@@ -1,12 +1,19 @@
 <template>
 <div class="flex w-full h-full justify-center">
-    Login Page
+    <UserSignInVue></UserSignInVue>
 
 </div>
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+import UserSignInVue from '../../components/UserSignIn.vue'
 
+
+onMounted(() => {
+    console.log(import.meta.env.VITE_BACKEND_URL)
+
+})
 </script>
 
 <style lang="scss" scoped>
