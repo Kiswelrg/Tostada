@@ -7,12 +7,17 @@ from django.forms import ValidationError
 from django.http.response import HttpResponseRedirect
 from django.urls import reverse
 import hashlib
+from user.models import User
 
-
+from django.conf import settings
+import json
 import random
 import os
 # Create your views here.
 
+def printc(info):
+    if settings.VERBOSE:
+        print(info)
 
 def Home(request):
     return render(request, 'user/index.html')
@@ -26,6 +31,41 @@ def SignUp(request):
     return render(request, 'user/index.html')
 
 
+def DoSignIn(request):
+    form_l = ['username', 'pwd', 'code']
+    try:
+        for fl in form_l:
+            request.POST[fl]
+    except MultiValueDictKeyError:
+        raise Http404('wow u got a 404!?-')
+    printc(request.POST)
+    msg = 0
+    state = False
+    '''
+    msg choices
+    1 验证码错误
+    2 账号或密码错误
+    '''
+    pwd = request.POST['pwd']
+    pwd = hashlib.sha256((pwd + 'tw').encode('utf-8')).hexdigest()
+    printc(request.session['code'], request.POST['code'])
+    if request.session["code"] != request.POST['code'].lower(): # 验证码
+        msg = 1
+    elif User.objects.filter(username = request.POST['username'], password = pwd):
+        state = True
+        msg = 11
+    else:
+        msg = 2
+    printc(f'login {state}')
+    '''
+    msg choices
+    1 验证码错误
+    2 帐号/密码不正确
+    11 成功
+    '''
+    return HttpResponse(json.dumps({'state': state, 'msg': msg}))
+
+
 def DoSignUp(request):
     form_l = ['username', 'pwd', 'code']
     try:
@@ -36,44 +76,41 @@ def DoSignUp(request):
     print(request.POST)
     msg = 1
     state = False
-    # 这里验证码 + ifinouc
     # if checkVcode(request):
     if request.session["code"] != request.POST['code'].lower(): # 验证码
         msg = 1
-    elif request.session.has_key("stu_id") and request.session["stu_id"]:
-        if User.objects.filter(stu_id = request.session["stu_id"]).exists():
-            msg = 2
-        elif User.objects.filter(username = request.POST.get('username')).exists():
+    else:
+        if User.objects.filter(username = request.POST.get('username')).exists():
             msg = 3
         else:
             #验证id pwd的规范性（用接口
-
             pwd = request.POST.get('pwd')
             pwd = hashlib.sha256(pwd.encode('utf-8')).hexdigest()
-            pwd = hashlib.sha256((pwd + 'ouc').encode('utf-8')).hexdigest()
+            pwd = hashlib.sha256((pwd + 'tw').encode('utf-8')).hexdigest()
             
             #设置user的其他field， 用接口
             u = User(
-                stu_id=int(request.session["stu_id"]),
                 username=request.POST.get('username'),
-                password = pwd
+                password = pwd,
+                additional = {}
             )
             try:
                 u.clean_fields()
-            except ValidationError:
-                print(1)
+            except ValidationError as e:
+                msg = 2
+                print(e)
+                return HttpResponse(json.dumps({'state': state, 'msg': msg}))
                 return HttpResponseRedirect(reverse('user:sign-up') + '?username=0')
             u.save()
             state = True
-            del request.session["stu_id"]
-    else:
-        raise Http404('wow u got a 404!?')
-    
+            msg = 11
+            return HttpResponse(json.dumps({'state': state, 'msg': msg}))
     '''
     msg choices
     1 验证码错误
-    2 该学号已经注册了
+    2 帐号/密码不合法
     3 该账号已经注册了
+    11 成功
     '''
     return HttpResponse(json.dumps({'state': state, 'msg': msg}))
 

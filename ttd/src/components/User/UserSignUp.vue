@@ -109,28 +109,6 @@
                 验证码不正确
               </div>
               <div
-                v-show="stu_already_signup"
-                class="bg-yellow-100 rounded-lg py-2 px-6 mb-3 text-sm text-yellow-700 inline-flex items-center w-full"
-                role="alert"
-              >
-                <svg
-                  aria-hidden="true"
-                  focusable="false"
-                  data-prefix="fas"
-                  data-icon="exclamation-triangle"
-                  class="w-4 h-4 mr-2 fill-current"
-                  role="img"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 576 512"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M569.517 440.013C587.975 472.007 564.806 512 527.94 512H48.054c-36.937 0-59.999-40.055-41.577-71.987L246.423 23.985c18.467-32.009 64.72-31.951 83.154 0l239.94 416.028zM288 354c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
-                  ></path>
-                </svg>
-                该学号已经注册了,&nbsp;&nbsp; <a class="text-lime-600" href="/user/forgetpassword">忘记密码？</a>
-              </div>
-              <div
                 v-show="username_taken"
                 class="bg-yellow-100 rounded-lg py-2 px-6 mb-3 text-sm text-yellow-700 inline-flex items-center w-full"
                 role="alert"
@@ -220,6 +198,25 @@
                     <label
                       for="exampleFormControlInput4"
                       class="form-label inline-block mb-2 text-gray-700 text-sm"
+                      >确认密码</label
+                    >
+                    <input
+                      class="form-control block w-full px-2 py-1 text-sm font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                      :class="{ invalid_style: !signup_varification_correct }"
+                      type="password"
+                      id="pwd2"
+                      name="pwd2"
+                      placeholder="密码"
+                      autocomplete="new-password"
+                      v-model="pwd2"
+                      required
+                      @input="checkPwdMatch()"
+                    />
+                  </div>
+                  <div class="mb-3 xl:w-80">
+                    <label
+                      for="exampleFormControlInput4"
+                      class="form-label inline-block mb-2 text-gray-700 text-sm"
                       >验证码</label
                     >
                     <div class="relative">
@@ -294,9 +291,7 @@ export default {
 import { ref } from "vue";
 // import $ from "jquery";
 
-const stu_already_signup = ref(false);
 const signup_pwd_match = ref(true);
-const stu_id_gonna_use = ref('');
 const username = ref("");
 const pwd = ref("");
 const pwd2 = ref("");
@@ -353,7 +348,6 @@ async function getToken() {
 
 async function signUp() {
   signup_varification_correct.value = true;
-  stu_already_signup.value = false;
   username_taken.value = false;
   if (!signup_pwd_match.value) return;
   const d = {
@@ -366,39 +360,78 @@ async function signUp() {
   for (var v in d) {
     form_data.append(v, d[v]);
   }
-  const res = await $.ajax({
-    url: "/api/user/signUp/",
-    method: "POST",
-    headers: { "X-CSRFToken": csrftoken },
-    processData: false,
-    contentType: false,
-    data: form_data,
-  })
-    .done(function (data, textStatus, xhr) {
+  try {
+    const response = await fetch("/api/user/dosignup/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrftoken,
+      },
+      body: form_data, // Assuming form_data is FormData; no need for processData: false as fetch does not automatically process data like jQuery
+    });
+
+    if (response.ok) {
+      const data = await response.json(); // Assuming the server response is JSON
       refreshVcode();
-      const r = JSON.parse(data);
-      if (r["state"]) {
-        console.log('注册成功');
+      if (data["state"]) {
+        console.log('sign up success');
       } else {
-        switch (r["msg"]) {
+        switch (data["msg"]) {
           case 1:
             signup_varification_correct.value = false;
-            console.log("验证码错误");
+            console.log("code wrong");
             break;
           case 2:
-            stu_already_signup.value = true;
-            console.log("该学号已经注册了");
+            // handle case 2
+            console.log("invalid request for you buddy!");
             break;
           case 3:
             username_taken.value = true;
-            console.log("该账号已经注册了");
+            console.log("username already signed up");
             break;
+          // Add more cases as needed
         }
       }
-    })
-    .fail(function (jqXHR, textStatus, errorThrown) {
-      console.log(jqXHR.status);
-    });
+    } else {
+      // If the server response was not ok (200-299)
+      console.log(response.status);
+    }
+  } catch (error) {
+    // Catch network errors or issues with the fetch call itself
+    console.error("Fetch error: " + error.message);
+  }
+
+  // const res = await $.ajax({
+  //   url: "/api/user/signUp/",
+  //   method: "POST",
+  //   headers: { "X-CSRFToken": csrftoken },
+  //   processData: false,
+  //   contentType: false,
+  //   data: form_data,
+  // })
+  //   .done(function (data, textStatus, xhr) {
+  //     refreshVcode();
+  //     const r = JSON.parse(data);
+  //     if (r["state"]) {
+  //       console.log('注册成功');
+  //     } else {
+  //       switch (r["msg"]) {
+  //         case 1:
+  //           signup_varification_correct.value = false;
+  //           console.log("验证码错误");
+  //           break;
+  //         case 2:
+
+  //           break;
+  //         case 3:
+  //           username_taken.value = true;
+  //           console.log("该账号已经注册了");
+  //           break;
+  //       }
+  //     }
+  //   })
+  //   .fail(function (jqXHR, textStatus, errorThrown) {
+  //     console.log(jqXHR.status);
+  //   });
 }
 </script>
 

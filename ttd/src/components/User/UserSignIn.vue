@@ -437,6 +437,7 @@ async function signIn() {
     .fail(function (jqXHR, textStatus, errorThrown) {
       console.log(jqXHR.status);
     });
+    const response = await fetch("/api/user/signup")
 }
 </script>
 

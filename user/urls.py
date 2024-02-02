@@ -7,11 +7,10 @@ app_name = 'user'
 urlpatterns = [
 	re_path(r'^(?:login/)?$',views.Login, name = 'login'),
 	# path('clearUserId/', views.clearStuId, name = 'clear-user-id'),
-	# path('signup/', views.signup, name = 'sign-up'),
 	path('signup/', views.SignUp, name = 'sign-up'),
-    path('dosignup/', views.DoSignUp, name = 'do-sign-sup'),
-	# path('signIn/', views.signIn, name = 'sign-In'),
+    path('dosignup/', views.DoSignUp, name = 'do-sign-up'),
 	# path('signin/', views.signin, name = 'sign-in'),
+	path('dosignin/', views.DoSignIn, name = 'do-sign-in'),
 	# path('forgetpassword/',views.forgetpassword, name = 'forget-pwd'),
 	# path('resetPwd/',views.resetPwd, name = 'reset-pwd'),
 	path('Token/',views.getToken),

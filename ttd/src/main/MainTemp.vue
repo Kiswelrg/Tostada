@@ -4,10 +4,9 @@
         <!-- Component changes when currentTab changes -->
         <div class="user-body flex h-full w-full justify-between">
             <div class="h-full"></div>
-            <!-- <component :is="currentTab" class="text-black flex w-[300px] h-full">
-            </component> -->
-            <router-view :is="currentTab" class="text-black flex w-[300px] h-full">
-            </router-view>
+            <!-- <router-view :is="currentTab" class="text-black flex w-[300px] h-full">
+            </router-view> -->
+            <Empty></Empty>
             <div class="h-full"></div>
 
         </div>
@@ -17,10 +16,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import Header from './Header/Header.vue'
-import Home from './Home/Home.vue'
-import Login from './Login/Login.vue'
-import Signup from './Signup/Signup.vue'
+import Header from '@/user/Header/Header.vue'
+import Home from '@/user/Home/Home.vue'
+import Empty from '../components/Util/Empty.vue'
 
 const p = defineProps({
     currentTabIndex: Number
@@ -31,8 +29,6 @@ const currentTabIndex = ref(p.currentTabIndex)
 const tabs = ref(
     [
         Home,
-        Login,
-        Signup,
     ]
 )
 
