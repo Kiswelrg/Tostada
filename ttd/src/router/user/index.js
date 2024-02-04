@@ -4,17 +4,22 @@ const userRoutes = [
     redirect: "/user/login/"
   },
   {
-    path: "login", // 对应 "/user/login"
+    path: "login/", // 对应 "/user/login"
     component: () => import("@/components/User/UserSignIn.vue"),
     props: { currentTabIndex: 1 }
   },
   {
-    path: "signup", // 对应 "/user/signup"
+    path: "signup/", // 对应 "/user/signup"
     component: () => import("@/components/User/UserSignUp.vue"),
     props: { currentTabIndex: 2 }
   },
   {
-    path: ":id(\\d+)?/:msg([^/]+)?", // 对应 "/user/:id/:msg"
+    path: "forgetpassword/", // 对应 "/user/signup"
+    component: () => import("@/components/User/UserForgetPassword.vue"),
+    props: { currentTabIndex: 2 }
+  },
+  {
+    path: ":id(\\d+)?/:msg([^/]+)?/", // 对应 "/user/:id/:msg"
     props: (route) => ({
       id: parseInt(route.params.id),
       msg: route.params.msg,

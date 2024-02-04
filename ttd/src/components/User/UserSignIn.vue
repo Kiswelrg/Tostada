@@ -324,22 +324,6 @@ onMounted(() => {
 })
 
 
-async function testAjax() {
-  const response = await $.ajax({
-    url: '/test_api/test.txt',
-    method: "GET",
-  }).done(function (data, textStatus, xhr) {
-    console.log(data);
-  })
-    .fail(function (jqXHR, textStatus, errorThrown) {
-      console.log(jqXHR.status);
-    });
-
-  // const r = JSON.parse(response);
-  // console.log(r);
-}
-
-
 function refreshVcode() {
   // $(vcodeImg.value).attr('src', '/api/user/Vcode/');
   VcodeUrl.value = '/api/user/Vcode/?h=' + Date.now().toString();
@@ -403,41 +387,60 @@ async function signIn() {
   for (var v in d) {
     form_data.append(v, d[v]);
   }
-  const res = await $.ajax({
-    url: "/api/user/signIn/",
-    method: "POST",
-    headers: { "X-CSRFToken": csrftoken },
-    processData: false,
-    contentType: false,
-    data: form_data,
-  })
-    .done(function (data, textStatus, xhr) {
-      refreshVcode();
-      const r = JSON.parse(data);
-      if (r["state"]) {
-        varification_correct.value = true;
-        pwd_validity.value = true;
-        console.log("登录成功");
-      } else {
-        switch (r["msg"]) {
-          case 1:
-            varification_correct.value = false;
-            pwd_validity.value = true;
-            console.log("验证码错误");
-            break;
-          case 2:
-            pwd_validity.value = false;
-            varification_correct.value = true;
-            console.log("账号或密码错误");
-            // goBeforeSignUp();
-            break;
-        }
+
+  // const res = await $.ajax({
+  //   url: "/api/user/dosignin/",
+  //   method: "POST",
+  //   headers: { "X-CSRFToken": csrftoken },
+  //   processData: false,
+  //   contentType: false,
+  //   data: form_data,
+  // })
+  //   .done(function (data, textStatus, xhr) {
+
+  //   })
+  //   .fail(function (jqXHR, textStatus, errorThrown) {
+  //     console.log(jqXHR.status);
+  //   });
+  
+  for (let [key, value] of form_data.entries()) {
+    console.log(`${key}: ${value}`);
+  }
+  const response = await fetch(
+    "/api/user/dosignin/",
+    {
+      method: "POST",
+      headers: { "X-CSRFToken": csrftoken },
+      body: form_data,
+    }
+  );
+  
+  if (response.ok) {
+    refreshVcode();
+    const r = await response.json();
+    if (r["state"]) {
+      varification_correct.value = true;
+      pwd_validity.value = true;
+      console.log("登陆成功");
+    } else {
+      console.log(r);
+      switch (r["msg"]) {
+        case 1:
+          varification_correct.value = false;
+          pwd_validity.value = true;
+          console.log("验证码错误");
+          break;
+        case 2:
+          pwd_validity.value = false;
+          varification_correct.value = true;
+          console.log("帐号/密码错误");
+          // goBeforeSignUp();
+          break;
       }
-    })
-    .fail(function (jqXHR, textStatus, errorThrown) {
-      console.log(jqXHR.status);
-    });
-    const response = await fetch("/api/user/signup")
+    }
+  } else {
+    console.log(response.status);
+  }
 }
 </script>
 

@@ -33,12 +33,19 @@ export default {
       'hui': {
         700: '#404249',
         800: '#81848e',
-      }
+      },
+      extend: {
+        colors: {
+          my_color: '#4dcb7a',
+        },
+      },
     },
     minHeight: {
       '10': '40px',
     },
-    extend: {},
+    extend: {
+      
+    },
   },
   plugins: [],
 }

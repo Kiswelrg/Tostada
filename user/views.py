@@ -15,8 +15,12 @@ import random
 import os
 # Create your views here.
 
-def printc(info):
+def printc(info, isList = False):
     if settings.VERBOSE:
+        if isList:
+            for i in info:
+                print(info)
+            return
         print(info)
 
 def Home(request):
@@ -31,14 +35,60 @@ def SignUp(request):
     return render(request, 'user/index.html')
 
 
-def DoSignIn(request):
-    form_l = ['username', 'pwd', 'code']
+def SignIn(request):
+    return render(request, 'user/index.html')
+
+
+def forgetpassword(request):
+    return render(request, 'user/index.html')
+
+
+def ResetPwd(request):
+    print(request.POST)
+    form_l = ['username', 'pwd', 'code', 'pwd2']
     try:
         for fl in form_l:
             request.POST[fl]
     except MultiValueDictKeyError:
         raise Http404('wow u got a 404!?-')
+
+    if request.POST['pwd'] == request.POST['pwd2']:
+        return HttpResponse(json.dumps({'state': False, 'msg': 4}))
+
     printc(request.POST)
+    msg = 0
+    state = False
+    if request.POST['code'] != request.session['code']:
+        msg = 1
+    elif not User.objects.filter(username = request.POST['username']).exists():
+        msg = 2
+    elif not User.objects.filter(username = request.POST['username'], password = hashlib.sha256((request.POST['pwd'] + 'tw').encode('utf-8')).hexdigest()).exists():
+        msg = 3
+    else:
+        state = True
+        pwd2 = hashlib.sha256((request.POST['pwd2'] + 'tw').encode('utf-8')).hexdigest()
+        u = User.objects.get(username = request.POST['username'])
+        u.password = pwd2
+        u.save()
+
+    '''
+    msg choices
+    1 验证码错误
+    2 没有注册
+    3 账号或密码错误
+    4 密码一样，放弃修改
+    '''
+    return HttpResponse(json.dumps({'state': state, 'msg': msg}))
+
+
+def DoSignIn(request):
+    form_l = ['username', 'pwd', 'code']
+    # try:
+    printc(request.POST)
+    for fl in form_l:
+        request.POST[fl]
+    # except MultiValueDictKeyError:
+        # raise Http404('wow u got a 404!?-')
     msg = 0
     state = False
     '''
@@ -48,7 +98,7 @@ def DoSignIn(request):
     '''
     pwd = request.POST['pwd']
     pwd = hashlib.sha256((pwd + 'tw').encode('utf-8')).hexdigest()
-    printc(request.session['code'], request.POST['code'])
+    printc([request.session['code'], request.POST['code']], isList = True)
     if request.session["code"] != request.POST['code'].lower(): # 验证码
         msg = 1
     elif User.objects.filter(username = request.POST['username'], password = pwd):
@@ -71,7 +121,7 @@ def DoSignUp(request):
     try:
         for fl in form_l:
             request.POST[fl]
-    except MultiValueDictKeyError:
+    except MultiValueDictKeyError as e:
         raise Http404('wow u got a 404!?')
     print(request.POST)
     msg = 1
