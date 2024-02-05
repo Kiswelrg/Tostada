@@ -8,9 +8,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, shallowRef } from 'vue'
 import ToolTypical from './ToolTypical/ToolTypical.vue'
-const tabs = ref({
+const tabs = shallowRef({
     'currentTab': ToolTypical,
 
 })

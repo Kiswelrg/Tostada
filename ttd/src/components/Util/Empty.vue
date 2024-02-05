@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 
 defineProps({
-  
+  helloText: String,
 })
 
 const count = ref(0)
@@ -10,7 +10,7 @@ const count = ref(0)
 
 <template>
   <div class="flex m-auto w-fit gap-4">
-    Blank Stuff
+    {{ helloText }}
   </div>
 </template>
 
