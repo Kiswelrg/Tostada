@@ -262,7 +262,7 @@
                     >
                       注册
                     </button>
-                    <div class="relative py-2 text-sm">
+                    <div class="relative py-2 text-[12px]">
                       已经注册了？&nbsp;<a class="text-blue-600" href="/user/login/">登录</a>
                     </div>
                   </div>
@@ -400,38 +400,6 @@ async function signUp() {
     console.error("Fetch error: " + error.message);
   }
 
-  // const res = await $.ajax({
-  //   url: "/api/user/signUp/",
-  //   method: "POST",
-  //   headers: { "X-CSRFToken": csrftoken },
-  //   processData: false,
-  //   contentType: false,
-  //   data: form_data,
-  // })
-  //   .done(function (data, textStatus, xhr) {
-  //     refreshVcode();
-  //     const r = JSON.parse(data);
-  //     if (r["state"]) {
-  //       console.log('注册成功');
-  //     } else {
-  //       switch (r["msg"]) {
-  //         case 1:
-  //           signup_varification_correct.value = false;
-  //           console.log("验证码错误");
-  //           break;
-  //         case 2:
-
-  //           break;
-  //         case 3:
-  //           username_taken.value = true;
-  //           console.log("该账号已经注册了");
-  //           break;
-  //       }
-  //     }
-  //   })
-  //   .fail(function (jqXHR, textStatus, errorThrown) {
-  //     console.log(jqXHR.status);
-  //   });
 }
 </script>
 

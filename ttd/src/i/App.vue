@@ -31,7 +31,7 @@ export default {
           // Add more objects with image sources for joined servers
         ],
         placeholderCount: [
-          { imageSrc: '/tostada.svg' }
+          { imageSrc: '/favicon.svg' }
         ]
       }
     };

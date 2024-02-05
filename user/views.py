@@ -24,23 +24,23 @@ def printc(info, isList = False):
         print(info)
 
 def Home(request):
-    return render(request, 'user/index.html')
+    return render(request, 'dist/index.html')
 
 
 def Login(request):
-    return render(request, 'user/index.html')
+    return render(request, 'dist/index.html')
 
 
 def SignUp(request):
-    return render(request, 'user/index.html')
+    return render(request, 'dist/index.html')
 
 
 def SignIn(request):
-    return render(request, 'user/index.html')
+    return render(request, 'dist/index.html')
 
 
 def forgetpassword(request):
-    return render(request, 'user/index.html')
+    return render(request, 'dist/index.html')
 
 
 def ResetPwd(request):
@@ -135,7 +135,7 @@ def DoSignUp(request):
         else:
             #验证id pwd的规范性（用接口
             pwd = request.POST.get('pwd')
-            pwd = hashlib.sha256(pwd.encode('utf-8')).hexdigest()
+            # pwd = hashlib.sha256(pwd.encode('utf-8')).hexdigest()
             pwd = hashlib.sha256((pwd + 'tw').encode('utf-8')).hexdigest()
             
             #设置user的其他field， 用接口

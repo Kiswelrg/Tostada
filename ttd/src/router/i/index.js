@@ -1,6 +1,6 @@
 const toolRoutes = [
   {
-    path: "", // 对应 "/user"
+    path: "/", // 对应 "/user"
     redirect: "/user/login/"
   }
 ];

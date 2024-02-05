@@ -253,7 +253,7 @@
                       重置
                     </button>
                     <div class="relative py-2 text-[12px]">
-                      想起来了？&nbsp;去<a class="text-blue-600" href="/user/login/">登录</a>
+                      想起来密码了？&nbsp;去<a class="text-blue-600" href="/user/login/">登录</a>
                     </div>
                   </div>
                 </form>

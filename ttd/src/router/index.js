@@ -37,7 +37,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes, // short for `routes: routes`
   sensitive: true,
-  strict: true,
+  // strict: true,
 });
 
 

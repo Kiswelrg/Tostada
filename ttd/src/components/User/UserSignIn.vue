@@ -278,7 +278,7 @@
                     >
                       登录
                     </button>
-                    <div class="flex justify-between relative py-2 text-blue-600 text-sm">
+                    <div class="flex text-[12px] justify-between relative py-2 text-blue-600 text-sm">
                       <a href="/user/signup/">还没注册？</a>
                       <a href="/user/forgetpassword/">忘记密码</a>
                     </div>
@@ -307,7 +307,7 @@ export default {
 
 <script setup>
 import { ref, onMounted } from "vue";
-// import $ from "jquery";
+import h256 from "@/util/encrypt";
 
 const varification_correct = ref(true);
 const pwd_validity = ref(true);
@@ -363,18 +363,6 @@ async function getToken() {
 }
 getToken();
 
-async function h256(string) {
-  const utf8 = new TextEncoder().encode(string);
-  const r = await crypto.subtle.digest('SHA-256', utf8).then((hashBuffer) => {
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray
-      .map((bytes) => bytes.toString(16).padStart(2, '0'))
-      .join('');
-    return hashHex;
-  });
-  return r;
-}
-
 async function signIn() {
 
   const d = {
@@ -388,24 +376,10 @@ async function signIn() {
     form_data.append(v, d[v]);
   }
 
-  // const res = await $.ajax({
-  //   url: "/api/user/dosignin/",
-  //   method: "POST",
-  //   headers: { "X-CSRFToken": csrftoken },
-  //   processData: false,
-  //   contentType: false,
-  //   data: form_data,
-  // })
-  //   .done(function (data, textStatus, xhr) {
+  // for (let [key, value] of form_data.entries()) {
+  //   console.log(`${key}: ${value}`);
+  // }
 
-  //   })
-  //   .fail(function (jqXHR, textStatus, errorThrown) {
-  //     console.log(jqXHR.status);
-  //   });
-  
-  for (let [key, value] of form_data.entries()) {
-    console.log(`${key}: ${value}`);
-  }
   const response = await fetch(
     "/api/user/dosignin/",
     {
@@ -434,7 +408,6 @@ async function signIn() {
           pwd_validity.value = false;
           varification_correct.value = true;
           console.log("帐号/密码错误");
-          // goBeforeSignUp();
           break;
       }
     }

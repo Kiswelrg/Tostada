@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-&jg^c=1ltb7jy-pq$uvvus*6g7$#(l729q#gp9z@$*-9#^&^-a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 VERBOSE = True
 # Application definition
@@ -55,7 +56,7 @@ ROOT_URLCONF = 'Tostada.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['ttd/dist'],
+        'DIRS': ['ttd'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -118,11 +119,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-import os
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
     os.path.join(BASE_DIR, 'ttd/dist/static'),
-    
+    os.path.join(BASE_DIR, 'ttd/dist'),
 ]
 
 # Default primary key field type
