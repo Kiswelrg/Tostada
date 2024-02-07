@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import RegexValidator
 from django.utils import timezone
-
+from .util import getUserCode
 # Create your models here.
 class User(models.Model):
     name = models.CharField(max_length=20,default='some_user')
@@ -19,6 +19,7 @@ class User(models.Model):
             ),
         ]
     )
+    urlCode = models.IntegerField(default=getUserCode, unique=True, db_index=True)
     password = models.CharField(max_length=64)
     sex = models.PositiveSmallIntegerField(default=None,blank=True,null=True)
     age = models.PositiveSmallIntegerField(default=None,blank=True,null=True)
@@ -26,3 +27,6 @@ class User(models.Model):
     info = models.FileField(default=None,blank=True,null=True)
     email = models.EmailField(max_length = 25, null = True)
     additional = models.JSONField(default=None, blank=True, null=True)
+
+    def __str__(self) -> str:
+        return f"{self.username}({self.urlCode})"
