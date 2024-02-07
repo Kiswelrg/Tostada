@@ -18,12 +18,14 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.urls.conf import include
 from django.http.response import HttpResponseRedirect
+from user.views import Home
 
 def favicon(request):
     return HttpResponseRedirect('/static/favicon.svg')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', Home),
     re_path(r'^(?:api/)?user/', include('user.urls', namespace = 'user')),
     path('favicon.svg', favicon),
     path('favicon.ico', favicon),
