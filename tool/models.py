@@ -27,7 +27,8 @@ class ToolServer(models.Model):
     type = models.PositiveSmallIntegerField(default=0)
     owner = models.ForeignKey(
         "user.User",
-        on_delete = models.CASCADE
+        on_delete = models.CASCADE,
+        related_name = 'tool_servers'
     )
     status = models.CharField(
         max_length=2,
@@ -62,7 +63,7 @@ class Tool(models.Model):
         ('3', 'archived'),
     ]
 
-    server = models.ForeignKey(ToolServer, on_delete=models.CASCADE)
+    server = models.ForeignKey(ToolServer, on_delete=models.CASCADE, related_name = 'tools')
     name = models.CharField(max_length=255)
     description = models.TextField()
     
@@ -73,7 +74,7 @@ class Tool(models.Model):
         max_length=2,
         choices=t_status,
         default='1',
-        validators = [lambda v, t_status: v in [int(s[0]) for s in t_status]]
+        validators = []
     )
     cover = models.ImageField(upload_to=cover_dir_path,blank=True, default='')
     logo = models.ImageField(upload_to=logo_dir_path,blank=True, default='')
@@ -104,9 +105,9 @@ class ServerAuthorizationLevel(models.Model):
 
 class ServerRole(models.Model):
     name = models.CharField(max_length = 64)
-    server = models.ForeignKey(ToolServer, on_delete = models.CASCADE)
+    server = models.ForeignKey(ToolServer, on_delete = models.CASCADE, related_name = 'server_roles')
     description = models.CharField(max_length = 512, default = '')
-    auth = models.ForeignKey(ServerAuthorizationLevel, on_delete = models.CASCADE)
+    auth = models.ManyToManyField(ServerAuthorizationLevel, related_name='server_roles')
     date_created = models.DateTimeField(default=timezone.now)
     def __str__(self) -> str:
         return f"{self.name} - {self.server}"
@@ -116,18 +117,21 @@ class ServerRole(models.Model):
 class UserServerAuthorization(models.Model):
     auth_type = models.ForeignKey(
         ServerAuthorizationLevel,
-        on_delete = models.CASCADE
+        on_delete = models.CASCADE,
+        related_name = 'user_server_auths'
     )
     auth_value_bool = models.BooleanField(default = False)
     user = models.ForeignKey(
         'user.User',
-        on_delete = models.CASCADE
+        on_delete = models.CASCADE,
+        related_name = 'user_server_auths'
     )
     server = models.ForeignKey(
         ToolServer,
-        on_delete = models.CASCADE
+        on_delete = models.CASCADE,
+        related_name = 'user_server_auths'
     )
-    role = models.ForeignKey(ServerRole, verbose_name=_("user role in the server"), on_delete=models.CASCADE)
+    role = models.ForeignKey(ServerRole, verbose_name=_("user role in the server"), on_delete=models.CASCADE, related_name = 'user_server_auths')
     date_added = models.DateTimeField(default=timezone.now)
 
     def __str__(self) -> str:
@@ -160,16 +164,19 @@ class ToolAuthorizationLevel(models.Model):
 class UserToolAuthorization(models.Model):
     auth_type = models.ForeignKey(
         ToolAuthorizationLevel,
-        on_delete = models.CASCADE
+        on_delete = models.CASCADE,
+        related_name = 'user_tool_auths'
     )
     auth_value_bool = models.BooleanField(default = False)
     user = models.ForeignKey(
         'user.User',
-        on_delete = models.CASCADE
+        on_delete = models.CASCADE,
+        related_name = 'user_tool_auths'
     )
     tool = models.ForeignKey(
         Tool,
-        on_delete = models.CASCADE
+        on_delete = models.CASCADE,
+        related_name = 'user_tool_auths'
     )
     date_added = models.DateTimeField(default=timezone.now)
 
