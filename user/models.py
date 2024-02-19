@@ -25,7 +25,7 @@ class User(models.Model):
     age = models.PositiveSmallIntegerField(default=None,blank=True,null=True)
     date_add = models.DateTimeField(default=timezone.now)
     info = models.FileField(default=None,blank=True,null=True)
-    email = models.EmailField(max_length = 25, null = True)
+    email = models.EmailField(max_length = 25, null = True, blank = True)
     additional = models.JSONField(default=None, blank=True, null=True)
 
     def __str__(self) -> str:

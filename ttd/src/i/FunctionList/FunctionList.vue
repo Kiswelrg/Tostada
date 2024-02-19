@@ -29,7 +29,7 @@
             </div>
             <!-- Your joined servers icons here -->
             <span class="icon inline-block w-12">
-                <img :src="server.imageSrc" alt="Direct Message" class="icon relative mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out" />
+                <img :src="server.imageSrc" alt="Server" class="icon relative mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out" />
             </span>
             </div>
         </div>
@@ -47,7 +47,7 @@
               <div class="h-12 relative flex mx-auto mb-2"  v-for="(func, index) in functionList.placeholderCount" :key="index">
               <!-- Your placeholder icons here -->
               <span class="icon inline-block w-12">
-                  <img @click="GoHome" :src="func.imageSrc" alt="Direct Message" class="icon cursor-pointer relative mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out" />
+                  <img @click="GoHome" :src="func.imageSrc" alt="Others" class="icon cursor-pointer relative mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out" />
               </span>
               </div>
           </div>

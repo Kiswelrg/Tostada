@@ -3,7 +3,7 @@
         <div class="toolinfo flex m-0 w-fit h-8 w-full items-center">
             <div class="tooltitle flex flex-row pl-4">
                 <div class="h-4 w-4 my-auto">
-                    <img class="hashsvg h-full" src="@/assets/hashtag-solid.svg" alt="">
+                    <img class="hashsvg h-full" :src="hashtag_url" alt="">
                 </div>
                 <div class="toolname text-start h-6 w-full pl-1 flex items-center">
                     <span class="text-xs/semibold text-white">{{ title }}</span>
@@ -28,6 +28,7 @@
 <script setup>
 import { ref } from 'vue'
 import ToolBarTR from '@/i/Global/ToolBarTR/ToolBarTR.vue'
+const hashtag_url = '/ipa/tool/main/chevron-down-solid.svg'
 const props = defineProps({
     title: String,
     intro: String

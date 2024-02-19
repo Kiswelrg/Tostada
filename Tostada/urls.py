@@ -20,14 +20,15 @@ from django.urls.conf import include
 from django.http.response import HttpResponseRedirect
 from user.views import Home
 
-def favicon(request):
-    return HttpResponseRedirect('/static/favicon.svg')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    re_path(r'^ipa/(?P<path>.*)$', lambda request, path: HttpResponseRedirect(f'/static/{path}')),
     path('', Home),
+
+    re_path(r'^i/', include('tool.urls', namespace = 'tool')),
     re_path(r'^(?:api/)?user/', include('user.urls', namespace = 'user')),
-    path('favicon.svg', favicon),
-    path('favicon.ico', favicon),
+    path('favicon.svg', lambda request: HttpResponseRedirect('/static/favicon.svg')),
+    path('favicon.ico', lambda request: HttpResponseRedirect('/static/favicon.svg')),
 ]
 

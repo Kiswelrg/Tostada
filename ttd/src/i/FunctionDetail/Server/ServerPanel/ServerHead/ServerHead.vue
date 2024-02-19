@@ -4,7 +4,7 @@
     <div class="wrapper m-0 w-full h-full">
         <div class="flex flex-row px-4 py-3">
             <div class="h-6 w-6 my-auto">
-                <img class="h-full" src="@/assets/thumb.svg" alt="">
+                <img class="h-full" :src="thumb_url" alt="">
             </div>
             <div class="servername text-start h-6 w-full pl-1">
                 <span class="text-xs text-white truncate">Some Server</span>
@@ -24,6 +24,8 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+const thumb_url = '/ipa/tool/main/thumb.svg';
 
 </script>
 

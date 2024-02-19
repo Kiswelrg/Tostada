@@ -16,18 +16,18 @@ export default {
     return {
       functionList: {
         directMessages: [
-          { imageSrc: '../../src/assets/main/sffgurus.webp' },
+          { imageSrc: '/ipa/main/sffgurus.webp' },
           // Add more objects with image sources for direct messages
         ],
         joinedServers: [
-          { imageSrc: '../../src/assets/main/myserver.webp' },
-          { imageSrc: '../../src/assets/main/sffgurus.webp' },
-          { imageSrc: '../../src/assets/main/mj.webp' },
-          { imageSrc: '../../src/assets/main/mj.webp' },
-          { imageSrc: '../../src/assets/main/mj.webp' },
-          { imageSrc: '../../src/assets/main/mj.webp' },
-          { imageSrc: '../../src/assets/main/mj.webp' },
-          { imageSrc: '../../src/assets/main/mj.webp' },
+          { imageSrc: '/ipa/main/myserver.webp' },
+          { imageSrc: '/ipa/main/sffgurus.webp' },
+          { imageSrc: '/ipa/main/mj.webp' },
+          { imageSrc: '/ipa/main/mj.webp' },
+          { imageSrc: '/ipa/main/mj.webp' },
+          { imageSrc: '/ipa/main/mj.webp' },
+          { imageSrc: '/ipa/main/mj.webp' },
+          { imageSrc: '/ipa/main/mj.webp' },
           // Add more objects with image sources for joined servers
         ],
         placeholderCount: [

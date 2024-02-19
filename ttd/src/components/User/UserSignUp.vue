@@ -289,7 +289,7 @@ export default {
 
 <script setup>
 import { ref } from "vue";
-// import $ from "jquery";
+import h256 from "@/util/encrypt";
 
 const signup_pwd_match = ref(true);
 const username = ref("");
@@ -354,13 +354,13 @@ async function signUp() {
     csrfmiddlewaretoken: cmt.value,
     username: username.value,
     code: vcode.value,
-    pwd: pwd.value,
+    pwd: await (pwd.value),
   };
   var form_data = new FormData();
   for (var v in d) {
     form_data.append(v, d[v]);
   }
-  try {
+  // try {
     const response = await fetch("/api/user/dosignup/", {
       method: "POST",
       headers: {
@@ -370,6 +370,7 @@ async function signUp() {
     });
 
     if (response.ok) {
+      console.log(response);
       const data = await response.json(); // Assuming the server response is JSON
       refreshVcode();
       if (data["state"]) {
@@ -395,10 +396,10 @@ async function signUp() {
       // If the server response was not ok (200-299)
       console.log(response.status);
     }
-  } catch (error) {
-    // Catch network errors or issues with the fetch call itself
-    console.error("Fetch error: " + error.message);
-  }
+  // } catch (error) {
+  //   // Catch network errors or issues with the fetch call itself
+  //   console.error("Fetch error: " + error.message);
+  // }
 
 }
 </script>

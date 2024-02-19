@@ -15,13 +15,25 @@ import random
 import os
 # Create your views here.
 
-def printc(info, isList = False):
+def printc(info, isList = False, color = None):
+    def printRGB(text):
+        def rgb_to_ansi(r, g, b):
+            # Convert RGB values to a color index
+            index = 16 + (36 * round(r * 5 / 255)) + (6 * round(g * 5 / 255)) + round(b * 5 / 255)
+            # Return the ANSI escape sequence
+            return f"\033[38;5;{index}m"
+        if color:
+            # Convert RGB to ANSI color code
+            ansi_code = rgb_to_ansi(color[0], color[1], color[2])
+            print(f"{ansi_code}{text}\033[0m")
+        else:
+            print(text)
     if settings.VERBOSE:
         if isList:
             for i in info:
-                print(info)
+                printRGB(i)
             return
-        print(info)
+        printRGB(info)
 
 def Home(request):
     return render(request, 'dist/index.html')
@@ -84,29 +96,26 @@ def ResetPwd(request):
 def DoSignIn(request):
     form_l = ['username', 'pwd', 'code']
     # try:
-    printc(request.POST)
+    printc(request.POST, color = [0,255,0])
     for fl in form_l:
         request.POST[fl]
     # except MultiValueDictKeyError:
         # raise Http404('wow u got a 404!?-')
     msg = 0
     state = False
-    '''
-    msg choices
-    1 验证码错误
-    2 账号或密码错误
-    '''
     pwd = request.POST['pwd']
     pwd = hashlib.sha256((pwd + 'tw').encode('utf-8')).hexdigest()
-    printc([request.session['code'], request.POST['code']], isList = True)
     if request.session["code"] != request.POST['code'].lower(): # 验证码
+        printc('VCODE wrong:', color = [255,47,47])
+        printc([f'real:  {request.session["code"]}', f'given: {request.POST["code"]}'], isList = True)
         msg = 1
     elif User.objects.filter(username = request.POST['username'], password = pwd):
         state = True
         msg = 11
     else:
         msg = 2
-    printc(f'login {state}')
+        printc([request.POST['pwd'], pwd], isList=True)
+    printc(f'login {"success" if state else "failed"}', color = [255,47,47])
     '''
     msg choices
     1 验证码错误
@@ -121,9 +130,9 @@ def DoSignUp(request):
     try:
         for fl in form_l:
             request.POST[fl]
-    except MultiValueDictKeyError as e:
+    except MultiValueDictKeyError as _:
         raise Http404('wow u got a 404!?')
-    print(request.POST)
+    printc(request.POST)
     msg = 1
     state = False
     # if checkVcode(request):
@@ -148,7 +157,7 @@ def DoSignUp(request):
                 u.clean_fields()
             except ValidationError as e:
                 msg = 2
-                print(e)
+                printc(e)
                 return HttpResponse(json.dumps({'state': state, 'msg': msg}))
                 return HttpResponseRedirect(reverse('user:sign-up') + '?username=0')
             u.save()

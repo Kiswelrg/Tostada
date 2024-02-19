@@ -6,7 +6,7 @@
             <div class="h-full"></div>
             <!-- <router-view :is="currentTab" class="text-black flex w-[300px] h-full">
             </router-view> -->
-            <Empty helloText="All Tools You Need, is here"></Empty>
+            <Empty helloText="All the Tools You Need, are here"></Empty>
             <div class="h-full"></div>
 
         </div>
