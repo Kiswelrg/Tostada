@@ -3,7 +3,7 @@
 import django.db.models.deletion
 import django.utils.timezone
 import tool.models
-import tool.util
+import tool.util.model
 from django.db import migrations, models
 
 
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255, unique=True)),
                 ('description', models.TextField()),
-                ('urlCode', models.IntegerField(db_index=True, default=tool.util.getToolServerCode, unique=True)),
+                ('urlCode', models.IntegerField(db_index=True, default=tool.util.model.getToolServerCode, unique=True)),
                 ('date_created', models.DateTimeField(default=django.utils.timezone.now)),
                 ('type', models.PositiveSmallIntegerField(default=0)),
                 ('status', models.CharField(choices=[('0', 'destroyed'), ('1', 'public'), ('2', 'private'), ('3', 'archived')], default='1', max_length=2)),
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255)),
                 ('description', models.TextField()),
-                ('urlCode', models.IntegerField(db_index=True, default=tool.util.getToolCode, unique=True)),
+                ('urlCode', models.IntegerField(db_index=True, default=tool.util.model.getToolCode, unique=True)),
                 ('date_created', models.DateTimeField(default=django.utils.timezone.now)),
                 ('type', models.CharField(choices=[('0', 'basic'), ('1', 'others')], default='0', max_length=2)),
                 ('status', models.CharField(choices=[('0', 'destroyed'), ('1', 'public'), ('2', 'private'), ('3', 'archived')], default='1', max_length=2)),

@@ -1,6 +1,6 @@
 <template>
     <div class="toolhead w-full h-12 flex items-center">
-        <div class="toolinfo flex m-0 w-fit h-8 w-full items-center">
+        <div class="toolinfo flex m-0 h-8 w-full items-center">
             <div class="tooltitle flex flex-row pl-4">
                 <div class="h-4 w-4 my-auto">
                     <img class="hashsvg h-full" :src="hashtag_url" alt="">

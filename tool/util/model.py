@@ -1,6 +1,7 @@
-import random, string
-from . import models
-from functools import partial
+import random
+import string
+from .. import models
+# from functools import partial
 
 def randomId(N, opt):
     head = random.choices( ((opt & 0b001) != 0) * string.ascii_lowercase + 

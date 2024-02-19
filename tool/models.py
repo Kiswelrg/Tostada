@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from . import util
+from .util import model
 # Create your models here.
 
 
@@ -26,9 +26,25 @@ class ToolServer(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField()
     urlCode = models.IntegerField(
-        default=util.getToolServerCode, unique=True, db_index=True)
+        default=model.getToolServerCode, unique=True, db_index=True)
     date_created = models.DateTimeField(default=timezone.now)
-    type = models.PositiveSmallIntegerField(default=0)
+    type = models.CharField(
+        default='0',
+        max_length=2,
+        choices=[
+            ('0', 'tool'),
+            ('1', 'have fun'),
+            ('2', 'others')
+        ],
+        verbose_name = '''
+        type:
+        [
+            ('0', 'tool'),
+            ('1', 'have fun'),
+            ('2', 'others')
+        ]
+        '''
+        )
     owner = models.ForeignKey(
         "user.User",
         on_delete=models.CASCADE,
@@ -68,7 +84,7 @@ class Tool(models.Model):
     description = models.TextField()
 
     urlCode = models.IntegerField(
-        default=util.getToolCode, unique=True, db_index=True)
+        default=model.getToolCode, unique=True, db_index=True)
     date_created = models.DateTimeField(default=timezone.now)
     type = models.CharField(
         default='0',
@@ -108,11 +124,15 @@ class ServerAuthorizationLevel(models.Model):
             ('0', 'binary'),
         ])
     category = models.CharField(
-        max_length=2,
+        max_length=3,
         default='0',
         choices=[
             ('0', 'General Server Permissions'),
-            ('1', 'Other Permissions'),
+            ('1', 'Membership PERMISSIONS'),
+            ('2', 'TEXT CHANNEL PERMISSIONS'),
+            ('3', 'VOICE CHANNEL PERMISSIONS'),
+            ('4', 'EVENTS PERMISSIONS'),
+            ('5', 'ADVANCED PERMISSIONS'),
         ])
     date_created = models.DateTimeField(default=timezone.now)
 
