@@ -17,7 +17,6 @@ def getXCode(name,base,r):
         'Tool': (models.Tool),
     }[name]
     
-    print(f)
     bot = pow(10, r - 4)
     head = pow(10, r - 3) 
     a = random.randint(bot, head-1) + base*head

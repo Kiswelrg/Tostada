@@ -81,7 +81,7 @@ class Tool(models.Model):
     server = models.ForeignKey(
         ToolServer, on_delete=models.CASCADE, related_name='tools')
     name = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank = True)
 
     urlCode = models.IntegerField(
         default=model.getToolCode, unique=True, db_index=True)
@@ -92,7 +92,8 @@ class Tool(models.Model):
         choices=[
             ('0', 'blank'),
             ('1', 'intput & output'),
-            ('2', 'exhibition')
+            ('2', 'exhibition'),
+            ('3', 'blog')
         ])
     status = models.CharField(
         max_length=2,
@@ -102,16 +103,16 @@ class Tool(models.Model):
     )
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='')
-    additional = models.JSONField(default=EmptyJson, null=True)
+    additional = models.JSONField(default=EmptyJson, null=True, blank = True)
 
     def __str__(self) -> str:
         return self.name
 
 
 class ToolOfInputAndOutput(Tool):
-    method_names = models.JSONField(default=EmptyJson)
-    input = models.JSONField(default=EmptyJson, null=True)
-    output = models.JSONField(default=EmptyJson, null=True)
+    method_names = models.JSONField(default=EmptyJson, blank = True)
+    input = models.JSONField(default=EmptyJson, null=True, blank = True)
+    output = models.JSONField(default=EmptyJson, null=True, blank = True)
     
 
 class ServerAuthorizationLevel(models.Model):
