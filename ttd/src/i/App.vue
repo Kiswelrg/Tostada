@@ -16,22 +16,22 @@ export default {
     return {
       functionList: {
         directMessages: [
-          { imageSrc: '/ipa/main/sffgurus.webp' },
+          { imageSrc: '/static/main/sffgurus.webp' },
           // Add more objects with image sources for direct messages
         ],
         joinedServers: [
-          { imageSrc: '/ipa/main/myserver.webp' },
-          { imageSrc: '/ipa/main/sffgurus.webp' },
-          { imageSrc: '/ipa/main/mj.webp' },
-          { imageSrc: '/ipa/main/mj.webp' },
-          { imageSrc: '/ipa/main/mj.webp' },
-          { imageSrc: '/ipa/main/mj.webp' },
-          { imageSrc: '/ipa/main/mj.webp' },
-          { imageSrc: '/ipa/main/mj.webp' },
+          { imageSrc: '/static/main/myserver.webp' },
+          { imageSrc: '/static/main/sffgurus.webp' },
+          { imageSrc: '/static/main/mj.webp' },
+          { imageSrc: '/static/main/mj.webp' },
+          { imageSrc: '/static/main/mj.webp' },
+          { imageSrc: '/static/main/mj.webp' },
+          { imageSrc: '/static/main/mj.webp' },
+          { imageSrc: '/static/main/mj.webp' },
           // Add more objects with image sources for joined servers
         ],
         placeholderCount: [
-          { imageSrc: '/favicon.svg' }
+          { imageSrc: '/static/favicon.svg' }
         ]
       }
     };

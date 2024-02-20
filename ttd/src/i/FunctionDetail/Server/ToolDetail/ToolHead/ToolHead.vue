@@ -28,7 +28,7 @@
 <script setup>
 import { ref } from 'vue'
 import ToolBarTR from '@/i/Global/ToolBarTR/ToolBarTR.vue'
-const hashtag_url = '/ipa/tool/main/chevron-down-solid.svg'
+const hashtag_url = '/static/tool/main/chevron-down-solid.svg'
 const props = defineProps({
     title: String,
     intro: String

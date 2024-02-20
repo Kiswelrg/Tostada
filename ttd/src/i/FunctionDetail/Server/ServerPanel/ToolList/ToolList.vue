@@ -30,8 +30,8 @@
 
 <script setup>
 import { ref } from 'vue'
-const hashtag_url = '/ipa/tool/main/chevron-down-solid.svg'
-const chevron_url = '/ipa/tool/main/hashtag-solid.svg'
+const hashtag_url = '/static/tool/main/chevron-down-solid.svg'
+const chevron_url = '/static/tool/main/hashtag-solid.svg'
 let selectedSubSection = ref(-1)
 const sections = ref([
   {

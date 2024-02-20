@@ -25,7 +25,7 @@
 
 <script setup>
 import { ref } from 'vue';
-const thumb_url = '/ipa/tool/main/thumb.svg';
+const thumb_url = '/static/tool/main/thumb.svg';
 
 </script>
 

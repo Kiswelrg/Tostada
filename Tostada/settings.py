@@ -57,7 +57,7 @@ ROOT_URLCONF = 'Tostada.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['ttd'],
+        'DIRS': ['ttd/dist'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -124,7 +124,6 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
     os.path.join(BASE_DIR, 'ttd/dist/static'),
-    os.path.join(BASE_DIR, 'ttd/dist'),
 ]
 
 # Default primary key field type

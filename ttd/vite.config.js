@@ -21,7 +21,7 @@ export default ({ mode }) => {
   return defineConfig({
     plugins: [
       vue(),
-      externalizeIpa()
+      // externalizeIpa()
     ],
     resolve: {
       alias: {
@@ -48,16 +48,16 @@ export default ({ mode }) => {
           changeOrigin: dev,
           rewrite: (path) => path.replace(/^\/api/,'/'),
         },
-        "/ipa": {
-          target: dev ? process.env.VITE_FRONTEND_URL : process.env.VITE_BACKEND_URL,
-          changeOrigin: dev,
-          rewrite: (path) => {
-            if (dev)
-              return path.replace(/^\/ipa/,'/')
-            else
-              return path.replace(/^\/ipa/,'/static')
-          },
-        },
+        // "/ipa": {
+        //   target: dev ? process.env.VITE_FRONTEND_URL : process.env.VITE_BACKEND_URL,
+        //   changeOrigin: dev,
+        //   rewrite: (path) => {
+        //     if (dev)
+        //       return path.replace(/^\/ipa/,'/')
+        //     else
+        //       return path.replace(/^\/ipa/,'/static')
+        //   },
+        // },
         
       }
     }

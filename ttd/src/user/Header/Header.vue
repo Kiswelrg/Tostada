@@ -2,7 +2,7 @@
     <div class="h-16 w-full flex shadow-lg">
         <div class="wrapper text-[#000000] flex items-center my-1 ml-2">
             <div class="site-icon shrink-0 grow-0">
-                <img src="/favicon.svg"
+                <img src="/static/favicon.svg"
                      alt=""
                      class="h-12 w-12 aspect-square rounded-full">
             </div>

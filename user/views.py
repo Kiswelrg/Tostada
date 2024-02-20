@@ -36,23 +36,23 @@ def printc(info, isList = False, color = None):
         printRGB(info)
 
 def Home(request):
-    return render(request, 'dist/index.html')
+    return render(request, 'index.html')
 
 
 def Login(request):
-    return render(request, 'dist/index.html')
+    return render(request, 'index.html')
 
 
 def SignUp(request):
-    return render(request, 'dist/index.html')
+    return render(request, 'index.html')
 
 
 def SignIn(request):
-    return render(request, 'dist/index.html')
+    return render(request, 'index.html')
 
 
 def forgetpassword(request):
-    return render(request, 'dist/index.html')
+    return render(request, 'index.html')
 
 
 def ResetPwd(request):
