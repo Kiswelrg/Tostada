@@ -1,6 +1,74 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import ToolServer, Tool, UserServerRole, UserToolRole
 # Create your views here.
 def Home(request):
     return render(request, 'index.html')
+
+
+# Fetch all tool servers that a user has joined
+def fetch_user_tool_servers(request, user_code):
+    tool_servers = ToolServer.objects.filter(user_server_auths__user__urlCode=user_code)
+    data = [{"cid": ts.urlCode, "name": ts.name, "description": ts.description} for ts in tool_servers]
+    return JsonResponse({"tool_servers": data})
+
+# Fetch a specific tool server by its urlCode
+def fetch_tool_server(request, tool_server_code):
+    tool_server = get_object_or_404(ToolServer, urlCode=tool_server_code)
+    tools = None
+    data = {
+        "cid": tool_server.urlCode,
+        "name": tool_server.name,
+        "description": tool_server.description,
+        "status": tool_server.get_status_display(),
+        "type": tool_server.get_type_display(),
+        "date_created": tool_server.date_created,
+        "owner": tool_server.owner.username,
+    }
+
+    if 'tools' not in request.GET or not request.GET['tools'] == '1':
+        return JsonResponse({"tool_server": data})
+    
+    if UserServerRole.objects.filter(user__username=request.session['username'], server = tool_server).exists():
+        # If already a member of the server, (assume got all reading access to ths tools inside)
+        tools = Tool.objects.filter(server=tool_server)
+    else:
+        tool_ids = UserToolRole.objects.filter(
+        user__username=request.session['username'],
+        tool__server=tool_server
+        ).values_list('tool', flat=True)
+
+        # Get the corresponding tool objects
+        if tool_ids.exists():
+            tools = Tool.objects.filter(id__in=tool_ids)
+    
+    if tools:
+        data["tools"] = [{"cid": tool.urlCode, "name": tool.name, "description": tool.description} for tool in tools]
+    else:
+        print('no joined server/available tool')
+    return JsonResponse({"tool_server": data})
+
+# Fetch a specific tool by its urlCode
+def fetch_tool(request, tool_code):
+    tool = get_object_or_404(Tool, urlCode=tool_code)
+    user_tool = None
+    try:
+        tool_id = UserToolRole.objects.filter(user__username=request.session['username']).values_list('tool', flat=True)[0]
+        user_tool = Tool.objects.get(id = tool_id)
+    except UserToolRole.DoesNotExist:
+        if not UserServerRole.objects.filter(server=tool.server, user__username=request.session['username']).exists():
+            return JsonResponse({})
+        user_tool = tool
+    
+    data = {
+        "cid": user_tool.urlCode,
+        "name": user_tool.name,
+        "description": user_tool.description,
+        "status": user_tool.get_status_display(),
+        "date_created": user_tool.date_created,
+        "server": user_tool.server.name,
+        "category": user_tool.category.name,
+    }
+    return JsonResponse({"tool": data})

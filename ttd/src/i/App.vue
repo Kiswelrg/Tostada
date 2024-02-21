@@ -1,8 +1,3 @@
-<script setup>
-import FunctionList from './FunctionList/FunctionList.vue';
-import Server from './FunctionDetail/Server/Server.vue';
-</script>
-
 <template>
   <div class="main flex flex-row grow h-full w-full">
     <FunctionList :functionList="functionList"/>
@@ -10,35 +5,33 @@ import Server from './FunctionDetail/Server/Server.vue';
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      functionList: {
-        directMessages: [
-          { imageSrc: '/static/main/sffgurus.webp' },
-          // Add more objects with image sources for direct messages
-        ],
-        joinedServers: [
-          { imageSrc: '/static/main/myserver.webp' },
-          { imageSrc: '/static/main/sffgurus.webp' },
-          { imageSrc: '/static/main/mj.webp' },
-          { imageSrc: '/static/main/mj.webp' },
-          { imageSrc: '/static/main/mj.webp' },
-          { imageSrc: '/static/main/mj.webp' },
-          { imageSrc: '/static/main/mj.webp' },
-          { imageSrc: '/static/main/mj.webp' },
-          // Add more objects with image sources for joined servers
-        ],
-        placeholderCount: [
-          { imageSrc: '/static/favicon.svg' }
-        ]
-      }
-    };
-  }
-  // You can fetch data or set your icons' image sources within the directMessages and joinedServers arrays.
-};
+<script setup>
+import { ref } from 'vue';
+import FunctionList from './FunctionList/FunctionList.vue';
+import Server from './FunctionDetail/Server/Server.vue';
+
+const functionList = ref({
+  directMessages: [
+    { imageSrc: '/static/main/sffgurus.webp' },
+    // Add more objects with image sources for direct messages
+  ],
+  joinedServers: [
+    { imageSrc: '/static/main/myserver.webp' },
+    { imageSrc: '/static/main/sffgurus.webp' },
+    { imageSrc: '/static/main/mj.webp' },
+    { imageSrc: '/static/main/mj.webp' },
+    { imageSrc: '/static/main/mj.webp' },
+    { imageSrc: '/static/main/mj.webp' },
+    { imageSrc: '/static/main/mj.webp' },
+    { imageSrc: '/static/main/mj.webp' },
+    // Add more objects with image sources for joined servers
+  ],
+  placeholderCount: [
+    { imageSrc: '/static/favicon.svg' }
+  ]
+});
 </script>
+
 
 <style scoped lang="scss">
 .main {

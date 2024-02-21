@@ -112,6 +112,8 @@ def DoSignIn(request):
     elif User.objects.filter(username = request.POST['username'], password = pwd):
         state = True
         msg = 11
+        request.session['isLoggedIn'] = True
+        request.session['username'] = request.POST['username']
     else:
         msg = 2
         printc([request.POST['pwd'], pwd], isList=True)
@@ -177,6 +179,12 @@ def DoSignUp(request):
 def getToken(request):
     return HttpResponse(get_token(request))
 
+def DoLogOut(request):
+    if request.session.has_key('isLoggedIn'):
+        del request.session['isLoggedIn']
+    if request.session.has_key('username'):
+        del request.session['username']
+    return HttpResponseRedirect('/')
 
 
 def Vcode(request):

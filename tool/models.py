@@ -57,7 +57,7 @@ class ToolServer(models.Model):
     )
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='')
-    additional = models.JSONField(default={"type": {}}, blank=True, null=True)
+    additional = models.JSONField(default=dict({"type": {}}), blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name
@@ -154,7 +154,7 @@ class Tool(models.Model):
     )
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='')
-    additional = models.JSONField(default={"type": "ToolTypical"}, null=True, blank = True)
+    additional = models.JSONField(default=dict({"type": "ToolTypical"}), null=True, blank = True)
 
     def __str__(self) -> str:
         return f"{self.name} in {self.server}"
@@ -232,29 +232,6 @@ class UserServerRole(models.Model):
         return f"{self.user} in [{self.server} : {self.role.name}]"
 
 
-# class ToolAuthorizationLevel(models.Model):
-#     title = models.CharField(max_length=128)
-#     description = models.CharField(max_length=512, default='')
-#     type = models.CharField(
-#         max_length=2,
-#         default='0',
-#         choices=[
-#             ('0', 'binary'),
-#         ])
-#     category = models.CharField(
-#         max_length=2,
-#         default='0',
-#         choices=[
-#             ('0', 'General Tool Permissions'),
-#             ('1', 'Membership Permissions'),
-#             ('2', 'Other Permissions'),
-#         ])
-#     date_created = models.DateTimeField(default=timezone.now)
-
-#     def __str__(self):
-#         return self.title
-
-
 # Default to be role-based table
 # Overwrite server-level ones, use as additional
 class UserToolRole(models.Model):
@@ -274,7 +251,12 @@ class UserToolRole(models.Model):
         on_delete=models.CASCADE,
         related_name='user_tool_auths'
     )
+    role = models.ForeignKey(ServerRole, verbose_name=_(
+        "user role in the server"),
+        on_delete=models.CASCADE,
+        related_name='user_tool_auths',
+    )
     date_added = models.DateTimeField(default=timezone.now)
 
     def __str__(self) -> str:
-        return f"{self.user} in [{self.tool.server}/{self.tool} : {self.role.name}]"
+        return f"{self.user} in .. 服务器: {self.tool.server} .. 工具: {self.tool.name} .. 角色: {self.role.name}"
