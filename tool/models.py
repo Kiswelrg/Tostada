@@ -12,10 +12,10 @@ def EmptyJson():
 
 class ToolServer(models.Model):
     def cover_dir_path(instance, filename):
-        return f'{instance.__class__.__name__}/{instance.id}/cover/' + instance.date_add.strftime('%Y/%m/%d/' + filename)
+        return f'cover/server-{instance.id}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
 
     def logo_dir_path(instance, filename):
-        return f'{instance.__class__.__name__}/{instance.id}/logo/' + instance.date_add.strftime('%Y/%m/%d/' + filename)
+        return f'logo/server-{instance.id}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
 
     ts_status = [
         ('0', 'destroyed'),
@@ -24,7 +24,7 @@ class ToolServer(models.Model):
         ('3', 'archived'),
     ]
     name = models.CharField(max_length=255, unique=True)
-    description = models.TextField()
+    description = models.TextField(blank = True)
     urlCode = models.IntegerField(
         default=model.getToolServerCode, unique=True, db_index=True)
     date_created = models.DateTimeField(default=timezone.now)
@@ -57,19 +57,65 @@ class ToolServer(models.Model):
     )
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='')
-    additional = models.JSONField(default=EmptyJson, null=True)
+    additional = models.JSONField(default={"type": {}}, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name
 
+    default_permissions_for_everyone = [('View Channel',),
+                ('Create Expressions',),
+                ('Create Invite',),
+                ('Change Nickname',),
+                ('Send Messages',),
+                ('Send Messages in Threads',),
+                ('Create Public Threads',),
+                ('Create Private Threads',),
+                ('Embed Links',),
+                ('Attach Files',),
+                ('Add Reactions',),
+                ('Use External Emoji',),
+                ('Use External Stickers',),
+                ('Mention @everyone, @here, and All Roles',),
+                ('Read Message History',),
+                ('Use Application Commands',),
+                ('Send Voice Messages',),
+                ('Connect',),
+                ('Speak',),
+                ('Video',),
+                ('Use Activities',),
+                ('Use Soundboard',),
+                ('Use External Sounds',),
+                ('Use Voice Activity',),
+                ('Set Voice Channel Status',),
+                ('Create Events',)
+            ]
+    def save(self, *args, **kwargs):
+        isNew = self._state.adding
+        super().save(*args, **kwargs)
+        if isNew:
+            
+            ids = AuthorizationLevel.objects.filter(title__in = [name[0] for name in self.default_permissions_for_everyone])
+            role = ServerRole.objects.create(
+                name = 'everyone',
+                server = self
+            )
+            role.auth.set(ids)
+            role.save()
+
+class CategoryInServer(models.Model):
+    name = models.CharField(max_length=100)
+    server = models.ForeignKey(ToolServer, on_delete=models.CASCADE, related_name='categories')
+
+    def __str__(self):
+        return f"{self.name} in {self.server}"
 
 class Tool(models.Model):
 
     def cover_dir_path(instance, filename):
-        return f'{instance.__class__.__name__}/{instance.id}/cover/' + instance.date_add.strftime('%Y/%m/%d/' + filename)
+        return f'cover/tool-{instance.id}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
 
     def logo_dir_path(instance, filename):
-        return f'{instance.__class__.__name__}/{instance.id}/logo/' + instance.date_add.strftime('%Y/%m/%d/' + filename)
+        return f'logo/tool-{instance.id}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
 
     t_status = [
         ('0', 'destroyed'),
@@ -86,15 +132,20 @@ class Tool(models.Model):
     urlCode = models.IntegerField(
         default=model.getToolCode, unique=True, db_index=True)
     date_created = models.DateTimeField(default=timezone.now)
-    type = models.CharField(
-        default='0',
-        max_length=2,
-        choices=[
-            ('0', 'blank'),
-            ('1', 'intput & output'),
-            ('2', 'exhibition'),
-            ('3', 'blog')
-        ])
+    # type = models.CharField(
+    #     default='0',
+    #     max_length=2,
+    #     choices=[
+    #         ('0', 'blank'),
+    #         ('1', 'intput & output'),
+    #         ('2', 'exhibition'),
+    #         ('3', 'blog')
+    #     ])
+    category = models.ForeignKey(
+        CategoryInServer,
+        on_delete = models.CASCADE,
+        related_name = 'tools',
+    )
     status = models.CharField(
         max_length=2,
         choices=t_status,
@@ -103,10 +154,10 @@ class Tool(models.Model):
     )
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='')
-    additional = models.JSONField(default=EmptyJson, null=True, blank = True)
+    additional = models.JSONField(default={"type": "ToolTypical"}, null=True, blank = True)
 
     def __str__(self) -> str:
-        return self.name
+        return f"{self.name} in {self.server}"
 
 
 class ToolOfInputAndOutput(Tool):
@@ -115,7 +166,7 @@ class ToolOfInputAndOutput(Tool):
     output = models.JSONField(default=EmptyJson, null=True, blank = True)
     
 
-class ServerAuthorizationLevel(models.Model):
+class AuthorizationLevel(models.Model):
     title = models.CharField(max_length=128)
     description = models.CharField(max_length=512, default='')
     type = models.CharField(
@@ -147,7 +198,8 @@ class ServerRole(models.Model):
         ToolServer, on_delete=models.CASCADE, related_name='server_roles')
     description = models.CharField(max_length=512, default='')
     auth = models.ManyToManyField(
-        ServerAuthorizationLevel, related_name='server_roles')
+        AuthorizationLevel, related_name='server_roles')
+    auth_value = models.BooleanField(default = True)
     date_created = models.DateTimeField(default=timezone.now)
 
     def __str__(self) -> str:
@@ -155,13 +207,13 @@ class ServerRole(models.Model):
 
 
 # Default to be role-based table
-class UserServerAuthorization(models.Model):
-    auth_type = models.ForeignKey(
-        ServerAuthorizationLevel,
-        on_delete=models.CASCADE,
-        related_name='user_server_auths'
-    )
-    auth_value_bool = models.BooleanField(default=False)
+class UserServerRole(models.Model):
+    # auth_type = models.ForeignKey(
+    #     AuthorizationLevel,
+    #     on_delete=models.CASCADE,
+    #     related_name='user_server_auths'
+    # )
+    # auth_value_bool = models.BooleanField(default=False)
     user = models.ForeignKey(
         'user.User',
         on_delete=models.CASCADE,
@@ -177,41 +229,41 @@ class UserServerAuthorization(models.Model):
     date_added = models.DateTimeField(default=timezone.now)
 
     def __str__(self) -> str:
-        return f"{self.user} in {self.server} : {self.role}"
+        return f"{self.user} in [{self.server} : {self.role.name}]"
 
 
-class ToolAuthorizationLevel(models.Model):
-    title = models.CharField(max_length=128)
-    description = models.CharField(max_length=512, default='')
-    type = models.CharField(
-        max_length=2,
-        default='0',
-        choices=[
-            ('0', 'binary'),
-        ])
-    category = models.CharField(
-        max_length=2,
-        default='0',
-        choices=[
-            ('0', 'General Tool Permissions'),
-            ('1', 'Membership Permissions'),
-            ('2', 'Other Permissions'),
-        ])
-    date_created = models.DateTimeField(default=timezone.now)
+# class ToolAuthorizationLevel(models.Model):
+#     title = models.CharField(max_length=128)
+#     description = models.CharField(max_length=512, default='')
+#     type = models.CharField(
+#         max_length=2,
+#         default='0',
+#         choices=[
+#             ('0', 'binary'),
+#         ])
+#     category = models.CharField(
+#         max_length=2,
+#         default='0',
+#         choices=[
+#             ('0', 'General Tool Permissions'),
+#             ('1', 'Membership Permissions'),
+#             ('2', 'Other Permissions'),
+#         ])
+#     date_created = models.DateTimeField(default=timezone.now)
 
-    def __str__(self):
-        return self.title
+#     def __str__(self):
+#         return self.title
 
 
 # Default to be role-based table
 # Overwrite server-level ones, use as additional
-class UserToolAuthorization(models.Model):
-    auth_type = models.ForeignKey(
-        ToolAuthorizationLevel,
-        on_delete=models.CASCADE,
-        related_name='user_tool_auths'
-    )
-    auth_value_bool = models.BooleanField(default=False)
+class UserToolRole(models.Model):
+    # auth_type = models.ForeignKey(
+    #     AuthorizationLevel,
+    #     on_delete=models.CASCADE,
+    #     related_name='user_tool_auths'
+    # )
+    # auth_value_bool = models.BooleanField(default=False)
     user = models.ForeignKey(
         'user.User',
         on_delete=models.CASCADE,
@@ -225,4 +277,4 @@ class UserToolAuthorization(models.Model):
     date_added = models.DateTimeField(default=timezone.now)
 
     def __str__(self) -> str:
-        return f"{self.user} in {self.tool.server}/{self.tool} : {self.role}"
+        return f"{self.user} in [{self.tool.server}/{self.tool} : {self.role.name}]"
