@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.dispatch import receiver
+import os
 
 from .util import model
 # Create your models here.
@@ -14,10 +16,10 @@ def getDefaultAdditional():
 
 class ToolServer(models.Model):
     def cover_dir_path(instance, filename):
-        return f'cover/server-{instance.id}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
+        return f'cover/server-{instance.urlCode}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
 
     def logo_dir_path(instance, filename):
-        return f'logo/server-{instance.id}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
+        return f'logo/server-{instance.urlCode}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
 
     ts_status = [
         ('0', 'destroyed'),
@@ -147,12 +149,58 @@ class ToolServer(models.Model):
                 save_list.append(t)
             for item in save_list:
                 item.save()
-                
+
+@receiver(models.signals.post_delete, sender=ToolServer)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `MyModel` object is deleted.
+    """
+    if instance.logo:
+        if os.path.isfile(instance.logo.path):
+            os.remove(instance.logo.path)
+
+@receiver(models.signals.pre_save, sender=ToolServer)
+def auto_delete_file_on_change(sender, instance, **kwargs):
+    """
+    Deletes old file from filesystem
+    when corresponding `ToolServer` object is updated
+    with new file.
+    """
+    if not instance.pk:
+        return False
+
+    try:
+        old_file = ToolServer.objects.get(pk=instance.pk).logo
+    except ToolServer.DoesNotExist:
+        return False
+
+    if old_file == '':
+        return
+    new_file = instance.logo
+    
+    if not old_file == new_file:
+        if os.path.isfile(old_file.path):
+            os.remove(old_file.path)
 
 class CategoryInServer(models.Model):
     name = models.CharField(max_length=100)
     server = models.ForeignKey(ToolServer, on_delete=models.CASCADE, related_name='categories')
-
+    type = models.CharField(
+        default='0',
+        max_length=2,
+        choices=[
+            ('0', 'chat'),
+            ('1', 'voice'),
+        ],
+        verbose_name = '''
+        type:
+        [
+            ('0', 'chat'),
+            ('1', 'voice'),
+        ]
+        '''
+        )
     def __str__(self):
         return f"{self.name} in {self.server}"
 
@@ -160,10 +208,10 @@ class CategoryInServer(models.Model):
 class Tool(models.Model):
 
     def cover_dir_path(instance, filename):
-        return f'cover/tool-{instance.id}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
+        return f'cover/tool-{instance.urlCode}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
 
     def logo_dir_path(instance, filename):
-        return f'logo/tool-{instance.id}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
+        return f'logo/tool-{instance.urlCode}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
 
     t_status = [
         ('0', 'destroyed'),

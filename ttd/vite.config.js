@@ -48,6 +48,10 @@ export default ({ mode }) => {
           changeOrigin: dev,
           rewrite: (path) => path.replace(/^\/api/,'/'),
         },
+        "/media": {
+          target: process.env.VITE_BACKEND_URL,
+          changeOrigin: dev,
+        },
         // "/ipa": {
         //   target: dev ? process.env.VITE_FRONTEND_URL : process.env.VITE_BACKEND_URL,
         //   changeOrigin: dev,

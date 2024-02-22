@@ -6,7 +6,7 @@
             <div class="h-full"></div>
             <!-- <component :is="currentTab" class="text-black flex w-[300px] h-full">
             </component> -->
-            <router-view :is="currentTab" class="text-black flex w-[300px] h-full">
+            <router-view class="text-black flex w-[300px] h-full">
             </router-view>
             <div class="h-full"></div>
 

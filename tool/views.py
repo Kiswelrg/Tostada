@@ -9,10 +9,17 @@ def Home(request):
 
 
 # Fetch all tool servers that a user has joined
-def fetch_user_tool_servers(request, user_code):
-    tool_servers = ToolServer.objects.filter(user_server_auths__user__urlCode=user_code)
-    data = [{"cid": ts.urlCode, "name": ts.name, "description": ts.description} for ts in tool_servers]
-    return JsonResponse({"tool_servers": data})
+def fetch_user_tool_servers(request):
+    tool_servers = ToolServer.objects.filter(user_server_auths__user__username=request.session['username'])
+    data = [
+        {
+            "cid": ts.urlCode,
+            "name": ts.name,
+            "description": ts.description,
+            "logoSrc": '/media/default/server/logo/logo.svg' if ts.logo == '' else ts.logo.url
+        } for ts in tool_servers
+    ]
+    return JsonResponse({"tool_servers": data, 'r': 'success'})
 
 # Fetch a specific tool server by its urlCode
 def fetch_tool_server(request, tool_server_code):
@@ -24,8 +31,7 @@ def fetch_tool_server(request, tool_server_code):
         "description": tool_server.description,
         "status": tool_server.get_status_display(),
         "type": tool_server.get_type_display(),
-        "date_created": tool_server.date_created,
-        "owner": tool_server.owner.username,
+        "date_created": tool_server.date_created.date(),
     }
 
     if 'tools' not in request.GET or not request.GET['tools'] == '1':
@@ -45,7 +51,17 @@ def fetch_tool_server(request, tool_server_code):
             tools = Tool.objects.filter(id__in=tool_ids)
     
     if tools:
-        data["tools"] = [{"cid": tool.urlCode, "name": tool.name, "description": tool.description} for tool in tools]
+        data["tools"] = [
+            {
+                "cid": tool.urlCode,
+                "name": tool.name,
+                "description": tool.description,
+                "category": {
+                    'name': tool.category.name,
+                    'type': tool.category.get_type_display()
+                }
+            } for tool in tools
+        ]
     else:
         print('no joined server/available tool')
     return JsonResponse({"tool_server": data})
@@ -67,7 +83,7 @@ def fetch_tool(request, tool_code):
         "name": user_tool.name,
         "description": user_tool.description,
         "status": user_tool.get_status_display(),
-        "date_created": user_tool.date_created,
+        "date_created": user_tool.date_created.date(),
         "server": user_tool.server.name,
         "category": user_tool.category.name,
     }

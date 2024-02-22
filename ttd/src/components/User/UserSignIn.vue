@@ -308,7 +308,7 @@ export default {
 <script setup>
 import { ref, onMounted } from "vue";
 import h256 from "@/util/encrypt";
-
+import session from "@/util/session";
 const varification_correct = ref(true);
 const pwd_validity = ref(true);
 const username = ref("");
@@ -316,52 +316,24 @@ const pwd = ref("");
 const vcode = ref("");
 const vcodeImg = ref(null);
 const VcodeUrl = ref('/api/user/Vcode/');
-const csrftoken = getCookie("csrftoken");
 const cmt = ref("");
-
+let csrftoken;
 onMounted(() => {
+  (async ()=> {
+    csrftoken = session.getCookie("csrftoken");
+    cmt.value = await session.getToken();
+  })();
+});
 
-})
 
 
 function refreshVcode() {
-  // $(vcodeImg.value).attr('src', '/api/user/Vcode/');
   VcodeUrl.value = '/api/user/Vcode/?h=' + Date.now().toString();
 }
 
 function checkPwdValidity() {
-  
-}
 
-
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== "") {
-    const cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      // Does this cookie string begin with the name we want?
-      if (cookie.substring(0, name.length + 1) === name + "=") {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
 }
-
-async function getToken() {
-  const r = await fetch("/api/user/Token/", {
-    method: "GET",
-    headers: {
-      "Content-type": "application/json",
-    },
-  });
-  r.text().then(function (text) {
-    cmt.value = text.toString();
-  });
-}
-getToken();
 
 async function signIn() {
 
