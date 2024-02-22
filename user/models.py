@@ -21,7 +21,14 @@ class User(models.Model):
     )
     urlCode = models.IntegerField(default=getUserCode, unique=True, db_index=True)
     password = models.CharField(max_length=64)
-    sex = models.PositiveSmallIntegerField(default=None,blank=True,null=True)
+    sex = models.CharField(
+            default='隐藏',
+            max_length = 2,
+            choices = {
+                '0': '男',
+                '1': '女',
+            },
+        )
     age = models.PositiveSmallIntegerField(default=None,blank=True,null=True)
     date_add = models.DateTimeField(default=timezone.now)
     info = models.FileField(default=None,blank=True,null=True)

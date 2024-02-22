@@ -9,6 +9,8 @@ from .util import model
 def EmptyJson():
     return {}
 
+def getDefaultAdditional():
+    return {"type": ""}
 
 class ToolServer(models.Model):
     def cover_dir_path(instance, filename):
@@ -57,50 +59,95 @@ class ToolServer(models.Model):
     )
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='')
-    additional = models.JSONField(default=dict({"type": {}}), blank=True, null=True)
+    additional = models.JSONField(default=getDefaultAdditional, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name
 
+    def initDefaultRole(self):
+        return ServerRole.objects.create(
+                name = 'everyone',
+                server = self
+            )
+        
+    def initDefaultCategories(self, with_tool = False):
+        names = [
+            ('welcome', 'Hi'),
+            ('chat', 'Main'),
+            ('voice', 'General')
+        ]
+        data = {
+            'categories': [
+                CategoryInServer.objects.create(
+                    name = name[0],
+                    server = self
+                ) for name in names
+            ],
+            
+        }
+        tools = [
+                    ToolOfChat.objects.create(
+                        name = names[i][1],
+                        server = self,
+                        category = data['categories'][i]
+                    ) for i in range(3)
+                ] if with_tool else []
+        data['tools'] = tools
+        return data
+
     default_permissions_for_everyone = [('View Channel',),
-                ('Create Expressions',),
-                ('Create Invite',),
-                ('Change Nickname',),
-                ('Send Messages',),
-                ('Send Messages in Threads',),
-                ('Create Public Threads',),
-                ('Create Private Threads',),
-                ('Embed Links',),
-                ('Attach Files',),
-                ('Add Reactions',),
-                ('Use External Emoji',),
-                ('Use External Stickers',),
-                ('Mention @everyone, @here, and All Roles',),
-                ('Read Message History',),
-                ('Use Application Commands',),
-                ('Send Voice Messages',),
-                ('Connect',),
-                ('Speak',),
-                ('Video',),
-                ('Use Activities',),
-                ('Use Soundboard',),
-                ('Use External Sounds',),
-                ('Use Voice Activity',),
-                ('Set Voice Channel Status',),
-                ('Create Events',)
-            ]
+                                        ('Create Expressions',),
+                                        ('Create Invite',),
+                                        ('Change Nickname',),
+                                        ('Send Messages',),
+                                        ('Send Messages in Threads',),
+                                        ('Create Public Threads',),
+                                        ('Create Private Threads',),
+                                        ('Embed Links',),
+                                        ('Attach Files',),
+                                        ('Add Reactions',),
+                                        ('Use External Emoji',),
+                                        ('Use External Stickers',),
+                                        ('Mention @everyone, @here, and All Roles',),
+                                        ('Read Message History',),
+                                        ('Use Application Commands',),
+                                        ('Send Voice Messages',),
+                                        ('Connect',),
+                                        ('Speak',),
+                                        ('Video',),
+                                        ('Use Activities',),
+                                        ('Use Soundboard',),
+                                        ('Use External Sounds',),
+                                        ('Use Voice Activity',),
+                                        ('Set Voice Channel Status',),
+                                        ('Create Events',)
+                                    ]
     def save(self, *args, **kwargs):
         isNew = self._state.adding
         super().save(*args, **kwargs)
         if isNew:
-            
+            # Init a Default Role called 'everyone'
+            save_list = []
+            role = self.initDefaultRole()
             ids = AuthorizationLevel.objects.filter(title__in = [name[0] for name in self.default_permissions_for_everyone])
-            role = ServerRole.objects.create(
-                name = 'everyone',
-                server = self
-            )
             role.auth.set(ids)
-            role.save()
+            user_server_role = UserServerRole.objects.create(
+                user = self.owner,
+                server = self,
+                role = role
+            )
+            save_list.append(user_server_role)
+            save_list.append(role)
+
+            # Init Default Categories: welcome, chat, voice
+            cs = self.initDefaultCategories(with_tool=True)
+            for c in cs['categories']:
+                save_list.append(c)
+            for t in cs['tools']:
+                save_list.append(t)
+            for item in save_list:
+                item.save()
+                
 
 class CategoryInServer(models.Model):
     name = models.CharField(max_length=100)
@@ -108,6 +155,7 @@ class CategoryInServer(models.Model):
 
     def __str__(self):
         return f"{self.name} in {self.server}"
+
 
 class Tool(models.Model):
 
@@ -154,7 +202,7 @@ class Tool(models.Model):
     )
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='')
-    additional = models.JSONField(default=dict({"type": "ToolTypical"}), null=True, blank = True)
+    additional = models.JSONField(default=getDefaultAdditional, null=True, blank = True)
 
     def __str__(self) -> str:
         return f"{self.name} in {self.server}"
@@ -164,6 +212,11 @@ class ToolOfInputAndOutput(Tool):
     method_names = models.JSONField(default=EmptyJson, blank = True)
     input = models.JSONField(default=EmptyJson, null=True, blank = True)
     output = models.JSONField(default=EmptyJson, null=True, blank = True)
+    
+
+class ToolOfChat(Tool):
+    method_names = models.JSONField(default=EmptyJson, blank = True)
+    bots = models.JSONField(default=EmptyJson, null=True, blank = True)
     
 
 class AuthorizationLevel(models.Model):
@@ -233,7 +286,6 @@ class UserServerRole(models.Model):
 
 
 # Default to be role-based table
-# Overwrite server-level ones, use as additional
 class UserToolRole(models.Model):
     # auth_type = models.ForeignKey(
     #     AuthorizationLevel,

@@ -2,10 +2,11 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import AuthorizationLevel, ToolServer, ServerRole, UserServerRole, UserToolRole
-from .models import ToolOfInputAndOutput
+from .models import ToolOfInputAndOutput, ToolOfChat
 from .models import CategoryInServer
 
 admin.site.register(ToolOfInputAndOutput)
+admin.site.register(ToolOfChat)
 admin.site.register(ToolServer)
 admin.site.register(CategoryInServer)
 admin.site.register(AuthorizationLevel)
