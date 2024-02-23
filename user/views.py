@@ -5,6 +5,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.http.response import Http404
 from django.forms import ValidationError
 from django.http.response import HttpResponseRedirect
+from django.http import JsonResponse
 from django.urls import reverse
 import hashlib
 from user.models import User
@@ -36,10 +37,12 @@ def printc(info, isList = False, color = None):
         printRGB(info)
 
 def Home(request):
+    print('hit unknown')
     return render(request, 'index.html')
 
 
 def Login(request):
+    print('hit login')
     return render(request, 'index.html')
 
 
@@ -179,12 +182,27 @@ def DoSignUp(request):
 def getToken(request):
     return HttpResponse(get_token(request))
 
+
+def isLoggedIn(request):
+    if not request.session.has_key('isLoggedIn') or not request.session.has_key('username') or not request.session['isLoggedIn']:
+        return JsonResponse({'r': 0})
+    return JsonResponse({'r': 1})
+
+
 def DoLogOut(request):
     if request.session.has_key('isLoggedIn'):
         del request.session['isLoggedIn']
     if request.session.has_key('username'):
         del request.session['username']
-    return HttpResponseRedirect('/')
+    return JsonResponse({'r': 1})
+
+
+def LogOut(request):
+    if request.session.has_key('isLoggedIn'):
+        del request.session['isLoggedIn']
+    if request.session.has_key('username'):
+        del request.session['username']
+    return HttpResponseRedirect(reverse('user:login'))
 
 
 def Vcode(request):
@@ -205,13 +223,13 @@ def Vcode(request):
     nums =[]    
     #数字
     for i in range(48,58):
-        nums.append(chr(i)) 
+        nums.append(chr(i))
     #小写英文字母
     for i in range(97,123):
-        nums.append(chr(i)) 
+        nums.append(chr(i))
     #大写英文字母
     for i in range(65,91):
-        nums.append(chr(i))  
+        nums.append(chr(i))
 
     code_str = ""
     for i in range(4):

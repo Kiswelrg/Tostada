@@ -11,12 +11,14 @@ urlpatterns = [
     path('dosignup/', views.DoSignUp, name = 'do-sign-up'),
 	path('signin/', views.SignIn, name = 'sign-in'),
 	path('dosignin/', views.DoSignIn, name = 'do-sign-in'),
+	path('logout/', views.LogOut, name = 'log-out'),
+	path('dologout/', views.DoLogOut, name = 'do-log-out'),
 	path('forgetpassword/',views.forgetpassword, name = 'forget-pwd'),
 	path('resetpwd/',views.ResetPwd, name = 'reset-pwd'),
 	path('Token/',views.getToken),
-	# path('getUsername/',views.getUsername),
+	path('isLoggedIn/',views.isLoggedIn, name = 'is-logged-in'),
 	path('Vcode/',views.Vcode, name = 'Vcode'),
 	# re_path(r'^search/(?:(?P<page>[0-9]{1,3})(?:[&=\w]+)/)?$',views.Search, name = 'search'),
-	re_path(r'.*',views.Home, name = 'home'),
+	path('',views.Home, name = 'home'),
 	
 ]

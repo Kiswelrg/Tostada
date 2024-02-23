@@ -24,7 +24,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'^ipa/(?P<path>.*)$', lambda request, path: HttpResponseRedirect(f'/static/{path}')),
+    # re_path(r'^ipa/(?P<path>.*)$', lambda request, path: HttpResponseRedirect(f'/static/{path}')),
     path('', Home),
 
     re_path(r'^(?:api/)?i/', include('tool.urls', namespace = 'tool')),

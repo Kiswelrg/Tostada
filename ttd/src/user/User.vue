@@ -20,7 +20,7 @@ import { ref, computed, onMounted } from 'vue'
 import Header from './Header/Header.vue'
 
 onMounted(() => {
-    console.log('User Page')
+    
 })
 
 

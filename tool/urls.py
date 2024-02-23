@@ -11,5 +11,5 @@ urlpatterns = [
 	path('user/tool_servers/', views.fetch_user_tool_servers, name='fetch_user_tool_servers'),
     path('tool_server/<int:tool_server_code>/', views.fetch_tool_server, name='fetch_tool_server'),
     path('tool/<int:tool_code>/', views.fetch_tool, name='fetch_tool'),
-	re_path(r'.*',views.Home, name = 'home'),
+	re_path(r'',views.Home, name = 'home'),
 ]

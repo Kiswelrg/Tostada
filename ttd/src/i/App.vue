@@ -1,7 +1,7 @@
 <template>
   <div class="main flex flex-row grow h-full w-full">
-    <ServerList :serverList="serverList" />
-    <Server />
+    <FunctionList :functionList="functionList" @update-active-tab="onUpdateActiveTab"></FunctionList>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -9,15 +9,18 @@
 import { ref, onMounted } from 'vue';
 import session from "@/util/session";
 
-import ServerList from './FunctionList/FunctionList.vue';
-import Server from './FunctionDetail/Server/Server.vue';
+import FunctionList from './FunctionList/FunctionList.vue';
+// import Server from './FunctionDetail/Server/Server.vue';
+
+const activeTab = ref(-1);
+
 onMounted(() => {
   (async () => {
     await fetchToolServers();
   })();
 });
 
-const serverList = ref({
+const functionList = ref({
   directMessages: [
     { logoSrc: '/static/tool/main/user-solid.svg' },
     // Add more objects with image sources for direct messages
@@ -38,8 +41,12 @@ const serverList = ref({
   ]
 });
 
-function setServerList(ss) {
-  serverList.value['joinedServers'] = ss['tool_servers'];
+function setFunctionList(ss) {
+  functionList.value['joinedServers'] = ss['tool_servers'];
+}
+
+function onUpdateActiveTab(tabIndex){
+  activeTab.value = tabIndex;
 }
 
 async function fetchToolServers() {
@@ -53,7 +60,7 @@ async function fetchToolServers() {
   if (response.ok) {
     const r = await response.json();
     console.log(r);
-    setServerList(r);
+    setFunctionList(r);
   } else {
     console.log(response.status);
   }

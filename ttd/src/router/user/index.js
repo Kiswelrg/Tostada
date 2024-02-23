@@ -1,10 +1,17 @@
 const userRoutes = [
   {
     path: "", // 对应 "/user"
+    name: "user-root",
+    redirect: "/user/login/"
+  },
+  {
+    path: "logout/", // 对应 "/user"
     redirect: "/user/login/"
   },
   {
     path: "login/", // 对应 "/user/login"
+    alias: 'signin/',
+    name: "user-login",
     component: () => import("@/components/User/UserSignIn.vue"),
     props: { currentTabIndex: 1 }
   },

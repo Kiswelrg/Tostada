@@ -9,7 +9,7 @@
 
 <script setup>
 import { ref, shallowRef } from 'vue'
-import ToolTypical from './ToolTypical/ToolTypical.vue'
+import ToolTypical from './Tools/ToolTypical/ToolTypical.vue'
 const tabs = shallowRef({
     'currentTab': ToolTypical,
 

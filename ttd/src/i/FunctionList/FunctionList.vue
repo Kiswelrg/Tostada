@@ -4,7 +4,7 @@
         <!-- Direct Message icons -->
         <div class="sublist flex-1 mx-0 grow-0">
           <div class="flex flex-col w-full">
-              <div class="h-12 relative flex mx-auto mb-2" v-for="(message, index) in serverList.directMessages" :key="index">
+              <div class="functioner h-12 relative flex mx-auto mb-2" @click="GoMe" v-for="(message, index) in functionList.directMessages" :key="index">
               <div>
                   
               </div>
@@ -25,7 +25,7 @@
         <!-- User's joined servers icons -->
         <div class="sublist flex-1 mx-0 grow-0">
         <div class="flex flex-col w-full">
-            <div class="h-12 relative flex mx-auto mb-2"  v-for="(server, index) in serverList.joinedServers" :key="index">
+            <div class="functioner h-12 relative flex mx-auto mb-2"  @click="clickFunctioner($event, index)"  v-for="(server, index) in functionList.joinedServers" :key="index">
               <div class="absolute w-0.5 h-2 white block left-0 inset-y-auto">
             </div>
             <!-- Your joined servers icons here -->
@@ -45,7 +45,7 @@
         <!-- Placeholder icons -->
         <div class="sublist flex-1 mx-0 grow-0">
           <div class="flex flex-col w-full">
-              <div class="h-12 relative flex mx-auto mb-2"  v-for="(func, index) in serverList.placeholderCount" :key="index">
+              <div class="functioner h-12 relative flex mx-auto mb-2"  v-for="(func, index) in functionList.placeholderCount" :key="index">
               <!-- Your placeholder icons here -->
               <span class="icon inline-block w-12">
                   <img @click="GoHome" :src="func.logoSrc" alt="Others" class="icon cursor-pointer relative mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out" />
@@ -58,12 +58,34 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
+
+const emit = defineEmits(
+  [
+    'update-active-tab'
+  ]
+)
+
+onMounted(() => {
+  (async () => {
+    // await fetchToolServers();
+  })();
+  
+});
+
 function GoHome(){
     window.location.href = '/'
 }
+function GoMe(){
+    window.location.href = '/i/@me'
+}
+
+function clickFunctioner(e, index){
+  emit('update-active-tab', index);
+}
 
 const props = defineProps({
-    serverList: Object,
+    functionList: Object,
 })
 
 </script>
