@@ -9,6 +9,7 @@ export default {
     fontSize: {
       '1s': ['10px', '14px'],
       '2s': ['8px', '12px'],
+      '3s': ['14px', '24px']
     },
     colors: {
       'fclist': {

@@ -25,8 +25,8 @@ class User(models.Model):
             default='隐藏',
             max_length = 2,
             choices = {
-                '0': '男',
-                '1': '女',
+                ('0', '男'),
+                ('1', '女'),
             },
         )
     age = models.PositiveSmallIntegerField(default=None,blank=True,null=True)
