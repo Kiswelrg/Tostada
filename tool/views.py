@@ -52,11 +52,19 @@ def fetch_tool_server(request, tool_server_code):
     
     category_dict = {}
     for tool in tools:
-        if tool['category'] not in category_dict:
-            category_dict[tool.category] = [tool]
+        t = {
+                "cid": tool.urlCode,
+                "name": tool.name,
+                "description": tool.description,
+                "category": {
+                    'type': tool.category.get_type_display()
+                }
+            }
+        if tool.category.name not in category_dict:
+            category_dict[tool.category.name] = [t]
         else:
-            category_dict[tool.category].append(tool)
-
+            category_dict[tool.category.name].append(t)
+    print(category_dict)
     if tools:
         data["category"] = category_dict
     else:

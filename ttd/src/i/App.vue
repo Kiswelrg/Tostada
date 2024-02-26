@@ -27,9 +27,6 @@ const functionList = ref({
     // Add more objects with image sources for direct messages
   ],
   joinedServers: [
-    { logoSrc: '/static/tool/server_list/myserver.webp' },
-    { logoSrc: '/static/tool/server_list/sffgurus.webp' },
-    { logoSrc: '/static/tool/server_list/mj.webp' },
     // Add more objects with image sources for joined servers
   ],
   placeholderCount: [
@@ -41,12 +38,13 @@ onMounted(() => {
   (async () => {
     await fetchToolServers();
     if ( route.name == 'tool-root') {
-    if ( functionList.value['joinedServers'].length == 0 ) {
-      console.log('open find server');
-    } else {
-      activeServerTab.value = 0;
-      
-    }
+      if ( functionList.value['joinedServers'].length == 0 ) {
+        console.log('open find-server panel');
+      } else {
+        activeServerTab.value = 0;
+        
+      }
+    
   }
   })();
   isMeActive.value = route.meta.isMeActive;
@@ -55,6 +53,7 @@ onMounted(() => {
 
 
 const activeServer = computed(() => {
+  if (activeServerTab.value == -1) return undefined
   return functionList.value['joinedServers'][activeServerTab.value]
 })
 provide('active-server', activeServer)
