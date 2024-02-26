@@ -8,6 +8,8 @@
 <script setup>
 import ServerPanel from "./ServerPanel/ServerPanel.vue"
 import ToolDetail from "./ToolDetail/ToolDetail.vue"
+
+
 </script>
 
 <style lang="scss" setup>

@@ -1,10 +1,10 @@
 <template>
-    <!-- something else-->
+    <div>
     <div class="toollist h-full overflow-y-scroll">
         <div class="seomthingelse">
         </div>
 
-        <div v-for="(section,index) in sections" class="section text-hui-800 text-sm w-full min-h-10 pt-4">
+        <div v-for="(section,index) in server_detail" class="section text-hui-800 text-sm w-full min-h-10 pt-4">
             <div class="w-full bg-gray flex">
                 <div class="h-2 w-2 my-auto mx-1">
                     <img class="downsvg" :src="hashtag_url" alt="" />
@@ -14,7 +14,7 @@
                 </div>
                 <div class=""></div>
             </div>
-            <div v-for="sub in section.subsec" :key="section.id" @click="selectSubSection(sub.id)" class="toolbutton text-white flex ml-3 mr-2 p-1 hover:bg-hui-700 rounded" :class="{'bg-hui-700': selectedSubSection == sub.id}">
+            <div v-for="sub in section.subsec" :key="section.cid" @click="selectSubSection(sub.id)" class="toolbutton text-white flex ml-3 mr-2 p-1 hover:bg-hui-700 rounded" :class="{'bg-hui-700': selectedSubSection == sub.id}">
                 <div class="h-2 w-2 my-auto mx-1">
                     <img class="hashsvg" :src="chevron_url" alt="" />
                 </div>
@@ -26,14 +26,18 @@
             </div>
         </div>
     </div>
+    </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { inject, onMounted } from 'vue';
+
+const server = inject('active-server')
 const hashtag_url = '/static/tool/main/chevron-down-solid.svg'
 const chevron_url = '/static/tool/main/hashtag-solid.svg'
 let selectedSubSection = ref(-1)
-const sections = ref([
+const server_detail = ref([
   {
     name:'asd',
     subsec:[
@@ -42,12 +46,8 @@ const sections = ref([
             id: 1
         },
         {
-            name: 123124,
+            name: 7,
             id: 2
-        },
-        {
-            name: 123124,
-            id: 3
         }
     ]
   },{
@@ -57,23 +57,43 @@ const sections = ref([
             name: 123124,
             id: 12
         },
-        {
-            name: 123124,
-            id: 23
-        },
-        {
-            name: 123124,
-            id: 34
-        }
     ]
   }
 ])
+
+onMounted(() => {
+    (async () => {
+        if (!server) {
+            console.log('server not ready!');
+            return;
+        }
+        await fetchAToolServer(server.value.cid);
+    })();
+})
+
+function setServerDetail(r) {
+    server_detail.value = r['tool_server']['tools'];
+}
 
 function selectSubSection(id) {
     selectedSubSection.value = id
 }
 
-function checkIsSelected(id) {
+async function fetchAToolServer(cid) {
+  const response = await fetch(
+    `/api/i/tool_server/${cid}/?tools=1`,
+    {
+      method: "GET",
+    }
+  );
+  
+  if (response.ok) {
+    const r = await response.json();
+    console.log(r);
+    setServerDetail(r);
+  } else {
+    console.log(response.status);
+  }
 }
 
 </script>

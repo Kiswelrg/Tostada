@@ -45,7 +45,9 @@ export default {
       '10': '40px',
     },
     extend: {
-      
+      flex: {
+        'zero': '0 1 0%'
+      }
     },
   },
   plugins: [],

@@ -1,24 +1,25 @@
 <template>
   <div class="main flex flex-row grow h-full w-full">
-    <FunctionList :functionList="functionList" @update-active-tab="onUpdateActiveTab"></FunctionList>
-    <router-view></router-view>
+    <FunctionList :functionList="functionList" @update-active-server-tab="onUpdateActiveServerTab" @go-tab="onGoTab"></FunctionList>
+    <MeVue v-if="isMeActive"></MeVue>
+    <ServerVue v-else :server="activeServer"></ServerVue>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { provide } from 'vue';
 import session from "@/util/session";
 
 import FunctionList from './FunctionList/FunctionList.vue';
-// import Server from './FunctionDetail/Server/Server.vue';
+import ServerVue from '@/i/FunctionDetail/Server/Server.vue'
+import MeVue from '@/i/FunctionDetail/me/me.vue'
 
-const activeTab = ref(-1);
-
-onMounted(() => {
-  (async () => {
-    await fetchToolServers();
-  })();
-});
+const activeServerTab = ref(-1);
+const isMeActive = ref(true);
+const route = useRoute();
+const router = useRouter();
 
 const functionList = ref({
   directMessages: [
@@ -29,11 +30,6 @@ const functionList = ref({
     { logoSrc: '/static/tool/server_list/myserver.webp' },
     { logoSrc: '/static/tool/server_list/sffgurus.webp' },
     { logoSrc: '/static/tool/server_list/mj.webp' },
-    { logoSrc: '/static/tool/server_list/mj.webp' },
-    { logoSrc: '/static/tool/server_list/mj.webp' },
-    { logoSrc: '/static/tool/server_list/mj.webp' },
-    { logoSrc: '/static/tool/server_list/mj.webp' },
-    { logoSrc: '/static/tool/server_list/mj.webp' },
     // Add more objects with image sources for joined servers
   ],
   placeholderCount: [
@@ -41,12 +37,49 @@ const functionList = ref({
   ]
 });
 
+onMounted(() => {
+  (async () => {
+    await fetchToolServers();
+    if ( route.name == 'tool-root') {
+    if ( functionList.value['joinedServers'].length == 0 ) {
+      console.log('open find server');
+    } else {
+      activeServerTab.value = 0;
+      
+    }
+  }
+  })();
+  isMeActive.value = route.meta.isMeActive;
+  
+});
+
+
+const activeServer = computed(() => {
+  return functionList.value['joinedServers'][activeServerTab.value]
+})
+provide('active-server', activeServer)
+
 function setFunctionList(ss) {
   functionList.value['joinedServers'] = ss['tool_servers'];
 }
 
-function onUpdateActiveTab(tabIndex){
-  activeTab.value = tabIndex;
+function onUpdateActiveServerTab(tabIndex) {
+  activeServerTab.value = tabIndex;
+}
+
+function onGoTab(path) {
+  if (path == router.resolve({name: 'tool-me'}).path) {
+    if (isMeActive.value) return;
+    
+    isMeActive.value = true;
+
+  } else if (path == router.resolve({name: 'tool-root'}).path) {
+    if (!isMeActive.value) return;
+
+    isMeActive.value = false;
+  } else {
+    console.log('error:', path);
+  }
 }
 
 async function fetchToolServers() {
@@ -56,7 +89,7 @@ async function fetchToolServers() {
       method: "GET",
     }
   );
-
+  
   if (response.ok) {
     const r = await response.json();
     console.log(r);
@@ -65,6 +98,7 @@ async function fetchToolServers() {
     console.log(response.status);
   }
 }
+
 </script>
 
 

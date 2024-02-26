@@ -7,7 +7,7 @@
                 <img class="h-full" :src="thumb_url" alt="">
             </div>
             <div class="servername text-start h-6 w-full pl-1">
-                <span class="text-xs text-white truncate">Some Server</span>
+                <span class="text-xs text-white truncate">{{ server.name }}</span>
             </div>
             <div class="h-6 w-6">
                 <div class="dropdownarror h-5 w-5 relative mb-0 mr-0"></div>
@@ -25,8 +25,10 @@
 
 <script setup>
 import { ref } from 'vue';
+import { inject } from 'vue';
 const thumb_url = '/static/tool/main/thumb.svg';
 
+const server = inject('active-server');
 </script>
 
 <style lang="scss" scoped>

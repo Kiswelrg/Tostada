@@ -50,18 +50,15 @@ def fetch_tool_server(request, tool_server_code):
         if tool_ids.exists():
             tools = Tool.objects.filter(id__in=tool_ids)
     
+    category_dict = {}
+    for tool in tools:
+        if tool['category'] not in category_dict:
+            category_dict[tool.category] = [tool]
+        else:
+            category_dict[tool.category].append(tool)
+
     if tools:
-        data["tools"] = [
-            {
-                "cid": tool.urlCode,
-                "name": tool.name,
-                "description": tool.description,
-                "category": {
-                    'name': tool.category.name,
-                    'type': tool.category.get_type_display()
-                }
-            } for tool in tools
-        ]
+        data["category"] = category_dict
     else:
         print('no joined server/available tool')
     return JsonResponse({"tool_server": data})

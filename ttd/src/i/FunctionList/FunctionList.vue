@@ -58,11 +58,14 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted } from 'vue'
+import { useRoute } from 'vue-router';
+const route = useRoute();
 
 const emit = defineEmits(
   [
-    'update-active-tab'
+    'update-active-server-tab',
+    'go-tab'
   ]
 )
 
@@ -77,11 +80,19 @@ function GoHome(){
     window.location.href = '/'
 }
 function GoMe(){
-    window.location.href = '/i/@me'
+  emit('go-tab', '/i/@me')
+}
+function GoTool(){
+  emit('go-tab', '/i')
 }
 
 function clickFunctioner(e, index){
-  emit('update-active-tab', index);
+  // If special do not go
+  GoTool()
+
+
+  // Emit
+  emit('update-active-server-tab', index)
 }
 
 const props = defineProps({

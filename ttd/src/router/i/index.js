@@ -2,12 +2,12 @@ const toolRoutes = [
   {
     path: "", // 对应 "/i"
     name: "tool-root",
-    component: () => import("@/i/FunctionDetail/Server/Server.vue"),
+    meta: {isMeActive: false}
   },
   {
     path: "@me", // 对应 "/i"
     name: "tool-me",
-    component: () => import("@/i/FunctionDetail/me/me.vue"),
+    meta: {isMeActive: true}
   },
 ];
 
