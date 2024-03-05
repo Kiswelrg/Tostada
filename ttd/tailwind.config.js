@@ -9,9 +9,13 @@ export default {
     fontSize: {
       '1s': ['10px', '14px'],
       '2s': ['8px', '12px'],
-      '3s': ['14px', '24px']
+      '3s': ['14px', '24px'],
+      '625': ['.625rem', '1rem'],
     },
     colors: {
+      'text-muted': 'hsl( 214 calc( 1 * 8.1%) 61.2% / 1)',
+      'bg-primary': 'hsl( 223 calc( 1 * 6.7%) 20.6% / 1)',
+      'interactive-normal': 'hsl( 215 calc( 1 * 8.8%) 73.3% / 1)',
       'fclist': {
         'bg': '#1e1f22',
       },
@@ -46,7 +50,8 @@ export default {
     },
     extend: {
       flex: {
-        'zero': '0 1 0%'
+        'zero': '0 1 0%',
+        'zauto': '0 0 auto',
       }
     },
   },
