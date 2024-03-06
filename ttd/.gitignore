@@ -24,4 +24,5 @@ dist-ssr
 *.sw?
 
 # WXY custom
-openmoji-svg-color
+src/assets/resources_ignore
+src/assets/FontAwesome
