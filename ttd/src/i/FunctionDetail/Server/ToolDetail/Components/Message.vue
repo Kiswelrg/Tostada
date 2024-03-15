@@ -1,12 +1,15 @@
 <template>
     <li class="messageListItem group my-0 border-1 border-solid border-white min-h-1 hover:bg-[#2e3035] w-full outline-none relative">
-        <div
+        <div :class="{'mt-0': !isGroupHead, 'min-h-[1.375rem]': !isGroupHead}"
              class="message select-text break-words relative pr-12 py-[0.125rem] pl-[72px] min-h-[2.75rem] mt-[1.0625rem]">
             <div class="message-contents static ml-0 pl-0 indent-0">
-                <img src=""
-                     alt=""
-                     class="avatar pointer-events-auto [alt]:indent-[-9999px] absolute left-4 mt-[calc(4px-0.125rem)] w-10 h-10 rounded-[50%] overflow-hidden cursor-pointer select-none z-[1]">
+                <img 
+                    v-if="msg['isGroupHead']"
+                    src=""
+                    alt=""
+                    class="avatar pointer-events-auto [alt]:indent-[-9999px] absolute left-4 mt-[calc(4px-0.125rem)] w-10 h-10 rounded-[50%] overflow-hidden cursor-pointer select-none z-[1]">
                 <h3
+                    v-if="msg['isGroupHead']"
                     class="header overflow-hidden relative leading-[1.375rem] text-[hsl( 214 calc( 1 * 8.1%) 61.2% / 1)] whitespace-break-spaces">
                     <span class="messageUsername mr-1">
                         <span
@@ -20,6 +23,11 @@
                         </time>
                     </div>
                 </h3>
+
+                <span v-if="!msg['isGroupHead']" class="compact-timestamp text-[11px] inline-block opacity-1 indent-0 font-text-muted mr-1 text-right select-none w-14 h-[1.375rem] left-0 absolute">
+                    <time title="Today at 12:39 PM" datetime="2024-03-15T04:39:20.353Z">12:39 PM</time>
+                </span>
+
                 <div
                      class="message-content pl-[72px] -ml-[72px] select-text overflow-hidden relative indent-0 text-base leading-[1.375rem] whitespace-break-spaces break-words text-[color:hsl( 210 calc( 1 * 9.1%) 87.1% / 1)]  font-light">
                     <a class="message-text anchor"><span>some link</span></a>
@@ -62,8 +70,13 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { computed } from 'vue';
 defineProps({
   msg: Object,
+})
+
+const isGroupHead = computed(() => {
+    return msg.value['isGroupHead']
 })
 
 </script>

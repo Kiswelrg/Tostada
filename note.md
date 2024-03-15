@@ -1,6 +1,9 @@
-### TaskList
+### ToDo
 
- - 
+ - msg in tool detail:
+   - with head and avatar ✅
+   - without
+ - reaction part of msg
 
 
 ### Tips
