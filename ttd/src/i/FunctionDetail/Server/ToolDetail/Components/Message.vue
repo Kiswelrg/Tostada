@@ -71,12 +71,12 @@
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed } from 'vue';
-defineProps({
+const props = defineProps({
   msg: Object,
 })
 
 const isGroupHead = computed(() => {
-    return msg.value['isGroupHead']
+    return props.msg?.value?.isGroupHead ?? false;
 })
 
 </script>
