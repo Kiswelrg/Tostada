@@ -132,5 +132,9 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'upload')
-MEDIA_URL = '/media/'
+
+MEDIA_ROOT = 'dafjdijgpaisdfajsdgijdaspfdsiajgisdjapfijaisgapsdjfiaosdjgioad'
+MEDIA_URL = 'fjiapjdgioajdfpjaiposdjgiasdjfpoajgiajspdoifjgjpaisjdfiojapigo'
+if DEBUG:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'upload')
+    MEDIA_URL = '/media/'

@@ -53,6 +53,16 @@ const messages = ref([
     },
     {
         'a': 1,
+        'id': 3,
+        'isGroupHead': false
+    },
+    {
+        'a': 1,
+        'id': 3,
+        'isGroupHead': false
+    },
+    {
+        'a': 1,
         'id': 4,
         'isGroupHead': true
     },

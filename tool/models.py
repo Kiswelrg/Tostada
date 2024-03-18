@@ -29,7 +29,7 @@ class ToolServer(models.Model):
     ]
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank = True)
-    urlCode = models.IntegerField(
+    urlCode = models.PositiveBigIntegerField(
         default=model.getToolServerCode, unique=True, db_index=True)
     date_created = models.DateTimeField(default=timezone.now)
     type = models.CharField(
@@ -225,7 +225,7 @@ class Tool(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank = True)
 
-    urlCode = models.IntegerField(
+    urlCode = models.PositiveBigIntegerField(
         default=model.getToolCode, unique=True, db_index=True)
     date_created = models.DateTimeField(default=timezone.now)
     # type = models.CharField(

@@ -1,7 +1,9 @@
 <template>
     <li class="messageListItem group my-0 border-1 border-solid border-white min-h-1 hover:bg-[#2e3035] w-full outline-none relative">
-        <div :class="{'mt-0': !isGroupHead, 'min-h-[1.375rem]': !isGroupHead}"
-             class="message select-text break-words relative pr-12 py-[0.125rem] pl-[72px] min-h-[2.75rem] mt-[1.0625rem]">
+        <div
+            class="message select-text break-words relative pr-12 py-[0.125rem] pl-[72px] mt-0"
+            :class="{'mt-[1.0625rem]': msg['isGroupHead'], 'min-h-[1.375rem]': !msg['isGroupHead'], 'min-h-[2.75rem]': msg['isGroupHead']}"
+            >
             <div class="message-contents static ml-0 pl-0 indent-0">
                 <img 
                     v-if="msg['isGroupHead']"
@@ -24,8 +26,8 @@
                     </div>
                 </h3>
 
-                <span v-if="!msg['isGroupHead']" class="compact-timestamp text-[11px] inline-block opacity-1 indent-0 font-text-muted mr-1 text-right select-none w-14 h-[1.375rem] left-0 absolute">
-                    <time title="Today at 12:39 PM" datetime="2024-03-15T04:39:20.353Z">12:39 PM</time>
+                <span v-if="!msg['isGroupHead']" class="compact-timestamp text-[11px] inline-block opacity-0 indent-0 font-text-muted mr-1 text-right select-none w-14 h-[1.375rem] left-0 absolute">
+                    <time title="Today at 12:39 PM" datetime="2024-03-15T04:39:20.353Z" class="pointer-events-none indent-0 text-text-muted text-right select-none leading-[22px]">12:39 PM</time>
                 </span>
 
                 <div
@@ -87,8 +89,11 @@ const isGroupHead = computed(() => {
     top: -16px;
 }
 
-.group:hover .buttons {
-    @apply opacity-100;
+.group:hover {
+    .buttons, .compact-timestamp {
+        @apply opacity-100;
+    }
+
 }
 
 .buttonlist-shadow {

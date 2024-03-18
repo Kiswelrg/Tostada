@@ -32,4 +32,3 @@ urlpatterns = [
     path('favicon.svg', lambda request: HttpResponseRedirect('/static/favicon.svg')),
     path('favicon.ico', lambda request: HttpResponseRedirect('/static/favicon.svg')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

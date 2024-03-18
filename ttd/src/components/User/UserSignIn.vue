@@ -307,6 +307,7 @@ export default {
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRouter } from 'vue-router';
 import h256 from "@/util/encrypt";
 import session from "@/util/session";
 const varification_correct = ref(true);
@@ -317,6 +318,7 @@ const vcode = ref("");
 const vcodeImg = ref(null);
 const VcodeUrl = ref('/api/user/Vcode/');
 const cmt = ref("");
+const router = useRouter();
 let csrftoken;
 onMounted(() => {
   (async ()=> {
@@ -368,6 +370,7 @@ async function signIn() {
       varification_correct.value = true;
       pwd_validity.value = true;
       console.log("登陆成功");
+      router.push({name: 'tool-root'});
     } else {
       console.log(r);
       switch (r["msg"]) {

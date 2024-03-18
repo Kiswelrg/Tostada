@@ -7,6 +7,8 @@ from django.forms import ValidationError
 from django.http.response import HttpResponseRedirect
 from django.http import JsonResponse
 from django.urls import reverse
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
 import hashlib
 from user.models import User
 
@@ -248,3 +250,12 @@ def Vcode(request):
     buf = io.BytesIO()
     img.save(buf,'png')
     return HttpResponse(buf.getvalue(),'image/png')
+
+
+def avatar_view(request, user_code):
+    user = get_object_or_404(User, urlCode=user_code)
+    if user.avatar:
+        return FileResponse(user.avatar.open(), content_type='image/jpeg')
+    else:
+        # Handle the case where the user does not have an avatar
+        pass

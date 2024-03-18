@@ -27,7 +27,15 @@ def getXCode(name,base,r):
 
 
 def getToolServerCode():
-    return getXCode('ToolServer',355,7)
+    # return getXCode('ToolServer',355,7)
+    while True:
+        random_value = random.randint(1e18, 2**63 - 1)
+        if not models.ToolServer.objects.filter(urlCode=random_value).exists():
+            return random_value
 
 def getToolCode():
-    return getXCode('Tool',201,10)
+    # return getXCode('Tool',201,10)
+    while True:
+        random_value = random.randint(1e18, 2**63 - 1)
+        if not models.Tool.objects.filter(urlCode=random_value).exists():
+            return random_value

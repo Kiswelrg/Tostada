@@ -2,12 +2,7 @@ import random,string
 from . import models
 
 def getUserCode():
-    #at most
-    #a = random.randint(1000000000, 9999999999)
-
-    #but now
-    a = random.randint(1000000, 9999999) + 103*10000000
-
-    while models.User.objects.filter(urlCode = a).exists():
-        a = random.randint(1000000, 9999999) + 102*10000000
-    return int(a)
+    while True:
+        random_value = random.randint(1e18, 2**63 - 1)
+        if not models.User.objects.filter(urlCode=random_value).exists():
+            return random_value
