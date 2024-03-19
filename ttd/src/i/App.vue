@@ -13,8 +13,8 @@ import { provide } from 'vue';
 import session from "@/util/session";
 
 import FunctionList from './FunctionList/FunctionList.vue';
-import ServerVue from '@/i/FunctionDetail/Server/Server.vue'
-import MeVue from '@/i/FunctionDetail/me/me.vue'
+import ServerVue from '@/i/FunctionDetail/Server/Server.vue';
+import MeVue from '@/i/FunctionDetail/me/me.vue';
 
 const activeServerTab = ref(-1);
 const isMeActive = ref(true);

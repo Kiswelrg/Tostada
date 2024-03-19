@@ -1,9 +1,12 @@
 ### ToDo
 
- - msg in tool detail:
-   - with head and avatar ✅
-   - without
- - reaction part of msg
+|Type|Detail|1|2|Finished|
+|---|---|---|---|---|
+|msg|msg block|with head/avatar|   |✅|
+|msg|msg block|without|   |✅|
+|msg|reaction part|   |   ||
+|Tool Input|Function Selection Dropdown|   |   ||
+|FunctionList|Default Button|Find Servers|   ||
 
 
 ### Tips

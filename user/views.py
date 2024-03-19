@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
 import hashlib
 from user.models import User
 
@@ -60,6 +61,7 @@ def forgetpassword(request):
     return render(request, 'index.html')
 
 
+@require_POST
 def ResetPwd(request):
     print(request.POST)
     form_l = ['username', 'pwd', 'code', 'pwd2']
@@ -98,6 +100,7 @@ def ResetPwd(request):
     return HttpResponse(json.dumps({'state': state, 'msg': msg}))
 
 
+@require_POST
 def DoSignIn(request):
     form_l = ['username', 'pwd', 'code']
     # try:

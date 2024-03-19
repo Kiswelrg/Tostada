@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
 from .models import ToolServer, Tool, UserServerRole, UserToolRole
 # Create your views here.
 def Home(request):
@@ -20,6 +21,7 @@ def fetch_user_tool_servers(request):
         } for ts in tool_servers
     ]
     return JsonResponse({"tool_servers": data, 'r': 'success'})
+
 
 # Fetch a specific tool server by its urlCode
 def fetch_tool_server(request, tool_server_code):
@@ -70,6 +72,7 @@ def fetch_tool_server(request, tool_server_code):
     else:
         print('no joined server/available tool')
     return JsonResponse({"tool_server": data})
+
 
 # Fetch a specific tool by its urlCode
 def fetch_tool(request, tool_code):

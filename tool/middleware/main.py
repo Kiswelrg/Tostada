@@ -15,8 +15,8 @@ class LoginRequireMiddleWare:
                 return HttpResponseRedirect(f"{reverse('user:sign-in')}?wish=" + quote_plus(request.path))
 
         # Need to be POST
-        except_list2 = []
-        for name in  except_list2:
+        include_list2 = []
+        for name in  include_list2:
             name = reverse('tool:' + name)
             if request.path == name  and request.method != "POST":
                 raise Http404('Invalid request!')

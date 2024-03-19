@@ -36,6 +36,8 @@
         </div>
         </div>
 
+        <!-- Find Server Button -->
+
         <div>
         <div class="delimeter h-0.5 w-8 flex-1 mx-auto mb-2">
 
@@ -89,7 +91,6 @@ function GoTool(){
 function clickFunctioner(e, index){
   // If special do not go
   GoTool()
-
 
   // Emit
   emit('update-active-server-tab', index)
