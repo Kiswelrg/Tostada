@@ -31,24 +31,24 @@
 
 <script setup>
 import { ref } from 'vue'
-import { inject, onMounted } from 'vue';
+import { inject, onMounted, onUnmounted } from 'vue';
 import { watch } from 'vue';
 
 const server = inject('active-server')
 const hashtag_url = '/static/tool/main/chevron-down-solid.svg'
 const chevron_url = '/static/tool/main/hashtag-solid.svg'
-let selectedSubSection = ref(-1)
-const server_detail = ref([
-  {
-    name:'Loading',
-    subsec:[
-        {
-            name: 1,
-            id: 1
-        }
-    ]
-  }
+const emit = defineEmits([
+    'select-tool'
 ])
+let selectedSubSection = ref(-1)
+const server_detail = ref([])
+
+
+function selectSubSection(id) {
+    selectedSubSection.value = id;
+    emit('select-tool', id);
+}
+
 
 onMounted(() => {
     (async () => {
@@ -56,13 +56,54 @@ onMounted(() => {
     })();
 })
 
-watch(server, async (newQuestion, oldQuestion) => {
+const watcher_server = watch(server, async (newQuestion, oldQuestion) => {
     if (!server || !server.value) {
-        console.log('loading server detail!');
+        console.log('loading server detail...');
         return;
     }
     await fetchAToolServer(server.value.cid);
-})
+}, { immediate: true})
+
+let cleanupwatcher_serverDetail = null
+const stopWatcher_serverDetail = () => {
+    if (cleanupwatcher_serverDetail) {
+        cleanupwatcher_serverDetail()
+        cleanupwatcher_serverDetail = null
+    }
+}
+
+const watcher_serverDetail = watch(
+    server_detail,
+    (newValue) => {
+        if (server_detail.value) {
+            for (let entry of server_detail.value) {
+                for (const [key, val] of Object.entries(entry.tools)) {
+                    if (!val) continue;
+                    selectSubSection(val.cid);
+                    stopWatcher_serverDetail();
+                }
+            }
+        }
+    },
+    {immediate: true}
+)
+cleanupwatcher_serverDetail = watcher_serverDetail
+
+// Clean up the watcher when the component is unmounted
+onUnmounted(stopWatcher_serverDetail)
+
+function setDefaultTool() {
+    console.log('setting default tool...', server_detail.value)
+    for (let entry of server_detail.value) {
+        for (const [key, val] of Object.entries(entry.tools)) {
+            if (!val) continue;
+            selectSubSection(val.cid);
+            return;
+        }
+    }
+    return;
+}
+
 
 function setServerDetail(r) {
     server_detail.value = [];
@@ -76,9 +117,7 @@ function setServerDetail(r) {
     }
 }
 
-function selectSubSection(id) {
-    selectedSubSection.value = id
-}
+
 
 async function fetchAToolServer(cid) {
   const response = await fetch(

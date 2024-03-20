@@ -2,7 +2,7 @@
     <div class="tooltypical z-[2] flex flex-col justify-between h-full w-full text-white">
         
         <div class="toolbody flex flex-col h-[calc(100%-53px)]">
-            <ToolHead :title="tool.title" :intro="tool.intro"/>
+            <ToolHead :title="tool.title" :intro="tool.intro + ' id: ' + selectedToolId"/>
             <div class="belly overflow-y-auto">
                 <div class="introduction">
                     <div class="introwrapper flex flex-col items-left text-left">
@@ -38,8 +38,10 @@
 import InputKing from '@/i/Global/InputKing/InputKing.vue'
 import ToolHead from '../../ToolHead/ToolHead.vue'
 import { ref } from 'vue'
+import { inject } from 'vue'
 import Message from '../../Components/Message.vue'
-
+const selectedToolId = inject('selected-tool-id');
+const intro = ref();
 const messages = ref([
     {
         'a': 1,
@@ -62,7 +64,7 @@ const messages = ref([
         'isGroupHead': false
     },
     {
-        'a': 1,
+        'a': '<div style="color: red"> plain html element</div>',
         'id': 4,
         'isGroupHead': true
     },
@@ -70,7 +72,7 @@ const messages = ref([
 
 const tool = ref({
     title: 'tool',
-    intro: 'this is an introduction'
+    intro: 'some introduction,'
 })
 </script>
 
