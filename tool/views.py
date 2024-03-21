@@ -95,4 +95,4 @@ def fetch_tool(request, tool_code):
         "server": user_tool.server.name,
         "category": user_tool.category.name,
     }
-    return JsonResponse({"tool": data})
+    return JsonResponse({"tool": data, "r": "success"})

@@ -252,6 +252,9 @@ class Tool(models.Model):
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='')
     additional = models.JSONField(default=getDefaultAdditional, null=True, blank = True)
 
+    class Meta:
+        abstract = True
+
     def __str__(self) -> str:
         return f"{self.name} in {self.server}"
 

@@ -15,9 +15,9 @@ export function useWatchOnce(source, callback, options = {}) {
 
   const watcher = watch(
     source,
-    (newValue, oldValue) => {
+    async (newValue, oldValue) => {
       if (!stopped.value) {
-        const shouldstop = callback(newValue, oldValue)
+        const shouldstop = await callback(newValue, oldValue)
         if (shouldstop)
           stopWatcher()
       }

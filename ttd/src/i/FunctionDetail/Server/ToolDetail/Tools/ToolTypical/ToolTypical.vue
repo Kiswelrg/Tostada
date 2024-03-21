@@ -40,7 +40,10 @@ import ToolHead from '../../ToolHead/ToolHead.vue'
 import { ref } from 'vue'
 import { inject } from 'vue'
 import Message from '../../Components/Message.vue'
-const selectedToolId = inject('selected-tool-id');
+// const selectedToolId = inject('selected-tool-id');
+const props = defineProps([
+    'selectedToolId',
+])
 const intro = ref();
 const messages = ref([
     {
