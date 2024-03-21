@@ -91,7 +91,7 @@ async function fetchToolServers() {
   
   if (response.ok) {
     const r = await response.json();
-    console.log(r);
+    console.log(`Servers( fetch status: ${r.r}): `, r.tool_servers);
     setFunctionList(r);
   } else {
     console.log(response.status);

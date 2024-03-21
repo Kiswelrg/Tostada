@@ -33,7 +33,7 @@
 import { ref } from 'vue'
 import { inject, onMounted, onUnmounted } from 'vue';
 import { watch } from 'vue';
-
+import { useWatchOnce } from '@/util/watcher'
 const server = inject('active-server')
 const hashtag_url = '/static/tool/main/chevron-down-solid.svg'
 const chevron_url = '/static/tool/main/hashtag-solid.svg'
@@ -58,42 +58,31 @@ onMounted(() => {
 
 const watcher_server = watch(server, async (newQuestion, oldQuestion) => {
     if (!server || !server.value) {
-        console.log('loading server detail...');
         return;
     }
+    console.log(`loading server detail... ${server.value.name} ${server.value.cid}`);
     await fetchAToolServer(server.value.cid);
 }, { immediate: true})
 
-let cleanupwatcher_serverDetail = null
-const stopWatcher_serverDetail = () => {
-    if (cleanupwatcher_serverDetail) {
-        cleanupwatcher_serverDetail()
-        cleanupwatcher_serverDetail = null
-    }
-}
 
-const watcher_serverDetail = watch(
-    server_detail,
-    (newValue) => {
-        if (server_detail.value) {
-            for (let entry of server_detail.value) {
-                for (const [key, val] of Object.entries(entry.tools)) {
-                    if (!val) continue;
-                    selectSubSection(val.cid);
-                    stopWatcher_serverDetail();
-                }
-            }
+const { stopped, stopWatcher } = useWatchOnce(
+  server_detail,
+  (newValue, old) => {
+    if (Array.isArray(newValue) && newValue.length > 0) {
+      for (let entry of newValue) {
+        for (const [key, val] of Object.entries(entry.tools)) {
+          if (!val) continue
+          selectSubSection(val.cid)
+          return true
         }
-    },
-    {immediate: true}
+      }
+    }
+    return false
+  }
 )
-cleanupwatcher_serverDetail = watcher_serverDetail
 
-// Clean up the watcher when the component is unmounted
-onUnmounted(stopWatcher_serverDetail)
 
 function setDefaultTool() {
-    console.log('setting default tool...', server_detail.value)
     for (let entry of server_detail.value) {
         for (const [key, val] of Object.entries(entry.tools)) {
             if (!val) continue;
