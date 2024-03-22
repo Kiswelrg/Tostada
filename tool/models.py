@@ -12,7 +12,7 @@ def EmptyJson():
     return {}
 
 def getDefaultAdditional():
-    return {"type": ""}
+    return {"type": "ToolTypical", "subclass":"ToolOfInputAndOutput"}
 
 class ToolServer(models.Model):
     def cover_dir_path(instance, filename):
@@ -206,7 +206,6 @@ class CategoryInServer(models.Model):
 
 
 class Tool(models.Model):
-
     def cover_dir_path(instance, filename):
         return f'cover/tool-{instance.urlCode}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
 
@@ -252,9 +251,6 @@ class Tool(models.Model):
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='')
     additional = models.JSONField(default=getDefaultAdditional, null=True, blank = True)
 
-    class Meta:
-        abstract = True
-
     def __str__(self) -> str:
         return f"{self.name} in {self.server}"
 
@@ -263,12 +259,12 @@ class ToolOfInputAndOutput(Tool):
     method_names = models.JSONField(default=EmptyJson, blank = True)
     input = models.JSONField(default=EmptyJson, null=True, blank = True)
     output = models.JSONField(default=EmptyJson, null=True, blank = True)
-    
+
 
 class ToolOfChat(Tool):
     method_names = models.JSONField(default=EmptyJson, blank = True)
     bots = models.JSONField(default=EmptyJson, null=True, blank = True)
-    
+
 
 class AuthorizationLevel(models.Model):
     title = models.CharField(max_length=128)

@@ -2,7 +2,7 @@
 
     <div class="tooldetail bg-tooldetail-bg flex grow bg-orange-50 w-full">
         <!-- Component changes when currentTab changes -->
-        <component :is="tabs[currentTab]" :selected-tool-id="props.selectedToolId"></component>
+        <component :is="tabs[currentTab]" :tool-detail="tool_detail" :introToMsg="introToMsg"></component>
     </div>
 
 </template>
@@ -17,6 +17,8 @@ const props = defineProps([
 
 const currentTab = ref('ToolTypical')
 
+const tool_detail = ref()
+
 const tabs = shallowRef({
     'ToolTypical': ToolTypical,
 })
@@ -27,26 +29,39 @@ async function fetchToolDetail() {
     {
       method: "GET",
     }
-  );
+  )
   
   if (response.ok) {
-    const r = await response.json();
-    console.log(`Tool ${props.selectedToolId} ( fetch status: ${r.r}): `, r.tool);
+    const r = await response.json()
+    if (r.r) {
+      tool_detail.value = r.tool
+    } else {
+      console.log(r)
+    }
   } else {
-    console.log(response.status);
+    console.log(response.status)
   }
 }
 
 const watch_tool = watch(
   () => props.selectedToolId,
   async (newValue, old) => {
-    console.log(newValue)
     if ( typeof newValue === 'number' ) {
       await fetchToolDetail()
     }
   }
 )
 
+const introToMsg = (intro) => {
+  // intro = intro.filter(obj => !obj.hasOwnProperty('type'))
+  return intro.map(element => ({
+    content: element.content,
+    title: 'Tool Bot', // Replace 'someValue' with the value you want for the 'bot' attribute
+    time: new Date().toISOString(), // Get the current time in ISO format
+    avatar: '/api/i/default-bot-avatar/'
+  }));
+
+}
 
 </script>
 

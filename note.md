@@ -2,6 +2,7 @@
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
+|code template|stoppable watcher|@/util/watcher.js|   |✅|
 |msg|msg block|with head/avatar|   |✅|
 |msg|msg block|without|   |✅|
 |msg|reaction part|   |   ||

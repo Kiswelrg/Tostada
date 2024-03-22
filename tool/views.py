@@ -77,22 +77,28 @@ def fetch_tool_server(request, tool_server_code):
 # Fetch a specific tool by its urlCode
 def fetch_tool(request, tool_code):
     tool = get_object_or_404(Tool, urlCode=tool_code)
-    user_tool = None
-    try:
-        tool_id = UserToolRole.objects.filter(user__username=request.session['username']).values_list('tool', flat=True)[0]
-        user_tool = Tool.objects.get(id = tool_id)
-    except UserToolRole.DoesNotExist:
-        if not UserServerRole.objects.filter(server=tool.server, user__username=request.session['username']).exists():
-            return JsonResponse({})
-        user_tool = tool
+    # user_tool = None
+
+    if not UserServerRole.objects.filter(server=tool.server, user__username=request.session['username']).exists():
+        if not UserToolRole.objects.filter(user__username=request.session['username'], tool=tool).exists():
+            return JsonResponse({"r": False})
     
     data = {
-        "cid": user_tool.urlCode,
-        "name": user_tool.name,
-        "description": user_tool.description,
-        "status": user_tool.get_status_display(),
-        "date_created": user_tool.date_created.date(),
-        "server": user_tool.server.name,
-        "category": user_tool.category.name,
+        "cid": tool.urlCode,
+        "name": tool.name,
+        "description": tool.description,
+        "status": tool.get_status_display(),
+        "date_created": tool.date_created.date(),
+        "server": tool.server.name,
+        "category": tool.category.name,
+        "additional": tool.additional,
     }
-    return JsonResponse({"tool": data, "r": "success"})
+    if 'subclass' not in tool.additional:
+        pass
+    elif tool.additional['subclass'] == 'ToolOfInputAndOutput':
+        from .models import ToolOfInputAndOutput
+        tool_specific = get_object_or_404(ToolOfInputAndOutput, id = tool.id)
+        data['methods'] = tool_specific.method_names
+    elif tool.additional['subclass'] == 'ToolOfChat':
+        pass
+    return JsonResponse({"tool": data, "r": True})
