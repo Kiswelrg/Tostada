@@ -117,7 +117,14 @@ async function fetchAToolServer(cid) {
   );
   
   if (response.ok) {
-    const r = await response.json();
+    const t = await response.text();
+    const r = JSON.parse(t, (key, value) => {
+      if (typeof value === 'string' && key === 'cid') {
+        return BigInt(value);
+      }
+      return value;
+    });
+    console.log(`Servers( fetch status: ${r.r}): `, r);
     setServerDetail(r);
   } else {
     console.log(response.status);

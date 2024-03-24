@@ -1,5 +1,5 @@
 <template>
-    <div class="serverpanel h-full w-[240px] bg-serverpanel-bg flex flex-col grow-0 shrink-0 bg-orange-100">
+    <div class="serverpanel h-`f`ull w-[240px] bg-serverpanel-bg flex flex-col grow-0 shrink-0 bg-orange-100">
         <div class="wrapper h-[calc(100%-53px)] items-stretch justify-start flex-auto">
             <ServerHead></ServerHead>
             <ToolList @select-tool="selectTool"></ToolList>

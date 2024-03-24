@@ -14,7 +14,7 @@ def fetch_user_tool_servers(request):
     tool_servers = ToolServer.objects.filter(user_server_auths__user__username=request.session['username'])
     data = [
         {
-            "cid": ts.urlCode,
+            "cid": str(ts.urlCode),
             "name": ts.name,
             "description": ts.description,
             "logoSrc": '/media/default/server/logo/logo.svg' if ts.logo == '' else ts.logo.url
@@ -28,7 +28,7 @@ def fetch_tool_server(request, tool_server_code):
     tool_server = get_object_or_404(ToolServer, urlCode=tool_server_code)
     tools = None
     data = {
-        "cid": tool_server.urlCode,
+        "cid": str(tool_server.urlCode),
         "name": tool_server.name,
         "description": tool_server.description,
         "status": tool_server.get_status_display(),
@@ -55,7 +55,7 @@ def fetch_tool_server(request, tool_server_code):
     category_dict = {}
     for tool in tools:
         t = {
-                "cid": tool.urlCode,
+                "cid": str(tool.urlCode),
                 "name": tool.name,
                 "description": tool.description,
                 "category": {
@@ -84,7 +84,7 @@ def fetch_tool(request, tool_code):
             return JsonResponse({"r": False})
     
     data = {
-        "cid": tool.urlCode,
+        "cid": str(tool.urlCode),
         "name": tool.name,
         "description": tool.description,
         "status": tool.get_status_display(),

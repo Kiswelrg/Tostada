@@ -59,14 +59,10 @@ const intro = computed(() => {
 
 const filtered_intro = computed(() => {
     if (props.toolDetail)
-        return props.toolDetail['additional']['intro'].filter(obj => !obj.hasOwnProperty('type'))
+        return props.toolDetail['additional']['intro']?.filter(obj => !obj.hasOwnProperty('type'))
     return undefined
 })
 
-function skipfornow(ito) {
-    console.log(ito)
-    return false
-}
 
 const messages = ref([
     {

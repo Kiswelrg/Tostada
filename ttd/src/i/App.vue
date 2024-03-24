@@ -90,7 +90,14 @@ async function fetchToolServers() {
   );
   
   if (response.ok) {
-    const r = await response.json();
+    const text = await response.text();
+    const r = JSON.parse(text, (key, value) => {
+      if (typeof value === 'string' && key === 'cid') {
+        return BigInt(value);
+      }
+      return value;
+    });
+
     console.log(`Servers( fetch status: ${r.r}): `, r.tool_servers);
     setFunctionList(r);
   } else {

@@ -32,9 +32,16 @@ async function fetchToolDetail() {
   )
   
   if (response.ok) {
-    const r = await response.json()
+    const t = await response.text()
+    const r = JSON.parse(t, (key, value) => {
+      if (typeof value === 'string' && key === 'cid') {
+        return BigInt(value);
+      }
+      return value;
+    })
     if (r.r) {
       tool_detail.value = r.tool
+      console.log(r)
     } else {
       console.log(r)
     }
@@ -46,7 +53,7 @@ async function fetchToolDetail() {
 const watch_tool = watch(
   () => props.selectedToolId,
   async (newValue, old) => {
-    if ( typeof newValue === 'number' ) {
+    if ( typeof newValue === 'bigint' ) {
       await fetchToolDetail()
     }
   }
@@ -54,7 +61,7 @@ const watch_tool = watch(
 
 const introToMsg = (intro) => {
   // intro = intro.filter(obj => !obj.hasOwnProperty('type'))
-  return intro.map(element => ({
+  return intro?.map(element => ({
     content: element.content,
     title: 'Tool Bot', // Replace 'someValue' with the value you want for the 'bot' attribute
     time: new Date().toISOString(), // Get the current time in ISO format
