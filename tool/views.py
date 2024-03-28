@@ -20,7 +20,7 @@ def fetch_user_tool_servers(request):
             "logoSrc": '/media/default/server/logo/logo.svg' if ts.logo == '' else ts.logo.url
         } for ts in tool_servers
     ]
-    return JsonResponse({"tool_servers": data, 'r': 'success'})
+    return JsonResponse({"tool_servers": data, 'r': True})
 
 
 # Fetch a specific tool server by its urlCode
@@ -37,7 +37,7 @@ def fetch_tool_server(request, tool_server_code):
     }
 
     if 'tools' not in request.GET or not request.GET['tools'] == '1':
-        return JsonResponse({"tool_server": data})
+        return JsonResponse({"tool_server": data, "r": True, "type": "no-tool"})
     
     if UserServerRole.objects.filter(user__username=request.session['username'], server = tool_server).exists():
         # If already a member of the server, (assume got all reading access to ths tools inside)
@@ -71,7 +71,7 @@ def fetch_tool_server(request, tool_server_code):
         data["category"] = category_dict
     else:
         print('no joined server/available tool')
-    return JsonResponse({"tool_server": data})
+    return JsonResponse({"tool_server": data, "r": True, "type": "with-tool"})
 
 
 # Fetch a specific tool by its urlCode
