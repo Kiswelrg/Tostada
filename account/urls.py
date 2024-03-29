@@ -3,7 +3,7 @@ from . import views
 
 # return HttpResponseRedirect(reverse('user:sign-up') + '?username=0')
 
-app_name = 'user'
+app_name = 'account'
 urlpatterns = [
     re_path(r'^avatar/(?P<user_code>(10\d)\d{7})/$', views.avatar_view, name='user_avatar'),
     

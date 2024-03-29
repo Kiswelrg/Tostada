@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('user', '0001_initial'),
+        ('account', '0001_initial'),
     ]
 
     operations = [
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                 ('cover', models.ImageField(blank=True, default='', upload_to=tool.models.ToolServer.cover_dir_path)),
                 ('logo', models.ImageField(blank=True, default='', upload_to=tool.models.ToolServer.logo_dir_path)),
                 ('additional', models.JSONField(default=tool.models.EmptyJson, null=True)),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tool_servers', to='user.user')),
+                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tool_servers', to='account.user')),
             ],
         ),
         migrations.CreateModel(
@@ -90,7 +90,7 @@ class Migration(migrations.Migration):
                 ('auth_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_server_auths', to='tool.serverauthorizationlevel')),
                 ('role', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_server_auths', to='tool.serverrole', verbose_name='user role in the server')),
                 ('server', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_server_auths', to='tool.toolserver')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_server_auths', to='user.user')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_server_auths', to='account.user')),
             ],
         ),
         migrations.CreateModel(
@@ -101,7 +101,7 @@ class Migration(migrations.Migration):
                 ('date_added', models.DateTimeField(default=django.utils.timezone.now)),
                 ('auth_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_tool_auths', to='tool.toolauthorizationlevel')),
                 ('tool', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_tool_auths', to='tool.tool')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_tool_auths', to='user.user')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_tool_auths', to='account.user')),
             ],
         ),
     ]

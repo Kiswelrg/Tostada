@@ -6,7 +6,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import UserSignUp from '../../components/User/UserSignUp.vue';
+import UserSignUp from '../../components/Account/UserSignUp.vue';
 
 </script>
 

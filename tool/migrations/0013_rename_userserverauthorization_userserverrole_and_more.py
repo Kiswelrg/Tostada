@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('tool', '0012_rename_serverauthorizationlevel_authorizationlevel'),
-        ('user', '0002_alter_user_email'),
+        ('account', '0002_alter_user_email'),
     ]
 
     operations = [

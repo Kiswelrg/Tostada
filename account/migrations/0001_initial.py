@@ -2,7 +2,7 @@
 
 import django.core.validators
 import django.utils.timezone
-import user.util
+import account.util
 from django.db import migrations, models
 
 
@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(default='some_user', max_length=20)),
                 ('username', models.CharField(db_index=True, max_length=24, unique=True, validators=[django.core.validators.RegexValidator(code='invalid_username', message='Enter a valid username', regex='^(?=.{6,20}$)(?![_0-9])(?!.*[_]{2})[a-zA-Z0-9_]+(?<![_])$')])),
-                ('urlCode', models.IntegerField(db_index=True, default=user.util.getUserCode, unique=True)),
+                ('urlCode', models.IntegerField(db_index=True, default=account.util.getUserCode, unique=True)),
                 ('password', models.CharField(max_length=64)),
                 ('sex', models.PositiveSmallIntegerField(blank=True, default=None, null=True)),
                 ('age', models.PositiveSmallIntegerField(blank=True, default=None, null=True)),

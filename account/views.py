@@ -11,7 +11,7 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 import hashlib
-from user.models import User
+from account.models import User
 
 from django.conf import settings
 import json

@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory, createWebHistory } from "vue-router"
-import User from '../user/User.vue'
+import User from '../account/User.vue'
 import NotFound from '../components/NotFound.vue'
 import Tool from '../i/App.vue'
 import Empty from '../components/Util/Empty.vue'
@@ -14,8 +14,8 @@ const routes = [
     component: () => import("@/main/MainTemp.vue"),
   },
   {
-    path: "/user",
-    name: "user",
+    path: "/a",
+    name: "account",
     component: User,
     children: userRoutes
   },

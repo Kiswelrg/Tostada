@@ -43,19 +43,29 @@
               role="tab"
               aria-controls="tabs-home"
               aria-selected="true"
-              >重置密码</a
+              >注册</a
             >
           </li>
           
         </ul>
 
         <div class="two-forms">
+          <!-- validate identity form part -->
+          <!-- <IfInOuc
+            v-show="!if_in_ouc"
+            :csrftoken="csrftoken"
+            :cmt="cmt"
+            @ifCanSignup="ifCanSignup"
+          >
+          </IfInOuc> -->
+
+          <!-- sign up form part -->
           <div
             class="su-container h-fit"
           >
             <div class="msg w-72 h-fit m-auto">
               <div
-                v-show="signup_pwd_match"
+                v-show="!signup_pwd_match"
                 class="text-sm bg-red-100 rounded-lg py-2 px-6 mb-3 text-red-700 inline-flex items-center w-full"
                 role="alert"
               >
@@ -74,7 +84,7 @@
                     d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z"
                   ></path>
                 </svg>
-                输入的新旧密码一样
+                两次密码不匹配
               </div>
               <div
                 v-show="!signup_varification_correct"
@@ -157,7 +167,7 @@
                         name="username"
                         pattern="[a-zA-Z0-9 ]+"
                         placeholder="账号"
-                        autocomplete="username"
+                        autocomplete="nope"
                         v-model="username"
                         required
                         oninvalid="this.setCustomValidity('用户名只能是6-20字母数字下划线的组合，只能字母开头，且不能下划线结尾')"
@@ -169,7 +179,7 @@
                     <label
                       for="exampleFormControlInput4"
                       class="form-label inline-block mb-2 text-gray-700 text-sm"
-                      >旧密码</label
+                      >密码</label
                     >
                     <input
                       class="form-control block w-full px-2 py-1 text-sm font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
@@ -178,7 +188,7 @@
                       id="pwd"
                       name="pwd"
                       placeholder="密码"
-                      autocomplete="current-password"
+                      autocomplete="new-password"
                       v-model="pwd"
                       required
                       @input="checkPwdMatch()"
@@ -187,8 +197,8 @@
                   <div class="mb-3 xl:w-80">
                     <label
                       for="exampleFormControlInput4"
-                      class="form-label inline-block mb-2 text-green-500 text-sm"
-                      >新密码</label
+                      class="form-label inline-block mb-2 text-gray-700 text-sm"
+                      >确认密码</label
                     >
                     <input
                       class="form-control block w-full px-2 py-1 text-sm font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
@@ -210,7 +220,7 @@
                       >验证码</label
                     >
                     <div class="relative">
-                      <img ref="vcodeImg" @click="refreshVcode()" id="vcode" :src="VcodeUrl" class="rounded-r absolute h-full right-0 w-14" href="/api/user/Vcode/" alt="">
+                      <img ref="vcodeImg" @click="refreshVcode()" id="vcode" :src="VcodeUrl" class="rounded-r absolute h-full right-0 w-14" href="/api/a/Vcode/" alt="">
                       <input
                       class="
                         form-control
@@ -250,10 +260,10 @@
                       data-mdb-ripple-color="light"
                       class="inline-block px-6 py-2.5 my-2 bg-blue-600 font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
                     >
-                      重置
+                      注册
                     </button>
                     <div class="relative py-2 text-[12px]">
-                      想起来密码了？&nbsp;去<a class="text-blue-600" href="/user/login/">登录</a>
+                      已经注册了？&nbsp;<a class="text-blue-600" href="/a/login/">登录</a>
                     </div>
                   </div>
                 </form>
@@ -280,9 +290,8 @@ export default {
 <script setup>
 import { ref } from "vue";
 import h256 from "@/util/encrypt";
-// import $ from "jquery";
 
-const signup_pwd_match = ref(false);
+const signup_pwd_match = ref(true);
 const username = ref("");
 const pwd = ref("");
 const pwd2 = ref("");
@@ -292,11 +301,10 @@ const csrftoken = getCookie("csrftoken");
 const cmt = ref("");
 const vcode = ref("");
 const vcodeImg = ref(null);
-const VcodeUrl = ref('/api/user/Vcode/');
-
+const VcodeUrl = ref('/api/a/Vcode/');
 
 function refreshVcode() {
-  VcodeUrl.value = '/api/user/Vcode/?h=' + Date.now().toString();
+  VcodeUrl.value = '/api/a/Vcode/?h=' + Date.now().toString();
 }
 
 function checkPwdMatch() {
@@ -327,7 +335,7 @@ function getCookie(name) {
 }
 
 async function getToken() {
-  const r = await fetch("/api/user/Token/", {
+  const r = await fetch("/api/a/Token/", {
     method: "GET",
     headers: {
       "Content-type": "application/json",
@@ -341,20 +349,19 @@ async function getToken() {
 async function signUp() {
   signup_varification_correct.value = true;
   username_taken.value = false;
-  if (signup_pwd_match.value) return;
+  if (!signup_pwd_match.value) return;
   const d = {
     csrfmiddlewaretoken: cmt.value,
     username: username.value,
     code: vcode.value,
-    pwd: await h256(pwd.value),
-    pwd2: await h256(pwd2.value),
+    pwd: await (pwd.value),
   };
   var form_data = new FormData();
   for (var v in d) {
     form_data.append(v, d[v]);
   }
-  try {
-    const response = await fetch("/api/user/resetpwd/", {
+  // try {
+    const response = await fetch("/api/a/dosignup/", {
       method: "POST",
       headers: {
         "X-CSRFToken": csrftoken,
@@ -363,10 +370,11 @@ async function signUp() {
     });
 
     if (response.ok) {
+      console.log(response);
       const data = await response.json(); // Assuming the server response is JSON
       refreshVcode();
       if (data["state"]) {
-        console.log('修改成功');
+        console.log('sign up success');
       } else {
         switch (data["msg"]) {
           case 1:
@@ -375,15 +383,11 @@ async function signUp() {
             break;
           case 2:
             // handle case 2
-            console.log("this user not found!");
+            console.log("invalid request for you buddy!");
             break;
           case 3:
-            // username_taken.value = true;
-            console.log("wrong password baby");
-            break;
-          case 4:
-            
-            console.log("same password as before dude");
+            username_taken.value = true;
+            console.log("username already signed up");
             break;
           // Add more cases as needed
         }
@@ -392,10 +396,10 @@ async function signUp() {
       // If the server response was not ok (200-299)
       console.log(response.status);
     }
-  } catch (error) {
-    // Catch network errors or issues with the fetch call itself
-    console.error("Fetch error: " + error.message);
-  }
+  // } catch (error) {
+  //   // Catch network errors or issues with the fetch call itself
+  //   console.error("Fetch error: " + error.message);
+  // }
 
 }
 </script>

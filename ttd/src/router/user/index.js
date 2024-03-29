@@ -12,17 +12,17 @@ const userRoutes = [
     path: "login/", // 对应 "/user/login"
     alias: 'signin/',
     name: "user-login",
-    component: () => import("@/components/User/UserSignIn.vue"),
+    component: () => import("@/components/Account/UserSignIn.vue"),
     props: { currentTabIndex: 1 }
   },
   {
     path: "signup/", // 对应 "/user/signup"
-    component: () => import("@/components/User/UserSignUp.vue"),
+    component: () => import("@/components/Account/UserSignUp.vue"),
     props: { currentTabIndex: 2 }
   },
   {
     path: "forgetpassword/", // 对应 "/user/signup"
-    component: () => import("@/components/User/UserForgetPassword.vue"),
+    component: () => import("@/components/Account/UserForgetPassword.vue"),
     props: { currentTabIndex: 2 }
   },
   {

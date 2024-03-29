@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.urls.conf import include
 from django.http.response import HttpResponseRedirect
-from user.views import Home
+from account.views import Home
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -28,7 +28,7 @@ urlpatterns = [
     path('', Home),
 
     re_path(r'^(?:api/)?i/', include('tool.urls', namespace = 'tool')),
-    re_path(r'^(?:api/)?user/', include('user.urls', namespace = 'user')),
+    re_path(r'^(?:api/)?a/', include('account.urls', namespace = 'account')),
     path('favicon.svg', lambda request: HttpResponseRedirect('/static/favicon.svg')),
     path('favicon.ico', lambda request: HttpResponseRedirect('/static/favicon.svg')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

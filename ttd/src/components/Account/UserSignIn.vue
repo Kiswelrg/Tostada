@@ -128,7 +128,7 @@
                   ></path>
                 </svg>
                 账号或密码错误, &nbsp;&nbsp;
-                <a class="text-lime-600" href="/user/forgetpassword"
+                <a class="text-lime-600" href="/a/forgetpassword"
                   >忘记密码？</a
                 >
               </div>
@@ -217,7 +217,7 @@
                       >验证码</label
                     >
                     <div class="relative">
-                      <img ref="vcodeImg" @click="refreshVcode()" id="vcode"  :src="VcodeUrl" class="rounded-r absolute h-full right-0 w-14" href="/api/user/Vcode/" alt="">
+                      <img ref="vcodeImg" @click="refreshVcode()" id="vcode"  :src="VcodeUrl" class="rounded-r absolute h-full right-0 w-14" href="/api/a/Vcode/" alt="">
                       <input
                       class="
                         form-control
@@ -279,8 +279,8 @@
                       登录
                     </button>
                     <div class="flex text-[12px] justify-between relative py-2 text-blue-600 text-sm">
-                      <a href="/user/signup/">还没注册？</a>
-                      <a href="/user/forgetpassword/">忘记密码</a>
+                      <a href="/a/signup/">还没注册？</a>
+                      <a href="/a/forgetpassword/">忘记密码</a>
                     </div>
                   </div>
                 </form>
@@ -316,7 +316,7 @@ const username = ref("");
 const pwd = ref("");
 const vcode = ref("");
 const vcodeImg = ref(null);
-const VcodeUrl = ref('/api/user/Vcode/');
+const VcodeUrl = ref('/api/a/Vcode/');
 const cmt = ref("");
 const router = useRouter();
 let csrftoken;
@@ -330,7 +330,7 @@ onMounted(() => {
 
 
 function refreshVcode() {
-  VcodeUrl.value = '/api/user/Vcode/?h=' + Date.now().toString();
+  VcodeUrl.value = '/api/a/Vcode/?h=' + Date.now().toString();
 }
 
 function checkPwdValidity() {
@@ -355,7 +355,7 @@ async function signIn() {
   // }
 
   const response = await fetch(
-    "/api/user/dosignin/",
+    "/api/a/dosignin/",
     {
       method: "POST",
       headers: { "X-CSRFToken": csrftoken },

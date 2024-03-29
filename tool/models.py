@@ -50,7 +50,7 @@ class ToolServer(models.Model):
         '''
         )
     owner = models.ForeignKey(
-        "user.User",
+        "account.User",
         on_delete=models.CASCADE,
         related_name='tool_servers'
     )
@@ -315,7 +315,7 @@ class UserServerRole(models.Model):
     # )
     # auth_value_bool = models.BooleanField(default=False)
     user = models.ForeignKey(
-        'user.User',
+        'account.User',
         on_delete=models.CASCADE,
         related_name='user_server_auths'
     )
@@ -342,7 +342,7 @@ class UserToolRole(models.Model):
     # )
     # auth_value_bool = models.BooleanField(default=False)
     user = models.ForeignKey(
-        'user.User',
+        'account.User',
         on_delete=models.CASCADE,
         related_name='user_tool_auths'
     )

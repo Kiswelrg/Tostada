@@ -16,8 +16,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import Header from '@/user/Header/Header.vue'
-import Home from '@/user/Home/Home.vue'
+import Header from '@/account/Header/Header.vue'
+import Home from '@/account/Home/Home.vue'
 import Empty from '../components/Util/Empty.vue'
 
 const p = defineProps({

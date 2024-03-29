@@ -1,5 +1,5 @@
 async function checkLoggedIn() {
-  const r = await fetch("/api/user/isLoggedIn/", {
+  const r = await fetch("/api/a/isLoggedIn/", {
     method: "GET",
     headers: {
       "Content-type": "application/json",
