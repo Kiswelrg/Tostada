@@ -10,13 +10,14 @@ from django.urls import reverse
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-import hashlib
-from account.models import User
-
 from django.conf import settings
+import hashlib
 import json
 import random
 import os
+
+
+from account.models import User
 # Create your views here.
 
 def printc(info, isList = False, color = None):
