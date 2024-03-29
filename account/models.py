@@ -1,11 +1,12 @@
 from django.db import models
+from django.contrib.auth.models import User as AUser
 from django.core.validators import RegexValidator
 from django.utils import timezone
 from .util import getUserCode
 from django.dispatch import receiver
 import os
 # Create your models here.
-class User(models.Model):
+class User(AUser):
     def cover_dir_path(instance, filename):
         return f'cover/user-{instance.urlCode}/' + instance.date_add.strftime('%Y-%m-%d/' + filename)
 
@@ -13,22 +14,22 @@ class User(models.Model):
         return f'avatar/user-{instance.urlCode}/' + instance.date_add.strftime('%Y-%m-%d/' + filename)
     
     name = models.CharField(max_length=20,default='some_user')
-    username = models.CharField(                                                        #只能包含_和数字 开头不能有数字或_ _不能2连 结尾不能_
-        unique=True,
-        null=False,
-        blank=False,
-        db_index=True,
-        max_length=24,
-        validators=[
-            RegexValidator(
-                regex=r'^(?=.{6,20}$)(?![_0-9])(?!.*[_]{2})[a-zA-Z0-9_]+(?<![_])$',
-                message='Enter a valid username',
-                code='invalid_username'
-            ),
-        ]
-    )
+    # username = models.CharField(                                                        #只能包含_和数字 开头不能有数字或_ _不能2连 结尾不能_
+    #     unique=True,
+    #     null=False,
+    #     blank=False,
+    #     db_index=True,
+    #     max_length=24,
+    #     validators=[
+    #         RegexValidator(
+    #             regex=r'^(?=.{6,20}$)(?![_0-9])(?!.*[_]{2})[a-zA-Z0-9_]+(?<![_])$',
+    #             message='Enter a valid username',
+    #             code='invalid_username'
+    #         ),
+    #     ]
+    # )
     urlCode = models.PositiveBigIntegerField(default=getUserCode, unique=True, db_index=True)
-    password = models.CharField(max_length=64)
+    # password = models.CharField(max_length=64)
     sex = models.CharField(
             default='隐藏',
             max_length = 2,
@@ -38,9 +39,9 @@ class User(models.Model):
             },
         )
     age = models.PositiveSmallIntegerField(default=None,blank=True,null=True)
-    date_add = models.DateTimeField(default=timezone.now)
+    # date_add = models.DateTimeField(default=timezone.now)
     info = models.FileField(default=None,blank=True,null=True)
-    email = models.EmailField(max_length = 25, null = True, blank = True)
+    # email = models.EmailField(max_length = 25, null = True, blank = True)
     additional = models.JSONField(default=None, blank=True, null=True)
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
     avatar = models.ImageField(upload_to=avatar_dir_path, blank=True, default='')
