@@ -1,0 +1,20 @@
+{
+ "argv": [
+  "/home/wxy/miniconda3/envs/web/bin/python",
+  "-m",
+  "ipykernel_launcher",
+  "-f",
+  "{connection_file}",
+  "--ext",
+  "django_extensions.management.notebook_extension"
+ ],
+ "env": {
+    "DJANGO_SETTINGS_MODULE": "Tostada.settings",
+    "PYTHONPATH": "$PYTHONPATH:/home/wxy/prj/Tostada"
+ },
+ "display_name": "Tostada",
+ "language": "python",
+ "metadata": {
+  "debugger": true
+ }
+}

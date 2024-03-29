@@ -327,6 +327,7 @@ class UserServerRole(models.Model):
     role = models.ForeignKey(ServerRole, verbose_name=_(
         "user role in the server"), on_delete=models.CASCADE, related_name='user_server_auths')
     date_added = models.DateTimeField(default=timezone.now)
+    order = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self) -> str:
         return f"{self.user} in [{self.server} : {self.role.name}]"
