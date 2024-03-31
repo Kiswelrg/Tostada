@@ -11,6 +11,7 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.contrib.auth.hashers import check_password
 import hashlib
 import json
 import random
@@ -113,19 +114,21 @@ def DoSignIn(request):
     msg = 0
     state = False
     pwd = request.POST['pwd']
-    pwd = hashlib.sha256((pwd + 'tw').encode('utf-8')).hexdigest()
+    # pwd = hashlib.sha256((pwd + 'tw').encode('utf-8')).hexdigest()
     if request.session["code"] != request.POST['code'].lower(): # 验证码
         printc('VCODE wrong:', color = [255,47,47])
         printc([f'real:  {request.session["code"]}', f'given: {request.POST["code"]}'], isList = True)
         msg = 1
-    elif User.objects.filter(username = request.POST['username'], password = pwd):
-        state = True
-        msg = 11
-        request.session['isLoggedIn'] = True
-        request.session['username'] = request.POST['username']
     else:
-        msg = 2
-        printc([request.POST['pwd'], pwd], isList=True)
+        u = User.objects.filter(username = request.POST['username']).first()
+        if u and check_password(pwd, u.password):
+            state = True
+            msg = 11
+            request.session['isLoggedIn'] = True
+            request.session['username'] = request.POST['username']
+        else:
+            msg = 2
+            printc([pwd, '!=', u.password], isList=True)
     printc(f'login {"success" if state else "failed"}', color = [255,47,47])
     '''
     msg choices

@@ -83,7 +83,7 @@ function onGoTab(path) {
 
 async function fetchToolServers() {
   const response = await fetch(
-    "/api/i/account/tool_servers/",
+    "/api/i/user/tool_servers/",
     {
       method: "GET",
     }
