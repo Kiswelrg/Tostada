@@ -28,7 +28,7 @@ urlpatterns = [
     path('', Home),
 
     re_path(r'^(?:api/)?i/', include('tool.urls', namespace = 'tool')),
-    re_path(r'^(?:api/)?a/', include('account.urls', namespace = 'account')),
+    re_path(r'^(?:api/)?account/', include('account.urls', namespace = 'account')),
     path('favicon.svg', lambda request: HttpResponseRedirect('/static/favicon.svg')),
     path('favicon.ico', lambda request: HttpResponseRedirect('/static/favicon.svg')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

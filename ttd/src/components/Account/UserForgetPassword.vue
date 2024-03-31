@@ -210,7 +210,7 @@
                       >验证码</label
                     >
                     <div class="relative">
-                      <img ref="vcodeImg" @click="refreshVcode()" id="vcode" :src="VcodeUrl" class="rounded-r absolute h-full right-0 w-14" href="/api/a/Vcode/" alt="">
+                      <img ref="vcodeImg" @click="refreshVcode()" id="vcode" :src="VcodeUrl" class="rounded-r absolute h-full right-0 w-14" href="/api/account/Vcode/" alt="">
                       <input
                       class="
                         form-control
@@ -253,7 +253,7 @@
                       重置
                     </button>
                     <div class="relative py-2 text-[12px]">
-                      想起来密码了？&nbsp;去<a class="text-blue-600" href="/a/login/">登录</a>
+                      想起来密码了？&nbsp;去<a class="text-blue-600" href="/account/login/">登录</a>
                     </div>
                   </div>
                 </form>
@@ -279,8 +279,7 @@ export default {
 
 <script setup>
 import { ref } from "vue";
-import h256 from "@/util/encrypt";
-// import $ from "jquery";
+// import h256 from "@/util/encrypt";
 
 const signup_pwd_match = ref(false);
 const username = ref("");
@@ -292,11 +291,11 @@ const csrftoken = getCookie("csrftoken");
 const cmt = ref("");
 const vcode = ref("");
 const vcodeImg = ref(null);
-const VcodeUrl = ref('/api/a/Vcode/');
+const VcodeUrl = ref('/api/account/Vcode/');
 
 
 function refreshVcode() {
-  VcodeUrl.value = '/api/a/Vcode/?h=' + Date.now().toString();
+  VcodeUrl.value = '/api/account/Vcode/?h=' + Date.now().toString();
 }
 
 function checkPwdMatch() {
@@ -327,7 +326,7 @@ function getCookie(name) {
 }
 
 async function getToken() {
-  const r = await fetch("/api/a/Token/", {
+  const r = await fetch("/api/account/Token/", {
     method: "GET",
     headers: {
       "Content-type": "application/json",
@@ -346,15 +345,15 @@ async function signUp() {
     csrfmiddlewaretoken: cmt.value,
     username: username.value,
     code: vcode.value,
-    pwd: await h256(pwd.value),
-    pwd2: await h256(pwd2.value),
+    pwd: pwd.value,
+    pwd2: pwd2.value,
   };
   var form_data = new FormData();
   for (var v in d) {
     form_data.append(v, d[v]);
   }
   try {
-    const response = await fetch("/api/a/resetpwd/", {
+    const response = await fetch("/api/account/resetpwd/", {
       method: "POST",
       headers: {
         "X-CSRFToken": csrftoken,

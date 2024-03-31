@@ -1,12 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import User as AUser
+from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.utils import timezone
 from .util import getUserCode
 from django.dispatch import receiver
 import os
 # Create your models here.
-class User(AUser):
+class AUser(User):
     def cover_dir_path(instance, filename):
         return f'cover/user-{instance.urlCode}/' + instance.date_add.strftime('%Y-%m-%d/' + filename)
 
@@ -48,9 +48,10 @@ class User(AUser):
 
     def __str__(self) -> str:
         return f"{self.username}({self.urlCode})"
+
     
 
-@receiver(models.signals.post_delete, sender=User)
+@receiver(models.signals.post_delete, sender=AUser)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
     """
     Deletes file from filesystem
@@ -60,19 +61,19 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
         if os.path.isfile(instance.avatar.path):
             os.remove(instance.avatar.path)
 
-@receiver(models.signals.pre_save, sender=User)
+@receiver(models.signals.pre_save, sender=AUser)
 def auto_delete_file_on_change(sender, instance, **kwargs):
     """
     Deletes old file from filesystem
-    when corresponding `User` object is updated
+    when corresponding `AUser` object is updated
     with new file.
     """
     if not instance.pk:
         return False
 
     try:
-        old_file = User.objects.get(pk=instance.pk).avatar
-    except User.DoesNotExist:
+        old_file = AUser.objects.get(pk=instance.pk).avatar
+    except AUser.DoesNotExist:
         return False
 
     if old_file == '':

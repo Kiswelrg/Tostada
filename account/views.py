@@ -170,7 +170,7 @@ def DoSignUp(request):
                 msg = 2
                 printc(e)
                 return HttpResponse(json.dumps({'state': state, 'msg': msg}))
-                return HttpResponseRedirect(reverse('user:sign-up') + '?username=0')
+                return HttpResponseRedirect(reverse('account:sign-up') + '?username=0')
             u.save()
             state = True
             msg = 11
@@ -208,7 +208,7 @@ def LogOut(request):
         del request.session['isLoggedIn']
     if request.session.has_key('username'):
         del request.session['username']
-    return HttpResponseRedirect(reverse('user:login'))
+    return HttpResponseRedirect(reverse('account:login'))
 
 
 def Vcode(request):

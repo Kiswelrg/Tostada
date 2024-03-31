@@ -1,5 +1,5 @@
 async function getToken() {
-  const r = await fetch("/api/user/Token/", {
+  const r = await fetch("/api/account/Token/", {
     method: "GET",
     headers: {
       "Content-type": "application/json",

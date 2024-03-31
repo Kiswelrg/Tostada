@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from . import views
 
-# return HttpResponseRedirect(reverse('user:sign-up') + '?username=0')
+# return HttpResponseRedirect(reverse('account:sign-up') + '?username=0')
 
 app_name = 'tool'
 urlpatterns = [

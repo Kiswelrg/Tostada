@@ -12,7 +12,7 @@ class LoginRequireMiddleWare:
         except_list1 = []
         if request.path[:2] == '/i' and request.path not in except_list1:
             if not request.session.has_key("isLoggedIn") or not request.session["isLoggedIn"]:
-                return HttpResponseRedirect(f"{reverse('user:sign-in')}?wish=" + quote_plus(request.path))
+                return HttpResponseRedirect(f"{reverse('account:sign-in')}?wish=" + quote_plus(request.path))
 
         # Need to be POST
         include_list2 = []

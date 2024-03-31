@@ -8,14 +8,14 @@ import Signup from "../Signup/Signup.vue"
 
 const routes = [
   {
-    path: "/user/:num(\\d+)?/",
+    path: "/account/:num(\\d+)?/",
     component: User,
     props: (route) => ({
       num: parseInt(route.params.num),
     }),
   },
   {
-    path: "/user/:id(\\d+)?/:msg([^/]+)?/",
+    path: "/account/:id(\\d+)?/:msg([^/]+)?/",
     component: User,
     props: (route) => ({
       id: parseInt(route.params.id),
@@ -30,7 +30,7 @@ const routes = [
 // keep it simple for now.
 const router = createRouter({
   // 4. Provide the history implementation to use. We are using the ×hash× history for simplicity here.
-  history: createWebHistory('/user/'),
+  history: createWebHistory('/account/'),
   routes, // short for `routes: routes`
   sensitive: true,
 })

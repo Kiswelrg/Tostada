@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='cover',
-            field=models.ImageField(blank=True, default='', upload_to=account.models.User.cover_dir_path),
+            field=models.ImageField(blank=True, default='', upload_to=account.models.AUser.cover_dir_path),
         ),
         migrations.AddField(
             model_name='user',
             name='logo',
-            field=models.ImageField(blank=True, default='', upload_to=account.models.User.avatar_dir_path),
+            field=models.ImageField(blank=True, default='', upload_to=account.models.AUser.avatar_dir_path),
         ),
     ]

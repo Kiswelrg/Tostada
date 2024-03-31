@@ -14,7 +14,7 @@ const routes = [
     component: () => import("@/main/MainTemp.vue"),
   },
   {
-    path: "/a",
+    path: "/account",
     name: "account",
     component: User,
     children: userRoutes
