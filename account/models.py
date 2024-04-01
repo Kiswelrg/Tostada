@@ -31,11 +31,12 @@ class AUser(User):
     urlCode = models.PositiveBigIntegerField(default=getUserCode, unique=True, db_index=True)
     # password = models.CharField(max_length=64)
     sex = models.CharField(
-            default='隐藏',
+            default='2',
             max_length = 2,
             choices = {
                 ('0', '男'),
                 ('1', '女'),
+                ('2', '0b01')
             },
         )
     age = models.PositiveSmallIntegerField(default=None,blank=True,null=True)

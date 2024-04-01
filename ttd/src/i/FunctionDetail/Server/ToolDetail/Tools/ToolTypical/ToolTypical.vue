@@ -9,7 +9,7 @@
                         <div v-if="!intro?.length" class="paragraph px-2 py-1 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
                             Another option you have is choosing the number of syllables in the words you speak. You probably have never considered this option before, but you have it every time you open your mouth and speak. You make so many choices like this that you never even think about, but you have the choice with each one. What are you going to do with this knowledge?
                         </div>
-                        <div v-for="ito in filtered_intro" class="paragraph px-2 py-1 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
+                        <div v-for="ito in filtered_intro" class="paragraph px-4 py-4 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
                             <div v-for="content in ito.content">{{ content }}</div>
                         </div>
                     </div>
@@ -96,6 +96,21 @@ watch(filtered_intro, (newV) => {
 </script>
 
 <style lang="scss" scoped>
+.belly {
+    &::-webkit-scrollbar {
+        background-color: transparent;
+        width: 12px;
+        height: 100%;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: rgb(27, 27, 27);
+        // border: 4px solid #2b2d31;
+        border: 2px solid rgba(0,0,0,0);
+        background-clip: padding-box;
+        border-radius: 5px;
+    }
+    
+}
 /* Define a custom class with the --elevation-stroke variable */
 .group:hover .buttons {
     @apply opacity-100;

@@ -1,5 +1,5 @@
 <template>
-<div class="serverhead w-full h-12">
+<div class="serverhead w-full h-[var(--m-serverhead-height)]">
     
     <div class="wrapper m-0 w-full h-full">
         <div class="flex flex-row px-4 py-3">
@@ -31,10 +31,19 @@ const thumb_url = '/static/tool/main/thumb.svg';
 const server = inject('active-server');
 </script>
 
+<style lang="scss">
+:root {
+    --m-serverhead-height: 48px;
+}
+</style>
+
 <style lang="scss" scoped>
+
 .serverhead {
     box-shadow: 0 0 2px 0 rgba(0,0,0,0.5);
 }
+
+
 
 .dropdownarror {
     &::before,&::after {

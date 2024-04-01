@@ -1,5 +1,5 @@
 <template>
-<div class="flex z-[2] h-[53px] grow-0 shrink-0 mb-px w-full pr-2 pl-[6px] bg-userbar-bg items-center">
+<div class="flex z-[2] h-[var(--m-userbar-height)] grow-0 shrink-0 mb-px w-full pr-2 pl-[6px] bg-userbar-bg items-center">
 
     <div class="flex min-w-[120px] h-[42px] mr-2 pl-0.5 bg-userbar-hoverbg rounded-md items-center">
         <div class="h-8 w-8 shrink-0 rounded-full bg-hui-800 cursor-pointer"></div>
@@ -23,7 +23,7 @@
         <div class="h-8 w-8 flex justify-center items-center rounded-md hover:bg-userbar-hoverbg"></div>
         <div class="h-8 w-8 flex justify-center items-center rounded-md hover:bg-userbar-hoverbg"></div>
     </div>
-    
+    <div class="bg-red-400 h-5 w-5 absolute bottom-0"></div>
 </div>
 </template>
 
@@ -31,7 +31,14 @@
 
 </script>
 
+<style lang="scss">
+:root {
+    --m-userbar-height: 53px;
+}
+</style>
+
 <style lang="scss" scoped>
+
 .username-text {
     font-size: 14px;
     line-height: 18px;

@@ -11,17 +11,17 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from django.conf import settings
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import check_password, make_password
 import hashlib
 import json
 import random
 import os
 
 
-from account.models import User
+from account.models import AUser
 # Create your views here.
 
-def printc(info, isList = False, color = None):
+def printc(info, isList = False, color = None, end = '\n'):
     def printRGB(text):
         def rgb_to_ansi(r, g, b):
             # Convert RGB values to a color index
@@ -31,9 +31,9 @@ def printc(info, isList = False, color = None):
         if color:
             # Convert RGB to ANSI color code
             ansi_code = rgb_to_ansi(color[0], color[1], color[2])
-            print(f"{ansi_code}{text}\033[0m")
+            print(f"{ansi_code}{text}\033[0m", end=end)
         else:
-            print(text)
+            print(text, end=end)
     if settings.VERBOSE:
         if isList:
             for i in info:
@@ -81,16 +81,18 @@ def ResetPwd(request):
     state = False
     if request.POST['code'] != request.session['code']:
         msg = 1
-    elif not User.objects.filter(username = request.POST['username']).exists():
-        msg = 2
-    elif not User.objects.filter(username = request.POST['username'], password = hashlib.sha256((request.POST['pwd'] + 'tw').encode('utf-8')).hexdigest()).exists():
-        msg = 3
     else:
-        state = True
-        pwd2 = hashlib.sha256((request.POST['pwd2'] + 'tw').encode('utf-8')).hexdigest()
-        u = User.objects.get(username = request.POST['username'])
-        u.password = pwd2
-        u.save()
+        u = AUser.objects.filter(username = request.POST['username']).first()
+        if u and check_password(request.POST['pwd'], u.passwrod):
+            state = True
+            u = AUser.objects.get(username = request.POST['username'])
+            u.password = make_password(request.POST['pwd2'])
+            u.save()
+        elif u:
+            msg = 3
+        else:
+            msg = 2
+        
 
     '''
     msg choices
@@ -120,7 +122,7 @@ def DoSignIn(request):
         printc([f'real:  {request.session["code"]}', f'given: {request.POST["code"]}'], isList = True)
         msg = 1
     else:
-        u = User.objects.filter(username = request.POST['username']).first()
+        u = AUser.objects.filter(username = request.POST['username']).first()
         if u and check_password(pwd, u.password):
             state = True
             msg = 11
@@ -128,7 +130,10 @@ def DoSignIn(request):
             request.session['username'] = request.POST['username']
         else:
             msg = 2
-            printc([pwd, '!=', u.password], isList=True)
+            if u:
+                printc([pwd, '!=', u.password], isList=True, end = ' ')
+            else:
+                printc('no such user! (dev message)')
     printc(f'login {"success" if state else "failed"}', color = [255,47,47])
     '''
     msg choices
@@ -153,18 +158,17 @@ def DoSignUp(request):
     if request.session["code"] != request.POST['code'].lower(): # 验证码
         msg = 1
     else:
-        if User.objects.filter(username = request.POST.get('username')).exists():
+        if AUser.objects.filter(username = request.POST.get('username')).exists():
             msg = 3
         else:
             #验证id pwd的规范性（用接口
             pwd = request.POST.get('pwd')
-            # pwd = hashlib.sha256(pwd.encode('utf-8')).hexdigest()
-            pwd = hashlib.sha256((pwd + 'tw').encode('utf-8')).hexdigest()
+            # pwd = hashlib.sha256((pwd + 'tw').encode('utf-8')).hexdigest()
             
             #设置user的其他field， 用接口
-            u = User(
+            u = AUser(
                 username=request.POST.get('username'),
-                password = pwd,
+                password = make_password(pwd),
                 additional = {}
             )
             try:
@@ -177,6 +181,8 @@ def DoSignUp(request):
             u.save()
             state = True
             msg = 11
+            request.session['isLoggedIn'] = True
+            request.session['username'] = request.POST['username']
             return HttpResponse(json.dumps({'state': state, 'msg': msg}))
     '''
     msg choices
@@ -260,7 +266,7 @@ def Vcode(request):
 
 
 def avatar_view(request, user_code):
-    user = get_object_or_404(User, urlCode=user_code)
+    user = get_object_or_404(AUser, urlCode=user_code)
     if user.avatar:
         return FileResponse(user.avatar.open(), content_type='image/jpeg')
     else:

@@ -4,7 +4,9 @@ from django.contrib import admin
 from .models import AuthorizationLevel, ToolServer, ServerRole, UserServerRole, UserToolRole
 from .models import ToolOfInputAndOutput, ToolOfChat
 from .models import CategoryInServer
+from .models import Tool
 
+admin.site.register(Tool)
 admin.site.register(ToolOfInputAndOutput)
 admin.site.register(ToolOfChat)
 admin.site.register(ToolServer)

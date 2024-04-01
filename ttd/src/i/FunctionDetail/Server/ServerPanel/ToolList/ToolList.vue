@@ -1,6 +1,6 @@
 <template>
     <div>
-    <div class="toollist h-full overflow-y-scroll">
+    <div class="toollist h-[calc(100vh-var(--m-serverhead-height)-var(--m-userbar-height))] overflow-y-scroll">
         <div class="seomthingelse">
         </div>
 
@@ -135,7 +135,6 @@ async function fetchAToolServer(cid) {
 
 <style lang="scss" scoped>
 .toollist {
-    
     &::-webkit-scrollbar {
         background-color: transparent;
         width: 8px;
