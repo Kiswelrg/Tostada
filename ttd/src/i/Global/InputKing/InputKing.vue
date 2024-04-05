@@ -1,6 +1,7 @@
 <template>
-    <div class="inputking flex flex-col px-2 h-[var(--m-inputking-height)] w-full grow-0 shrink-0 bg-[#313338]">
-        <div class="wrapper flex justify-between mb-1 bg-[#383a40] w-full h-full rounded-lg">
+    <div class="inputking flex flex-col px-2 h-fit w-full grow-0 shrink-0 bg-[#313338] z-10">
+        <Arg></Arg>
+        <div class="wrapper flex justify-between mb-1 bg-[#383a40] w-full h-[44.32px] rounded-lg z-[2]">
             <div class="left-buttons h-full flex items-center ml-2">
                 <div>
                     <div class="h-8 w-8 bg-[#2f2f2f] rounded-lg"></div>
@@ -32,14 +33,13 @@
                 </div>
             </div>
         </div>
-        <div class="h-0.5 translate-y-[1px] w-full bg-white rounded-lg"></div>
-        <div class="args max-w-[calc(100%-64px)] min-w-8 h-6 bg-text-muted absolute bottom-[var(--m-inputking-height)] translate-x-[var(--m-inputking-l-idt)] rounded-t-[4px]">
-            1
-        </div>
+        <div class="h-1 translate-y-[1px] w-full bg-white rounded-lg"></div>
+        
     </div>
 </template>
 
 <script setup>
+import Arg from './Arg/Arg.vue';
 
 </script>
 

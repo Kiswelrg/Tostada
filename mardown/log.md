@@ -3,8 +3,9 @@ Learning <a href='https://docs.djangoproject.com/en/5.0/topics/auth/default/'>Us
 Learning <a href='https://docs.djangoproject.com/en/5.0/topics/auth/passwords/'>Password management in Django</a> ✅  
 Alter 'user' app to 'account' ✅  
 Add an app to store project-wide settings  ✅  
+Rewrite user log in view  ✅
+Rewrite user log out view  
 Make Server List items draggable  
-Rewrite user log in/out view  
 
 
 ### 2024-04-01
@@ -12,3 +13,5 @@ Rewrite existing password management part ✅
 Consider ❓ whether to let account.user inheritate auth.user  ✅yes
 Consider ❓ whether to pass plain text while transferring password between client and server  ✅yes
 
+### 2024-04-05
+function args section  

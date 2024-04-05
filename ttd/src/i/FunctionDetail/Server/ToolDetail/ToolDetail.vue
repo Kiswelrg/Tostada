@@ -1,6 +1,6 @@
 <template>
 
-    <div class="tooldetail bg-tooldetail-bg flex grow bg-orange-50 w-full">
+    <div class="tooldetail bg-tooldetail-bg flex grow bg-orange-50 min-w-[300px]">
         <!-- Component changes when currentTab changes -->
         <component :is="tabs[currentTab]" :tool-detail="tool_detail" :introToMsg="introToMsg"></component>
     </div>
