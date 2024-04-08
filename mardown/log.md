@@ -14,4 +14,9 @@ Consider ❓ whether to let account.user inheritate auth.user  ✅yes
 Consider ❓ whether to pass plain text while transferring password between client and server  ✅yes
 
 ### 2024-04-05
-function args section  
+function args section  ✅  
+
+
+### 2024-04-08
+methods dropup menu  
+load method args in front end

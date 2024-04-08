@@ -1,7 +1,7 @@
 <template>
     <div class="argument relative flex flex-col min-h-[calc(var(--m-onearg-h)+var(--m-args-rounded-offset))] h-fit w-full grow-0 shrink-0 bg-[#313338] translate-y-[var(--m-args-rounded-offset)] z-0">
         <ArgV></ArgV>
-        <div class="offset-holder h-[var(--m-args-rounded-offset)] w-full bg-text-muted"></div>
+        <div class="offset-holder h-[var(--m-args-rounded-offset)] w-full bg-arg-base"></div>
     </div>
 </template>
 

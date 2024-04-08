@@ -15,6 +15,7 @@ export default {
     },
     colors: {
       'text-muted': 'hsl( 214 calc( 1 * 8.1%) 61.2% / 1)',
+      'arg-base': '#434343',
       'msgbutton':{
         'primary': 'hsl( 223 calc( 1 * 6.7%) 20.6% / 1)',
         'hover': '#393c41',
