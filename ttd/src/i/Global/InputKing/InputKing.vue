@@ -33,7 +33,7 @@
                 </div>
             </div>
         </div>
-        <div class="h-1 translate-y-[1px] w-full bg-white rounded-lg"></div>
+        <div class="h-[3px] w-full bg-white rounded-lg"></div>
         
     </div>
 </template>

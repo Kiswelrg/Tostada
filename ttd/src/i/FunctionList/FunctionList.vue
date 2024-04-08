@@ -1,6 +1,6 @@
 <template>
   
-    <div class="functionlist bg-fclist-bg flex flex-col overflow-y-scroll">
+    <div class="functionlist bg-fclist-bg flex flex-col flex-none h-screen overflow-y-scroll">
         <!-- Direct Message icons -->
         <div class="sublist flex-1 mx-0 grow-0">
           <div class="flex flex-col w-full">

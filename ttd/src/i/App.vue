@@ -1,5 +1,5 @@
 <template>
-  <div class="main flex flex-row grow h-full w-full">
+  <div class="main flex flex-row grow h-full w-full min-h-[250px]">
     <FunctionList :functionList="functionList" @update-active-server-tab="onUpdateActiveServerTab" @go-tab="onGoTab"></FunctionList>
     <MeVue v-if="isMeActive"></MeVue>
     <ServerVue v-else :server="activeServer"></ServerVue>
