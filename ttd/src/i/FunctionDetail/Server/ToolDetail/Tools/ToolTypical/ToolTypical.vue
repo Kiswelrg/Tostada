@@ -29,7 +29,7 @@
             </div>
         </div>
         
-        <InputKing class="flex-none" />
+        <InputKing class="flex-none" :tool-detail="toolDetail"/>
     </div>
 
 </template>

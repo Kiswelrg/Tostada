@@ -4,6 +4,8 @@ import App from './App.vue'
 import router from './router'
 import { library, icon } from '@fortawesome/fontawesome-svg-core'
 import { faSmile, faPen, faEllipsisH } from '@fortawesome/free-solid-svg-icons'
+import clickOutside from './util/directives/clickOutside'
+
 
 library.add(
     faSmile,
@@ -11,6 +13,6 @@ library.add(
     faEllipsisH
 )
 
-createApp(App)
-    .use(router)
-    .mount('#app')
+const app = createApp(App).use(router)
+app.directive('click-outside', clickOutside)
+app.mount('#app')

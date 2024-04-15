@@ -14,6 +14,18 @@ export default {
       '625': ['.625rem', '1rem'],
     },
     colors: {
+      'inputking': {
+        'bg': '#383a40',
+      },
+      'dark': {
+        'interactive-normal': 'hsl( 215 calc( 1 * 8.8%) 73.3% / 1)',
+        'interactive-hover': 'hsl( 215 calc( 1 * 8.8%) 73.3% / 1)',
+        'filter-normal': 'invert(97%) sepia(0%) saturate(1954%) hue-rotate(278deg) brightness(120%) contrast(73%)',
+        'dropmenu': {
+          'thumb': 'hsl(225 calc(1 * 7.1%) 11% / 1)',
+          'track': '#0000'
+        }
+      },
       'text-muted': 'hsl( 214 calc( 1 * 8.1%) 61.2% / 1)',
       'arg-base': '#434343',
       'msgbutton':{

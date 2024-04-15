@@ -3,21 +3,27 @@
         <Arg></Arg>
         <div class="wrapper flex justify-between mb-1 bg-[#383a40] w-full h-[44.32px] rounded-lg z-[2]">
             <div class="left-buttons h-full flex items-center ml-2">
-                <div>
+                <div class="flex">
                     <div class="h-8 w-8 bg-[#2f2f2f] rounded-lg"></div>
+                    
                 </div>
             </div>
             <div class="main-input items-center w-full h-full flex mx-2">
 
                 <div class="flex rounded-md shadow-sm w-full h-full">
-                    <input type="text" placeholder="Message here" class="w-full text-md my-2 bg-[#383a40] outline-none font-light">
+                    <div class="flex">
+                        <input type="text" placeholder="Message here" class="w-full text-md my-2 bg-inputking-bg outline-none font-light">
+                    </div>
                 </div>
 
             </div>
             <div class="main-input items-center w-16 flex mx-2">
 
                 <div class="flex shadow-sm w-16 h-8">
-                    <input type="submit" class="border-[1px] w-full h-8 rounded-md text-[12px] my-auto bg-[#2f3135] hover:bg-[#4f5258] outline-none font-light">
+                    <!-- <input type="submit" class="border-[1px] w-full h-8 rounded-md text-[12px] my-auto bg-[#2f3135] hover:bg-[#4f5258] outline-none font-light"> -->
+                    <div class="h-full">
+                        <Drop class="h-8 w-16" :down="false" :height="30" :menu-gap="6" :has-icon="false" :methods-list="methodsList"></Drop>
+                    </div>
                 </div>
 
             </div>
@@ -39,7 +45,36 @@
 </template>
 
 <script setup>
-import Arg from './Arg/Arg.vue';
+import Arg from './Arg/Arg.vue'
+import Drop from '../../../components/Util/Drop.vue'
+import { ref } from 'vue';
+const props = defineProps([
+    'tool-detail',
+])
+
+const isDropMenuOpen = ref(false)
+
+const methodsList = ref([
+    {
+        'methods': [
+            {'icon': '/static/tool/main/user-solid.svg', 'name': 'Edit'},
+            {'icon': '/static/tool/main/user-solid.svg', 'name': 'Duplicate'}
+        ]
+    },
+    {
+        'methods': [
+            {'icon': '/static/tool/main/user-solid.svg', 'name': 'Archive'},
+            {'icon': '/static/tool/main/user-solid.svg', 'name': 'Move'}
+        ]
+    },
+    {
+        'methods': [
+            {'icon': '/static/tool/main/user-solid.svg', 'name': 'Delete'}
+        ]
+    },
+])
+
+
 
 </script>
 

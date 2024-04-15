@@ -4,8 +4,7 @@ Learning <a href='https://docs.djangoproject.com/en/5.0/topics/auth/passwords/'>
 Alter 'user' app to 'account' ✅  
 Add an app to store project-wide settings  ✅  
 Rewrite user log in view  ✅
-Rewrite user log out view  
-Make Server List items draggable  
+
 
 
 ### 2024-04-01
@@ -18,5 +17,18 @@ function args section  ✅
 
 
 ### 2024-04-08
+
+
+
+
+
+
+
+
+
+
 methods dropup menu  
-load method args in front end
+load method args in front end  
+Rewrite user log out view  👀
+    don't login to the admin page is the right move maybe
+Make Server List items draggable  
