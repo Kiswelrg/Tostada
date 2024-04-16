@@ -33,7 +33,7 @@
         <div :style="menuPosition"
              class="absolute right-0 z-10 m-0 origin-bottom-right rounded-md bg-dark-dropmenu-thumb shadow-lg focus:outline-none"
              :class="{hidden: !isDropMenuOpen}"
-             v-click-outside="(closeMenu, triggerRef)"
+             v-click-outside="[closeMenu, triggerRef]"
              role="menu"
              aria-orientation="vertical"
              aria-labelledby="menu-button"
@@ -81,6 +81,7 @@ const props = defineProps([
 const isDropMenuOpen = ref(true);
 
 const closeMenu = () => {
+    if (!isDropMenuOpen.value) return;
     isDropMenuOpen.value = false;
 }
 
@@ -88,10 +89,6 @@ const menuPosition = computed(() => {
     return props.down
         ? { top: `${props.height + props.menuGap}px` }
         : { bottom: `${props.height + props.menuGap}px` }
-})
-
-const darkFilterNormal = computed(() => {
-    return getComputedStyle(document.documentElement).getPropertyValue('--tw-dark-filter-normal')
 })
 
 
