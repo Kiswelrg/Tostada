@@ -39,11 +39,11 @@
              aria-labelledby="menu-button"
              tabindex="-1">
             <div
-                v-for="ms in props.methodsList"
+                v-for="group in methods"
                 class="py-1"
                 role="none">
                 <div
-                    v-for="method in ms.methods"
+                    v-for="method in group.methods"
                     :class="{'pl-2': !props.hasIcon, 'pl-2': props.hasIcon}"
                     class="menu-item flex items-center mx-1 hover:bg-dark-interactive-normal hover:text-black rounded-sm">
                     <div :class="{'hidden': !props['hasIcon']}" class="item-icon px-0">
@@ -53,10 +53,10 @@
                     </div>
                     <a href="#"
                         :class="{'pl-2': !props.hasIcon, 'pl-0.5': props.hasIcon}"
-                       class="block pr-4 py-0.5 text-[10px] text-dark-interactive-normal hover:text-black"
+                       class="inline-block break-words max-w-32 min-w-[57px] pr-4 py-0.5 text-[10px] text-dark-interactive-normal hover:text-black"
                        role="menuitem"
                        tabindex="-1"
-                       id="menu-item-6">{{ method.name }}</a>
+                       id="menu-item-6">{{ method.display_name }}</a>
                 </div>
             </div>
         </div>
@@ -77,6 +77,12 @@ const props = defineProps([
     'has-icon',
     'methods-list',
 ])
+
+const methods = computed(() => {
+    if (props.methodsList)
+        return props.methodsList['groups']
+    return []
+})
 
 const isDropMenuOpen = ref(true);
 

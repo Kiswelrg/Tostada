@@ -4,8 +4,9 @@
         <div class="wrapper flex justify-between mb-1 bg-[#383a40] w-full h-[44.32px] rounded-lg z-[2]">
             <div class="left-buttons h-full flex items-center ml-2">
                 <div class="flex">
-                    <div class="h-8 w-8 bg-[#2f2f2f] rounded-lg"></div>
-                    
+                    <div class="h-8 w-8 bg-[#2f2f2f] rounded-full">
+
+                    </div>
                 </div>
             </div>
             <div class="main-input items-center w-full h-full flex mx-2">
@@ -47,32 +48,18 @@
 <script setup>
 import Arg from './Arg/Arg.vue'
 import Drop from '../../../components/Util/Drop.vue'
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 const props = defineProps([
     'tool-detail',
 ])
 
 const isDropMenuOpen = ref(false)
 
-const methodsList = ref([
-    {
-        'methods': [
-            {'icon': '/static/tool/main/user-solid.svg', 'name': 'Edit'},
-            {'icon': '/static/tool/main/user-solid.svg', 'name': 'Duplicate'}
-        ]
-    },
-    {
-        'methods': [
-            {'icon': '/static/tool/main/user-solid.svg', 'name': 'Archive'},
-            {'icon': '/static/tool/main/user-solid.svg', 'name': 'Move'}
-        ]
-    },
-    {
-        'methods': [
-            {'icon': '/static/tool/main/user-solid.svg', 'name': 'Delete'}
-        ]
-    },
-])
+const methodsList = computed(() => {
+    if (props.toolDetail)
+        return props.toolDetail['methods']
+    return undefined
+})
 
 
 
