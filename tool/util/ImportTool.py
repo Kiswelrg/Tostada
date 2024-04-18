@@ -1,4 +1,5 @@
 from importlib import import_module
+import importlib.util
 import inspect
 from typing import get_type_hints
 
@@ -10,6 +11,24 @@ from typing import get_type_hints
 def importFunction(module_path, function_name):
     module = import_module(module_path)
     return getattr(module, function_name)
+
+
+
+def import_function_from_file(file_path, function_name):
+    spec = importlib.util.spec_from_file_location("module.name", file_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return getattr(module, function_name)
+
+
+def importTest(server_code, tool_code, function_name):
+    # Specify the path to somefunctionsinhere.py
+    file_path = "dir_A/dir_B/somefunctionsinhere.py"
+    # Specify the name of the function you want to import
+    function_name = "some_function"
+
+    # Import the function dynamically
+    return import_function_from_file(file_path, function_name)
 
 
 

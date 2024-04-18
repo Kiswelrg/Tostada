@@ -10,8 +10,9 @@ from django.urls import reverse
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
+
+from UtilGlobal.print import printc
 import hashlib
 import json
 import random
@@ -21,25 +22,6 @@ import os
 from account.models import AUser
 # Create your views here.
 
-def printc(info, isList = False, color = None, end = '\n'):
-    def printRGB(text):
-        def rgb_to_ansi(r, g, b):
-            # Convert RGB values to a color index
-            index = 16 + (36 * round(r * 5 / 255)) + (6 * round(g * 5 / 255)) + round(b * 5 / 255)
-            # Return the ANSI escape sequence
-            return f"\033[38;5;{index}m"
-        if color:
-            # Convert RGB to ANSI color code
-            ansi_code = rgb_to_ansi(color[0], color[1], color[2])
-            print(f"{ansi_code}{text}\033[0m", end=end)
-        else:
-            print(text, end=end)
-    if settings.VERBOSE:
-        if isList:
-            for i in info:
-                printRGB(i)
-            return
-        printRGB(info)
 
 def Home(request):
     print('hit unknown')

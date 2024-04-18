@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from .models import ToolServer, Tool, UserServerRole, UserToolRole
+from UtilGlobal.print import printc
 # Create your views here.
 def Home(request):
     return render(request, 'index.html')
@@ -102,3 +103,9 @@ def fetch_tool(request, tool_code):
     elif tool.additional['subclass'] == 'ToolOfChat':
         pass
     return JsonResponse({"tool": data, "r": True})
+
+
+@require_POST
+def run_tool(request):
+    printc(request.POST)
+    return JsonResponse({})
