@@ -40,11 +40,13 @@
              tabindex="-1">
             <div
                 v-for="group in methods"
+                :key="group.index"
                 class="py-1"
                 role="none">
                 <div
                     v-for="method in group.methods"
-                    :class="{'pl-2': !props.hasIcon, 'pl-2': props.hasIcon}"
+                    :key="method.code"
+                    :class="{'pl-2': !props.hasIcon, 'pl-2': props.hasIcon, 'bg-white': curMethod == method.code}"
                     class="menu-item flex items-center mx-1 hover:bg-dark-interactive-normal hover:text-black rounded-sm">
                     <div :class="{'hidden': !props['hasIcon']}" class="item-icon px-0">
                         <div class="flex">
@@ -52,11 +54,12 @@
                         </div>
                     </div>
                     <a href="#"
-                        :class="{'pl-2': !props.hasIcon, 'pl-0.5': props.hasIcon}"
-                       class="inline-block break-words max-w-32 min-w-[57px] pr-4 py-0.5 text-[10px] text-dark-interactive-normal hover:text-black"
-                       role="menuitem"
-                       tabindex="-1"
-                       id="menu-item-6">{{ method.display_name }}</a>
+                        :class="{'pl-2': !props.hasIcon, 'pl-0.5': props.hasIcon, 'text-black': curMethod == method.code, 'text-dark-interactive-normal': curMethod != method.code}"
+                        @click="chooseMethod(method.code)"
+                        class="inline-block break-words max-w-32 min-w-[57px] pr-4 py-0.5 text-[10px] hover:text-black"
+                        role="menuitem"
+                        tabindex="-1"
+                        id="menu-item-6">{{ method.display_name }}</a>
                 </div>
             </div>
         </div>
@@ -68,7 +71,13 @@ import { computed, ref } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import colors from 'tailwindcss/colors'
 
+const emit = defineEmits([
+    'onChooseMethod'
+])
+
 const triggerRef = ref(null)
+
+const curMethod = ref(-1)
 
 const props = defineProps([
     'down',
@@ -78,10 +87,25 @@ const props = defineProps([
     'methods-list',
 ])
 
+const chooseMethod = (code) => {
+    curMethod.value = code
+    emit('onChooseMethod', code)
+}
+
 const methods = computed(() => {
+    let res = undefined
     if (props.methodsList)
-        return props.methodsList['groups']
-    return []
+        res = props.methodsList['groups']
+    if (res?.length) return res
+    return [{
+        index: 1,
+        methods: [{
+            code: 0,
+            display_name: '默认',
+            input: [],
+            output: []
+        }]
+    }]
 })
 
 const isDropMenuOpen = ref(true);

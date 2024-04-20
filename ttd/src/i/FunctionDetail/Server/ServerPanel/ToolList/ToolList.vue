@@ -4,7 +4,7 @@
         <div class="seomthingelse">
         </div>
 
-        <div v-for="(section,index) in server_detail" class="section text-hui-800 text-sm w-full min-h-10 pt-4">
+        <div v-for="(section, index) in server_detail" :key="index" class="section text-hui-800 text-sm w-full min-h-10 pt-4">
             <div class="w-full bg-gray flex">
                 <div class="h-2 w-2 my-auto mx-1">
                     <img class="downsvg" :src="hashtag_url" alt="" />
@@ -58,10 +58,12 @@ onMounted(() => {
 
 const watcher_server = watch(server, async (newQuestion, oldQuestion) => {
     if (!server || !server.value) {
-        return;
+      return;
     }
     console.log(`loading server detail... ${server.value.name} ${server.value.cid}`);
     await fetchAToolServer(server.value.cid);
+    if (server_detail.value && server_detail.value.length && server_detail.value[0].tools.length)
+      selectSubSection(server_detail.value[0].tools[0].cid);
 }, { immediate: true})
 
 

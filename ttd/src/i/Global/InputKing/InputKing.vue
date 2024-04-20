@@ -23,7 +23,9 @@
                 <div class="flex shadow-sm w-16 h-8">
                     <!-- <input type="submit" class="border-[1px] w-full h-8 rounded-md text-[12px] my-auto bg-[#2f3135] hover:bg-[#4f5258] outline-none font-light"> -->
                     <div class="h-full">
-                        <Drop class="h-8 w-16" :down="false" :height="30" :menu-gap="6" :has-icon="false" :methods-list="methodsList"></Drop>
+                        <Drop class="h-8 w-16" :down="false" 
+                        @on-choose-method="chooseMethod"
+                        :height="30" :menu-gap="6" :has-icon="false" :methods-list="methodsList"></Drop>
                     </div>
                 </div>
 
@@ -54,6 +56,13 @@ const props = defineProps([
 ])
 
 const isDropMenuOpen = ref(false)
+
+const curMethod = ref(-1)
+
+const chooseMethod = (code) => {
+    curMethod.value = code
+    console.log(curMethod.value)
+}
 
 const methodsList = computed(() => {
     if (props.toolDetail)
