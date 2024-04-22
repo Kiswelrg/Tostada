@@ -8,7 +8,7 @@
                     id="menu-button"
                     aria-expanded="true"
                     aria-haspopup="true">
-                Options
+                Functions
                 <svg class="-mr-1 h-3 w-3 text-gray-400"
                      viewBox="0 0 20 20"
                      fill="currentColor"
@@ -31,7 +31,7 @@
         To: "transform opacity-0 scale-95"
     -->
         <div :style="menuPosition"
-             class="absolute right-0 z-10 m-0 origin-bottom-right rounded-md bg-dark-dropmenu-thumb shadow-lg focus:outline-none"
+             class="absolute right-0 z-10 m-0 py-0.5 origin-bottom-right rounded-md bg-dark-dropmenu-thumb shadow-lg focus:outline-none"
              :class="{hidden: !isDropMenuOpen}"
              v-click-outside="[closeMenu, triggerRef]"
              role="menu"
@@ -41,20 +41,20 @@
             <div
                 v-for="group in methods"
                 :key="group.index"
-                class="py-1"
+                class="py-[1.5px]"
                 role="none">
                 <div
                     v-for="method in group.methods"
                     :key="method.code"
-                    :class="{'pl-2': !props.hasIcon, 'pl-2': props.hasIcon, 'bg-white': curMethod == method.code}"
-                    class="menu-item flex items-center mx-1 hover:bg-dark-interactive-normal hover:text-black rounded-sm">
+                    :class="{'pl-2': !props.hasIcon, 'pl-2': props.hasIcon, 'bg-white': props.curMethod == method.code || isUsingDefault, 'hover:bg-dark-interactive-normal': props.curMethod != method.code && !isUsingDefault}"
+                    class="menu-item flex items-center mx-1 hover:text-black rounded-sm">
                     <div :class="{'hidden': !props['hasIcon']}" class="item-icon px-0">
                         <div class="flex">
                             <font-awesome-icon :icon="['fas', 'ellipsis-h']" class="block h-2 w-2 object-contain" :style="{color : colors.darkFilterNormal}"/>
                         </div>
                     </div>
                     <a href="#"
-                        :class="{'pl-2': !props.hasIcon, 'pl-0.5': props.hasIcon, 'text-black': curMethod == method.code, 'text-dark-interactive-normal': curMethod != method.code}"
+                        :class="{'pl-2': !props.hasIcon, 'pl-0.5': props.hasIcon, 'text-black': props.curMethod == method.code || isUsingDefault, 'text-dark-interactive-normal': props.curMethod != method.code && !isUsingDefault}"
                         @click="chooseMethod(method.code)"
                         class="inline-block break-words max-w-32 min-w-[57px] pr-4 py-0.5 text-[10px] hover:text-black"
                         role="menuitem"
@@ -67,17 +67,15 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import colors from 'tailwindcss/colors'
 
 const emit = defineEmits([
-    'onChooseMethod'
+    'onChooseMethod',
 ])
 
 const triggerRef = ref(null)
-
-const curMethod = ref(-1)
 
 const props = defineProps([
     'down',
@@ -85,10 +83,10 @@ const props = defineProps([
     'menu-gap',
     'has-icon',
     'methods-list',
+    'cur-method'
 ])
 
 const chooseMethod = (code) => {
-    curMethod.value = code
     emit('onChooseMethod', code)
 }
 
@@ -100,12 +98,18 @@ const methods = computed(() => {
     return [{
         index: 1,
         methods: [{
-            code: 0,
+            code: -1,
             display_name: '默认',
             input: [],
             output: []
         }]
     }]
+})
+
+const isUsingDefault = ref(false)
+watch(methods, (newl) => {
+    if (newl.length && props.curMethod === -1) isUsingDefault.value = true
+    else isUsingDefault.value = false
 })
 
 const isDropMenuOpen = ref(true);

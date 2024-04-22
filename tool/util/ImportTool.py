@@ -2,19 +2,21 @@ from importlib import import_module
 import importlib.util
 import inspect
 from typing import get_type_hints
-
+import os
 
 # Usage
 # module_path = 'user.views'
 # function_name = 'Home'
 # my_function = import_function(module_path, function_name)
 def importFunction(module_path, function_name):
-    module = import_module(module_path)
+    module = import_module(module_path.replace('/', '.'))
     return getattr(module, function_name)
 
 
 
 def import_function_from_file(file_path, function_name):
+    print(file_path, function_name)
+    print(os.getcwd())
     spec = importlib.util.spec_from_file_location("module.name", file_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

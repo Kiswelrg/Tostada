@@ -6,10 +6,15 @@
             ref="arg"
             :class="{' mb-2 ' : !arg_OverflowX}"
             class="arg h-fit text-[1rem] text-left px-2 flex gap-2 mt-0 overflow-x-auto">
-                <div v-for="_ in 3" :key="1" class="w-[150px] h-fit grow-0 shrink-0">
-                    <label for="city" class="block text-[10px] font-medium leading-2 text-gray-900">City</label>
+                <div v-for="input_item in props.curMethodDetail?.input" class="w-[150px] h-fit grow-0 shrink-0">
+                    <label for="city" class="block text-[10px] font-medium leading-2 text-gray-900">
+                        {{ input_item.name }}
+                    </label>
                     <div class="mt-0.5">
-                        <textarea rows="4" type=" text" name="city" id="city" class="arg-input resize-none block w-full rounded-md border-0 px-1 py-1.5 text-[#eeeeee] text-[8px] shadow-sm placeholder:text-gray-800 sm:text-sm sm:leading-2 bg-[color:#585858]"></textarea>
+                        <textarea rows="4" type=" text" :name="input_item.name" :id="input_item.name" class="arg-input resize-none block w-full rounded-md border-0 px-1 py-1.5 text-[#eeeeee] text-[8px] shadow-sm placeholder:text-gray-800 sm:text-sm sm:leading-2 bg-[color:#585858]"
+                        :value="props.curArgs[input_item.name]"
+                        @input="onUpdateArgs($event.target.value, $event.target.name)"
+                        ></textarea>
                     </div>
                 </div>
             
@@ -22,8 +27,22 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
+const emits = defineEmits([
+    'update-args'
+])
+
+
+const props = defineProps([
+    'cur-method-detail',
+    'cur-args'
+])
+
 const arg = ref(null);
 const arg_OverflowX = ref(false);
+
+const onUpdateArgs = (v, k) => {
+    emits('update-args', v, k)
+}
 
 onMounted(() => {
     const observer = new MutationObserver(checkOverflowX);

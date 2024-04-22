@@ -10,7 +10,6 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { provide } from 'vue';
-import session from "@/util/session";
 
 import FunctionList from './FunctionList/FunctionList.vue';
 import ServerVue from '@/i/FunctionDetail/Server/Server.vue';

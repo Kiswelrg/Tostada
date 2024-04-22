@@ -3,8 +3,9 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from .models import ToolServer, Tool, UserServerRole, UserToolRole
+from .models import ToolServer, Tool, UserServerRole, UserToolRole, ToolOfInputAndOutput, ToolOfChat
 from UtilGlobal.print import printc
+from .util.ImportTool import import_function_from_file, importFunction
 # Create your views here.
 def Home(request):
     return render(request, 'index.html')
@@ -105,7 +106,29 @@ def fetch_tool(request, tool_code):
     return JsonResponse({"tool": data, "r": True})
 
 
+subtools = {
+    'ToolOfInputAndOutput': ToolOfInputAndOutput,
+    'ToolOfChat': ToolOfChat
+}
 @require_POST
-def run_tool(request):
-    printc(request.POST)
-    return JsonResponse({})
+def run_tool(request, tool_code):
+    printc([request.POST, tool_code], isList=True, color=[255,255,0])
+    add = Tool.objects.get(urlCode = tool_code).additional
+    methods = (subtools[add['subtype']].objects.get(urlCode = tool_code).method_names)
+    server_code = methods['tool'].strip().split('/')[0]
+    method_detail = None
+    for g in methods['groups']:
+        for m in g['methods']:
+            if m['code'] == int(request.POST['method-code']):
+                method_detail = m
+                break
+        if method_detail:
+            break
+    
+    
+    print(importFunction(f'tool.servers.{methods["tool"]}.main', 'f_' + request.POST['method-code']))
+    return JsonResponse({
+        'status': 200,
+        'r': True,
+        'msg': f'{tool_code} got!'
+    })

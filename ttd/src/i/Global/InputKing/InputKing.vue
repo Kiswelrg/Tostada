@@ -1,6 +1,6 @@
 <template>
     <div class="inputking flex flex-col px-2 h-fit w-full grow-0 shrink-0 bg-[#313338] z-10">
-        <Arg></Arg>
+        <Arg :cur-method-detail="curMethodDetail" :cur-args="curArgs" v-if="Object.keys(curMethodDetail).length !== 0" @update-args="onUpdateArgs"></Arg>
         <div class="wrapper flex justify-between mb-1 bg-[#383a40] w-full h-[44.32px] rounded-lg z-[2]">
             <div class="left-buttons h-full flex items-center ml-2">
                 <div class="flex">
@@ -13,7 +13,8 @@
 
                 <div class="flex rounded-md shadow-sm w-full h-full">
                     <div class="flex">
-                        <input type="text" placeholder="Message here" class="w-full text-md my-2 bg-inputking-bg outline-none font-light">
+                        <input type="text" placeholder="Message here" class="w-full text-md my-2 bg-inputking-bg outline-none font-light"
+                        @keyup.enter="runToolMethod">
                     </div>
                 </div>
 
@@ -25,6 +26,7 @@
                     <div class="h-full">
                         <Drop class="h-8 w-16" :down="false" 
                         @on-choose-method="chooseMethod"
+                        :cur-method="curMethod"
                         :height="30" :menu-gap="6" :has-icon="false" :methods-list="methodsList"></Drop>
                     </div>
                 </div>
@@ -50,18 +52,30 @@
 <script setup>
 import Arg from './Arg/Arg.vue'
 import Drop from '../../../components/Util/Drop.vue'
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
+import { jsonWithBigInt } from '@/util/parse'
+import { getCookie } from '@/util/session'
 const props = defineProps([
     'tool-detail',
 ])
+
+onMounted(() => {
+    
+})
+
 
 const isDropMenuOpen = ref(false)
 
 const curMethod = ref(-1)
 
+const curArgs = ref({})
+
+const onUpdateArgs = (v, k) => {
+    curArgs.value[k] = v;
+}
+
 const chooseMethod = (code) => {
     curMethod.value = code
-    console.log(curMethod.value)
 }
 
 const methodsList = computed(() => {
@@ -70,6 +84,69 @@ const methodsList = computed(() => {
     return undefined
 })
 
+watch(methodsList, (newV) => {
+    curArgs.value = {}
+    if (newV)
+        for (const group of newV.groups) {
+            for (const method of group.methods) {
+                if (curMethod.value != -1) break
+                curMethod.value = method.code
+            }
+            if (curMethod.value != -1) break
+        }
+    else
+        curMethod.value = -1
+})
+
+const methodDetail = (c) => {
+    if (!methodsList.value) return {}
+    for (const group of methodsList.value.groups) {
+        for (const method of group.methods) {
+            if (method?.code == c) {
+                return method
+            }
+        }
+    }
+    return {}
+}
+
+const curMethodDetail = computed(() => {
+    if (curMethod.value == -1) return {}
+    return methodDetail(curMethod.value)
+})
+
+async function runToolMethod() {
+  var form_data = new FormData();
+  
+  curArgs.value['method-name'] = curMethodDetail.value.display_name;
+  curArgs.value['method-code'] = curMethod.value;
+
+  for (var v in curArgs.value) {
+    form_data.append(v, curArgs.value[v]);
+  }
+  const response = await fetch(
+    `/api/i/runtool/${props.toolDetail.cid}/`,
+    {
+      method: "POST",
+      body: form_data,
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken")
+      }
+    }
+  );
+  
+  if (response.ok) {
+    const text = await response.text();
+    const r = jsonWithBigInt(text);
+    console.log(`RunTool( fetch status: ${r.r}): `);
+
+    // for (var v in curArgs.value) {
+    //   curArgs.value[v] = undefined;
+    // }
+  } else {
+    console.log(response.status);
+  }
+}
 
 
 </script>

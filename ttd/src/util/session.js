@@ -1,4 +1,4 @@
-async function getToken() {
+export async function getToken() {
   const r = await fetch("/api/account/Token/", {
     method: "GET",
     headers: {
@@ -10,7 +10,7 @@ async function getToken() {
   });
 }
 
-function getCookie(name) {
+export function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== "") {
     const cookies = document.cookie.split(";");
@@ -26,4 +26,4 @@ function getCookie(name) {
   return cookieValue;
 }
 
-export default { getToken, getCookie };
+// export default getToken, getCookie;
