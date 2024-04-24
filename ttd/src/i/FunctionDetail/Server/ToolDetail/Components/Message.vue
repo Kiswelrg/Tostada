@@ -7,7 +7,7 @@
             <div class="message-contents static ml-0 pl-0 indent-0">
                 <img 
                     v-if="msg['isGroupHead']"
-                    src=""
+                    :src="msg['avatar_src']"
                     alt=""
                     class="avatar pointer-events-auto [alt]:indent-[-9999px] absolute left-4 mt-[calc(4px-0.125rem)] w-10 h-10 rounded-[50%] overflow-hidden cursor-pointer select-none z-[1]">
                 <h3

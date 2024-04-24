@@ -309,7 +309,6 @@ export default {
 import { ref, onMounted } from "vue";
 import { useRouter } from 'vue-router';
 // import h256 from "@/util/encrypt";
-import session from "@/util/session";
 const varification_correct = ref(true);
 const pwd_validity = ref(true);
 const username = ref("");

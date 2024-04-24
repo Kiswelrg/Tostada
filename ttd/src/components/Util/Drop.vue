@@ -1,8 +1,8 @@
 <template>
     <div class="relative inline-block text-left">
-        <div>
+        <div class="h-full flex">
             <button type="button"
-                    class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-dark-interactive-normal px-3 py-2 text-[8px] font-semibold text-inputking-bg shadow-sm hover:bg-dark-interactive-hover focus:outline-none hover:border-white"
+                    class="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-dark-interactive-normal px-3 py-2 text-[8px] font-semibold text-inputking-bg shadow-sm hover:bg-dark-interactive-hover focus:outline-none hover:border-white"
                     @click="isDropMenuOpen = !isDropMenuOpen"
                     ref="triggerRef"
                     id="menu-button"
@@ -18,6 +18,7 @@
                           clip-rule="evenodd" />
                 </svg>
             </button>
+            <div class="h-full w-4 absolute right-[-4px] top-0 content-top text-black z-10 text-[8px]">({{ methodsNum }})</div>
         </div>
 
         <!--
@@ -85,6 +86,19 @@ const props = defineProps([
     'methods-list',
     'cur-method'
 ])
+
+const methodsNum = computed(() => {
+  if (props.methodsList) {
+    if (!props.methodsList.groups) return 0;
+    let res = 0;
+    for (const g of props.methodsList.groups) {
+        res += g.methods ? g.methods.length : 0;
+    }
+    return res;
+  }
+  return 0;
+});
+
 
 const chooseMethod = (code) => {
     emit('onChooseMethod', code)

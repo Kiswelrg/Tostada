@@ -13,14 +13,17 @@ def Home(request):
 
 # Fetch all tool servers that a user has joined
 def fetch_user_tool_servers(request):
-    tool_servers = ToolServer.objects.filter(user_server_auths__user__username=request.session['username'])
+    # tool_servers = ToolServer.objects.filter(user_server_auths__user__username=request.session['username'])
+    u_s_role = UserServerRole.objects.filter(user__username=request.session['username'])
     data = [
         {
-            "cid": str(ts.urlCode),
-            "name": ts.name,
-            "description": ts.description,
-            "logoSrc": '/media/default/server/logo/logo.svg' if ts.logo == '' else ts.logo.url
-        } for ts in tool_servers
+            "cid": str(us.server.urlCode),
+            "name": us.server.name,
+            "description": us.server.description,
+            "logoSrc": '/media/default/server/logo/logo.svg' if us.server.logo == '' else us.server.logo.url,
+            "order": us.order,
+            "date_added": us.date_added.strftime("%Y-%m-%dT%H:%M:%SZ")
+        } for us in u_s_role
     ]
     return JsonResponse({"tool_servers": data, 'r': True})
 
@@ -114,7 +117,7 @@ subtools = {
 def run_tool(request, tool_code):
     printc([request.POST, tool_code], isList=True, color=[255,255,0])
     add = Tool.objects.get(urlCode = tool_code).additional
-    methods = (subtools[add['subtype']].objects.get(urlCode = tool_code).method_names)
+    methods = (subtools[add['subclass']].objects.get(urlCode = tool_code).method_names)
     server_code = methods['tool'].strip().split('/')[0]
     method_detail = None
     for g in methods['groups']:
@@ -126,7 +129,7 @@ def run_tool(request, tool_code):
             break
     
     
-    print(importFunction(f'tool.servers.{methods["tool"]}.main', 'f_' + request.POST['method-code']))
+    f = importFunction(f'tool.servers.{methods["tool"]}.main', 'f_' + request.POST['method-code'])
     return JsonResponse({
         'status': 200,
         'r': True,

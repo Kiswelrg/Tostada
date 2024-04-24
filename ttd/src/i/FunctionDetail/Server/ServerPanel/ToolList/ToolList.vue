@@ -60,7 +60,6 @@ const watcher_server = watch(server, async (newQuestion, oldQuestion) => {
     if (!server || !server.value) {
       return;
     }
-    console.log(`loading server detail... ${server.value.name} ${server.value.cid}`);
     await fetchAToolServer(server.value.cid);
     if (server_detail.value && server_detail.value.length && server_detail.value[0].tools.length)
       selectSubSection(server_detail.value[0].tools[0].cid);

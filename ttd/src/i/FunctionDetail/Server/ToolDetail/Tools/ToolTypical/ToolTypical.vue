@@ -72,22 +72,26 @@ const messages = ref([
     {
         'a': 1,
         'id': 2,
-        'isGroupHead': true
+        'isGroupHead': true,
+        'avatar_src': '/static/@me/1F955.svg'
     },
     {
         'a': 1,
         'id': 3,
-        'isGroupHead': false
+        'isGroupHead': false,
+        'avatar_src': '/static/@me/1F955.svg'
     },
     {
         'a': 1,
         'id': 3,
-        'isGroupHead': false
+        'isGroupHead': false,
+        'avatar_src': '/static/@me/1F955.svg'
     },
     {
         'a': '<div style="color: red"> plain html element</div>',
         'id': 4,
-        'isGroupHead': true
+        'isGroupHead': true,
+        'avatar_src': '/static/@me/1F955.svg'
     },
 ])
 
