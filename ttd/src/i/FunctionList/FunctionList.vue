@@ -1,9 +1,10 @@
 <template>
 
-  <div 
-    class="functionlist bg-fclist-bg flex flex-col flex-none h-screen overflow-y-scroll w-full"
-    
-    >
+  <div class="functionlist bg-fclist-bg flex flex-col flex-none h-screen overflow-y-scroll w-full"
+      @dragenter.prevent
+      @dragover.prevent="onDragOverFL($event)"
+      @drop.prevent="onDropServer($event)"
+      >
     <!-- Direct Message icons -->
     <div class="sublist flex-1 mx-0 grow-0">
       <div class="flex flex-col w-full">
@@ -33,7 +34,8 @@
     </div>
 
     <!-- User's joined servers icons -->
-    <div class="sublist flex-1 mx-0 grow-0 w-full">
+    <div class="sublist flex-1 mx-0 grow-0 w-full"
+         >
       <div class="flex flex-col w-full">
 
         <div class="functioner h-12 w-full relative flex mx-0 mt-0 mb-2 justify-center"
@@ -46,13 +48,20 @@
           <span class="icon inline-block w-12 h-12">
             <img :src="server.logoSrc"
                  alt="Server"
-                 class="icon relative m-full h-full mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out" 
+                 class="icon relative m-full h-full mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out"
                  draggable="true"
-                 @dragstart="startDragServer($event, server)"/>
+                 @dragstart="startDragServer($event, server)" />
           </span>
-          <div class="drag-mask absolute flex items-stretch flex-col -top-4 -bottom-1 left-0 right-0 pointer-events-none bg-[color:#8a67673b] z-10">
-            <div class="above" :id="'above_' + server.name" :cid="server.cid" @drop.prevent="onDropServer($event)"></div>
-            <div class="combine" :id="'combine_' + server.name" :cid="server.cid" @drop.prevent="onDropServer($event)"></div>
+          <div
+               class="drag-mask absolute flex items-stretch flex-col -top-4 -bottom-1 left-0 right-0 pointer-events-none bg-[color:#8a67673b]">
+            <div class="above"
+                 :id="'above_' + server.name"
+                 draggable="true"
+                 :cid="server.cid"></div>
+            <div class="combine"
+                 :id="'combine_' + server.name"
+                 draggable="true"
+                 :cid="server.cid"></div>
           </div>
         </div>
 
@@ -77,6 +86,7 @@
             <img @click="GoHome"
                  :src="func.logoSrc"
                  alt="Others"
+                 @dragstart.prevent
                  class="icon cursor-pointer relative mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out" />
           </span>
         </div>
@@ -110,8 +120,10 @@ onMounted(() => {
 });
 
 const startDragServer = (e, server) => {
-  var d = new Date(server.date_added)
+  // var d = new Date(server.date_added)
   // console.log(e.target, server, d)
+  e.dataTransfer.dropEffect = 'move'
+  e.dataTransfer.effectAllowed = 'move'
 }
 
 const onDragOverFL = (e) => {
@@ -120,7 +132,7 @@ const onDragOverFL = (e) => {
 }
 
 const onDropServer = (e) => {
-  // console.log(e.target)
+  console.log(e.target)
   console.log('dropped')
 }
 
