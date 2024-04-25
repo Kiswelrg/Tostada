@@ -178,7 +178,6 @@ const displayedServers = computed(() => {
 
 const strippedServers = computed(() => {
   let keep_list = [
-    'name',
     'order',
     'date_added',
     'cid'
@@ -210,7 +209,6 @@ const onDragOverFL = (e) => {
 const reorderServers = (ss, oldIndex, newIndex) => {
   const clone = (ele) => {
     return {
-      'name': ele.name,
       'cid': ele.cid,
       'order': ele.order,
       'date_added': ele.date_added
@@ -225,24 +223,38 @@ const reorderServers = (ss, oldIndex, newIndex) => {
     if (i === oldIndex) {
       continue;
     } else if (i === newIndex) {
-      r.push(clone(ss[oldIndex]));
-      r[curIdx].order = ++curIdx;
-      r.push(clone(ss[newIndex]));
-      r[curIdx].order = ++curIdx;
+      if (ss[oldIndex].order !== curIdx + 1) {
+        r.push(clone(ss[oldIndex]));
+        r[curIdx].order = curIdx + 1;
+        r[curIdx].old_order = ss[oldIndex].order;
+      }
+      ++curIdx;
+      if (ss[newIndex].order !== curIdx + 1) {
+        r.push(clone(ss[newIndex]));
+        r[curIdx].order = curIdx + 1;
+        r[curIdx].old_order = ss[newIndex].order;
+      }
+      ++curIdx;
     } else {
-      r.push(clone(ss[i]));
-      r[curIdx].order = ++curIdx;
+      if (ss[i].order !== curIdx + 1) {
+        r.push(clone(ss[i]));
+        r[curIdx].order = curIdx + 1;
+        r[curIdx].old_order = ss[i].order;
+      }
+      ++curIdx;
     }
   }
   if(newIndex == ss.length) {
     r.push(clone(ss[oldIndex]))
-    r[curIdx].order = ++curIdx;
+    r[curIdx].order = curIdx + 1;
+    r[curIdx].old_order = ss[oldIndex].order;
   }
   return r;
 };
 
-const submitOrderChange = () => {
+const submitOrderChange = (r) => {
   console.log('submitting...')
+  console.log(r)
 }
 
 const onDropServer = (e, cid) => {
@@ -256,11 +268,12 @@ const onDropServer = (e, cid) => {
     ) return true
     return false
   }
+  // const ss = strippedServers.value
+  const oldIndex = orderedServers.value.findIndex(obj => obj.cid === startCID)
+  const newIndex = orderedServers.value.findIndex(obj => obj.cid === cid)
   if(cid === -1) {
-    const r = reorderServers(orderedServers.value, orderedServers.value.findIndex(obj => obj.cid === startCID), orderedServers.value.length)
-    for (const s of r) {
-      console.log(s.order, s.name, s.date_added)
-    }
+    if(oldIndex + 1 === orderedServers.value.length) return
+    const r = reorderServers(orderedServers.value, oldIndex, orderedServers.value.length)
     submitOrderChange(r)
     return
   }
@@ -268,15 +281,8 @@ const onDropServer = (e, cid) => {
   const aboveB = parent.querySelector('.above-block').getBoundingClientRect()
   const combineB = parent.querySelector('.combine-block').getBoundingClientRect()
   if (!onself && within(aboveB, e.clientX, e.clientY)) {
-    console.log('should put above')
-    const ss = strippedServers.value
-    const oldIndex = ss.findIndex(obj => obj.cid === startCID)
-    const newIndex = ss.findIndex(obj => obj.cid === cid)
-
+    if (oldIndex + 1 === newIndex) return
     const r = reorderServers(orderedServers.value, oldIndex, newIndex)
-    for (const s of r) {
-      console.log(s.order, s.name, s.date_added)
-    }
     submitOrderChange(r)
   }
   else if (!onself && within(combineB, e.clientX, e.clientY)) {
