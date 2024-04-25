@@ -309,6 +309,7 @@ export default {
 import { ref, onMounted } from "vue";
 import { useRouter } from 'vue-router';
 // import h256 from "@/util/encrypt";
+import { getCookie, getToken } from '@/util/session'
 const varification_correct = ref(true);
 const pwd_validity = ref(true);
 const username = ref("");
@@ -321,8 +322,8 @@ const router = useRouter();
 let csrftoken;
 onMounted(() => {
   (async ()=> {
-    csrftoken = session.getCookie("csrftoken");
-    cmt.value = await session.getToken();
+    csrftoken = getCookie("csrftoken");
+    cmt.value = await getToken();
   })();
 });
 

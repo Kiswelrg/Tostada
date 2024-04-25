@@ -28,6 +28,13 @@ const functionList = ref({
   joinedServers: [
     // Add more objects with image sources for joined servers
   ],
+  serverButtons: [
+    {
+      logoSrc: '/static/tool/main/plus-solid.svg',
+      scale: 0.5
+    },
+    // Add more objects with image sources for direct messages
+  ],
   placeholderCount: [
     { logoSrc: '/static/favicon.svg' }
   ]
