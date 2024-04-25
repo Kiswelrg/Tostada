@@ -169,6 +169,7 @@ const orderedServers = computed(() => {
   
 })
 
+// ordered + server_buttons
 const displayedServers = computed(() => {
   if (!functionListRef.value) return []
   return orderedServers.value.concat(functionListRef.value.serverButtons)
@@ -272,17 +273,8 @@ const onDropServer = (e, cid) => {
     const oldIndex = ss.findIndex(obj => obj.cid === startCID)
     const newIndex = ss.findIndex(obj => obj.cid === cid)
 
-    for (const s of ss) {
-      console.log(s.order, s.name, s.date_added)
-    }
-    
-    console.log(oldIndex, newIndex)
-
-    console.log('starting re-orderring...')
-
-    const newOrderedServers = reorderServers(orderedServers.value, oldIndex, newIndex)
-    console.log(newOrderedServers)
-    for (const s of newOrderedServers) {
+    const r = reorderServers(orderedServers.value, oldIndex, newIndex)
+    for (const s of r) {
       console.log(s.order, s.name, s.date_added)
     }
     submitOrderChange(r)
