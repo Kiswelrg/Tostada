@@ -140,7 +140,8 @@ const emit = defineEmits(
   [
     'update-active-server-tab',
     'go-tab',
-    'updateServerList'
+    'updateServerList',
+    'updateServerListOffline',
   ]
 )
 
@@ -257,6 +258,10 @@ const reorderServers = (ss, oldIndex, newIndex) => {
 };
 
 const submitOrderChange = async (r) => {
+  // Apply order change anyway
+  emit('updateServerListOffline', r, false)
+
+  // After the server responded, change again if failed.
   var form_data = new FormData()
   form_data.append('change_list', JSON.stringify(r.map((obj) => {
     return {
@@ -282,15 +287,15 @@ const submitOrderChange = async (r) => {
   if (response.ok) {
     const r = jsonWithBigInt(text)
     console.log(`Reorder Ss (result: ${r.r}): `, r)
-    emit('updateServerList')
+    // emit('updateServerList')
   } else {
     console.log(response.status)
+    emit('updateServerListOffline', r, true)
     // Replace the current page content with the fetched HTML
     document.open();
     document.write(text);
     document.close();
   }
-
 }
 
 const onDropServer = (e, cid) => {
@@ -323,7 +328,6 @@ const onDropServer = (e, cid) => {
   }
   else if (!onself && within(combineB, e.clientX, e.clientY)) {
     console.log('should combine')
-
   }
 }
 

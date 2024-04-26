@@ -1,6 +1,10 @@
 <template>
   <div class="main flex flex-row grow h-full w-full min-h-[250px]">
-    <FunctionList :functionList="functionList" @updateServerList="fetchToolServers" @update-active-server-tab="onUpdateActiveServerTab" @go-tab="onGoTab"></FunctionList>
+    <FunctionList :functionList="functionList" 
+    @updateServerList="fetchToolServers" 
+    @updateServerListOffline="updateServersOrderOffline" 
+    @update-active-server-tab="onUpdateActiveServerTab" 
+    @go-tab="onGoTab"></FunctionList>
     <MeVue v-if="isMeActive"></MeVue>
     <ServerVue v-else :server="activeServer"></ServerVue>
   </div>
@@ -105,11 +109,20 @@ async function fetchToolServers() {
       return value
     });
 
-    console.log(`Servers( fetch status: ${r.r}): `, r.tool_servers)
+    console.log(`Servers (fetch status: ${r.r}): `, r.tool_servers)
     setFunctionList(r)
   } else {
     console.log(response.status)
   }
+}
+
+const updateServersOrderOffline = (r, use_old) => {
+  functionList.value['joinedServers'].map((server) => {
+    const s_in_r = r.find(obj => obj.cid === server.cid)
+    if (!s_in_r) return server
+    server.order = use_old ? s_in_r.old_order : s_in_r.order
+    return server
+  })
 }
 
 </script>
