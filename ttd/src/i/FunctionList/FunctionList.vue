@@ -34,7 +34,7 @@
       <div class="flex flex-col w-full">
 
         <div class="functioner h-12 w-full relative flex mx-0 mt-0 mb-2 justify-center"
-             @click="clickFunctioner($event, index)"
+             @click="clickFunctioner($event, server.cid)"
              v-for="(server, index) in orderedServers"
              :key="index"
              :id="'functioner_' + server.cid"
@@ -63,7 +63,6 @@
         </div>
 
         <div class="functioner h-12 w-full relative flex mx-0 mt-0 mb-2 justify-center"
-             @click="clickFunctioner($event, index)"
              v-for="(server, index) in props.functionList.serverButtons"
              :key="index"
              :id="'functioner_' + server.cid"
@@ -126,6 +125,8 @@
 <script setup>
 import { computed, onMounted, ref, toRaw } from 'vue'
 import { useRoute } from 'vue-router';
+import { getCookie } from '@/util/session';
+import { jsonWithBigInt } from '@/util/parse';
 const route = useRoute();
 
 const props = defineProps({
@@ -138,7 +139,8 @@ const functionListRef = ref(props.functionList)
 const emit = defineEmits(
   [
     'update-active-server-tab',
-    'go-tab'
+    'go-tab',
+    'updateServerList'
   ]
 )
 
@@ -217,29 +219,31 @@ const reorderServers = (ss, oldIndex, newIndex) => {
 
   let r = [];
   let curIdx = 0;
-  let inserted = false;
-  
+  let skipped = 0;
   for (let i = 0; i < ss.length; i++) {
     if (i === oldIndex) {
       continue;
     } else if (i === newIndex) {
       if (ss[oldIndex].order !== curIdx + 1) {
         r.push(clone(ss[oldIndex]));
-        r[curIdx].order = curIdx + 1;
-        r[curIdx].old_order = ss[oldIndex].order;
+        r.at(-1).order = curIdx + 1;
+        r.at(-1).old_order = ss[oldIndex].order;
+        ++skipped;
       }
       ++curIdx;
       if (ss[newIndex].order !== curIdx + 1) {
         r.push(clone(ss[newIndex]));
-        r[curIdx].order = curIdx + 1;
-        r[curIdx].old_order = ss[newIndex].order;
+        r.at(-1).order = curIdx + 1;
+        r.at(-1).old_order = ss[newIndex].order;
+        ++skipped;
       }
       ++curIdx;
     } else {
       if (ss[i].order !== curIdx + 1) {
         r.push(clone(ss[i]));
-        r[curIdx].order = curIdx + 1;
-        r[curIdx].old_order = ss[i].order;
+        r.at(-1).order = curIdx + 1;
+        r.at(-1).old_order = ss[i].order;
+        ++skipped;
       }
       ++curIdx;
     }
@@ -252,9 +256,41 @@ const reorderServers = (ss, oldIndex, newIndex) => {
   return r;
 };
 
-const submitOrderChange = (r) => {
-  console.log('submitting...')
-  console.log(r)
+const submitOrderChange = async (r) => {
+  var form_data = new FormData()
+  form_data.append('change_list', JSON.stringify(r.map((obj) => {
+    return {
+      'cid': obj.cid.toString(),
+      'order': obj.order,
+      'date_added': obj.date_added,
+      'old_order': obj.old_order,
+    }
+  })))
+
+  const response = await fetch(
+    `/api/i/reorderss/`,
+    {
+      method: "POST",
+      body: form_data,
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken")
+      }
+    }
+  )
+  
+  const text = await response.text()
+  if (response.ok) {
+    const r = jsonWithBigInt(text)
+    console.log(`Reorder Ss (result: ${r.r}): `, r)
+    emit('updateServerList')
+  } else {
+    console.log(response.status)
+    // Replace the current page content with the fetched HTML
+    document.open();
+    document.write(text);
+    document.close();
+  }
+
 }
 
 const onDropServer = (e, cid) => {
@@ -301,12 +337,12 @@ function GoTool(){
   emit('go-tab', '/i')
 }
 
-function clickFunctioner(e, index){
+function clickFunctioner(e, cid){
   // If special do not go
   GoTool()
 
   // Emit
-  emit('update-active-server-tab', index)
+  emit('update-active-server-tab', cid)
 }
 
 </script>

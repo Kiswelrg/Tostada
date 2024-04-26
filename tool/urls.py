@@ -12,5 +12,6 @@ urlpatterns = [
     path('tool_server/<int:tool_server_code>/', views.fetch_tool_server, name='fetch_tool_server'),
     path('tool/<int:tool_code>/', views.fetch_tool, name='fetch_tool'),
     re_path(r'^runtool/(?P<tool_code>[0-9]{10})/$', views.run_tool, name='run_tool'),
+    path('reorderss/', views.reorderServers, name='reorder_server'),
 	re_path(r'',views.Home, name = 'home'),
 ]

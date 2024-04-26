@@ -1,6 +1,6 @@
 <template>
   <div class="main flex flex-row grow h-full w-full min-h-[250px]">
-    <FunctionList :functionList="functionList" @update-active-server-tab="onUpdateActiveServerTab" @go-tab="onGoTab"></FunctionList>
+    <FunctionList :functionList="functionList" @updateServerList="fetchToolServers" @update-active-server-tab="onUpdateActiveServerTab" @go-tab="onGoTab"></FunctionList>
     <MeVue v-if="isMeActive"></MeVue>
     <ServerVue v-else :server="activeServer"></ServerVue>
   </div>
@@ -15,7 +15,7 @@ import FunctionList from './FunctionList/FunctionList.vue';
 import ServerVue from '@/i/FunctionDetail/Server/Server.vue';
 import MeVue from '@/i/FunctionDetail/me/me.vue';
 
-const activeServerTab = ref(-1);
+const activeServerTab = ref(BigInt(-1));
 const isMeActive = ref(true);
 const route = useRoute();
 const router = useRouter();
@@ -42,34 +42,35 @@ const functionList = ref({
 
 onMounted(() => {
   (async () => {
-    await fetchToolServers();
+    await fetchToolServers()
     if ( route.name == 'tool-root') {
       if ( functionList.value['joinedServers'].length == 0 ) {
         console.log('open find-server panel');
       } else {
-        activeServerTab.value = 0;
+        activeServerTab.value = functionList.value['joinedServers'][0]['cid']
         
       }
     
   }
   })();
-  isMeActive.value = route.meta.isMeActive;
+  isMeActive.value = route.meta.isMeActive
   
 });
 
 
 const activeServer = computed(() => {
-  if (activeServerTab.value == -1) return undefined
-  return functionList.value['joinedServers'][activeServerTab.value]
+  if (activeServerTab.value == -1 || functionList.value['joinedServers'] === undefined) return undefined
+  return functionList.value['joinedServers'].find((obj) => obj.cid === activeServerTab.value)
 })
 provide('active-server', activeServer)
 
 function setFunctionList(ss) {
-  functionList.value['joinedServers'] = ss['tool_servers'];
+  functionList.value['joinedServers'] = ss['tool_servers']
 }
 
-function onUpdateActiveServerTab(tabIndex) {
-  activeServerTab.value = tabIndex;
+function onUpdateActiveServerTab(cid) {
+  console.log('dude', cid)
+  activeServerTab.value = cid
 }
 
 function onGoTab(path) {
@@ -96,18 +97,18 @@ async function fetchToolServers() {
   );
   
   if (response.ok) {
-    const text = await response.text();
+    const text = await response.text()
     const r = JSON.parse(text, (key, value) => {
       if (typeof value === 'string' && key === 'cid') {
-        return BigInt(value);
+        return BigInt(value)
       }
-      return value;
+      return value
     });
 
-    console.log(`Servers( fetch status: ${r.r}): `, r.tool_servers);
-    setFunctionList(r);
+    console.log(`Servers( fetch status: ${r.r}): `, r.tool_servers)
+    setFunctionList(r)
   } else {
-    console.log(response.status);
+    console.log(response.status)
   }
 }
 

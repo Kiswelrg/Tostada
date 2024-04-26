@@ -1,11 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.http import Http404
+from django.utils.datastructures import MultiValueDictKeyError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from .models import ToolServer, Tool, UserServerRole, UserToolRole, ToolOfInputAndOutput, ToolOfChat
 from UtilGlobal.print import printc
 from .util.ImportTool import import_function_from_file, importFunction
+import json
 # Create your views here.
 def Home(request):
     return render(request, 'index.html')
@@ -26,6 +29,27 @@ def fetch_user_tool_servers(request):
         } for us in u_s_role
     ]
     return JsonResponse({"tool_servers": data, 'r': True})
+
+@require_POST
+def reorderServers(request):
+    try:
+        change_list = json.loads(request.POST['change_list'])
+    except MultiValueDictKeyError:
+        raise Http404('Damn')
+    change_list = {int(s['cid']):s for s in change_list}
+    # Verify user auth
+
+    # use custom decorator to check if logged in
+
+    # Search targetted servers
+    r = UserServerRole.objects.filter(user__username = request.session['username'], server__urlCode__in = change_list.keys())
+    print(change_list)
+    for u_s_r in r:
+        if u_s_r.order != change_list[u_s_r.server.urlCode]['old_order']:
+            raise Http404('Damn')
+        u_s_r.order = change_list[u_s_r.server.urlCode]['order']
+        u_s_r.save()
+    return JsonResponse({'msg': 'reorder success','r': True})
 
 
 # Fetch a specific tool server by its urlCode
