@@ -251,8 +251,8 @@ const reorderServers = (ss, oldIndex, newIndex) => {
   }
   if(newIndex == ss.length) {
     r.push(clone(ss[oldIndex]))
-    r[curIdx].order = curIdx + 1;
-    r[curIdx].old_order = ss[oldIndex].order;
+    r.at(-1).order = curIdx + 1;
+    r.at(-1).old_order = ss[oldIndex].order;
   }
   return r;
 };
@@ -286,7 +286,9 @@ const submitOrderChange = async (r) => {
   const text = await response.text()
   if (response.ok) {
     const r = jsonWithBigInt(text)
-    console.log(`Reorder Ss (result: ${r.r}): `, r)
+    // console.log(`Reorder Ss (result: ${r.r}): `, r)
+   
+    // Legacy Implement!
     // emit('updateServerList')
   } else {
     console.log(response.status)

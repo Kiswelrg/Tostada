@@ -29,7 +29,7 @@
             </div>
         </div>
         
-        <InputKing class="flex-none" :tool-detail="toolDetail"/>
+        <InputKing class="flex-none" :tool-detail="toolDetail" @add-message="onAddMessage"/>
     </div>
 
 </template>
@@ -99,6 +99,10 @@ watch(filtered_intro, (newV) => {
     props.introToMsg(newV)
 })
 
+
+const onAddMessage = (l) => {
+    console.log(l)
+}
 
 
 </script>

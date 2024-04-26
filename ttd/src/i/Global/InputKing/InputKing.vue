@@ -52,11 +52,16 @@
 <script setup>
 import Arg from './Arg/Arg.vue'
 import Drop from '../../../components/Util/Drop.vue'
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, watch, defineEmits } from 'vue';
 import { jsonWithBigInt } from '@/util/parse'
 import { getCookie } from '@/util/session'
 const props = defineProps([
     'tool-detail',
+])
+
+const emit = defineEmits([
+    'add-message',
+    
 ])
 
 onMounted(() => {
@@ -116,13 +121,13 @@ const curMethodDetail = computed(() => {
 })
 
 async function runToolMethod() {
-  var form_data = new FormData();
+  var form_data = new FormData()
   
-  curArgs.value['method-name'] = curMethodDetail.value.display_name;
-  curArgs.value['method-code'] = curMethod.value;
+  curArgs.value['method-name'] = curMethodDetail.value.display_name
+  curArgs.value['method-code'] = curMethod.value
 
   for (var v in curArgs.value) {
-    form_data.append(v, curArgs.value[v]);
+    form_data.append(v, curArgs.value[v])
   }
   const response = await fetch(
     `/api/i/runtool/${props.toolDetail.cid}/`,
@@ -133,18 +138,19 @@ async function runToolMethod() {
         "X-CSRFToken": getCookie("csrftoken")
       }
     }
-  );
+  )
   
   if (response.ok) {
-    const text = await response.text();
-    const r = jsonWithBigInt(text);
-    console.log(`RunTool( fetch status: ${r.r}): `);
-
+    const text = await response.text()
+    const r = jsonWithBigInt(text)
+    console.log(`RunTool( fetch status: ${r.r}): `, r)
+    const d = JSON.parse(r.data)
+    emit('add-message', d)
     // for (var v in curArgs.value) {
     //   curArgs.value[v] = undefined;
     // }
   } else {
-    console.log(response.status);
+    console.log(response.status)
   }
 }
 

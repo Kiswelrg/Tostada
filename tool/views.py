@@ -151,11 +151,19 @@ def run_tool(request, tool_code):
                 break
         if method_detail:
             break
-    
-    
-    f = importFunction(f'tool.servers.{methods["tool"]}.main', 'f_' + request.POST['method-code'])
+    if method_detail is None:
+        raise Http404()
+    f_name = method_detail.get('function_name')
+    if f_name is None or len(f_name) == 0:
+        f_name = request.POST['method-code']
+    f_name = 'f_' + f_name
+    f = importFunction(f'tool.servers.{methods["tool"]}.main', f_name)
+
+    # 不具备复用
+    r = f(method_detail)
     return JsonResponse({
         'status': 200,
         'r': True,
-        'msg': f'{tool_code} got!'
+        'msg': f'{tool_code} got!',
+        'data': r
     })
