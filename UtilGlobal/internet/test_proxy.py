@@ -29,7 +29,8 @@ def get_url_via_proxy(url, proxy):
         else:
             print(f"Failed to get URL {url} via proxy {proxy}")
     except requests.exceptions.RequestException as err:
-        print(f"Error: {err}")
+        # print(f"Error: {err}")
+        print('timed out', proxy)
     return False
 
 if __name__ == '__main__':

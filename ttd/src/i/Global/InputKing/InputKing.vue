@@ -52,7 +52,7 @@
 <script setup>
 import Arg from './Arg/Arg.vue'
 import Drop from '../../../components/Util/Drop.vue'
-import { computed, ref, onMounted, watch, defineEmits } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { jsonWithBigInt } from '@/util/parse'
 import { getCookie } from '@/util/session'
 const props = defineProps([
@@ -70,9 +70,9 @@ onMounted(() => {
 
 
 const isDropMenuOpen = ref(false)
+const isRunningTool = ref(false)
 
 const curMethod = ref(-1)
-
 const curArgs = ref({})
 
 const onUpdateArgs = (v, k) => {
@@ -121,8 +121,9 @@ const curMethodDetail = computed(() => {
 })
 
 async function runToolMethod() {
+  if (isRunningTool.value) return
+  isRunningTool.value = true
   var form_data = new FormData()
-  
   curArgs.value['method-name'] = curMethodDetail.value.display_name
   curArgs.value['method-code'] = curMethod.value
 
@@ -143,15 +144,15 @@ async function runToolMethod() {
   if (response.ok) {
     const text = await response.text()
     const r = jsonWithBigInt(text)
-    console.log(`RunTool( fetch status: ${r.r}): `, r)
+    console.log(`RunTool (fetch status: ${r.r}): `)
     const d = JSON.parse(r.data)
     emit('add-message', d)
-    // for (var v in curArgs.value) {
-    //   curArgs.value[v] = undefined;
-    // }
+
   } else {
     console.log(response.status)
   }
+
+  isRunningTool.value = false
 }
 
 

@@ -3,10 +3,6 @@ import json
 from UtilGlobal.internet.test_proxy import check_port, get_url_via_proxy
 
 
-def f_301928492108():
-    return inspect.currentframe().f_code.co_name + '_function return'
-
-
 def f_availableIpPort(method_detail):
     def geturl(pp):
         return f"http://{pp['ip']}:{pp['port']}"
@@ -18,7 +14,6 @@ def f_availableIpPort(method_detail):
         if get_url_via_proxy('https://4.ipw.cn', geturl(ipport)):
             ipport['status'] = 2
         r.append(ipport)
-    print(r)
     return json.dumps(r, ensure_ascii=False)
 
 

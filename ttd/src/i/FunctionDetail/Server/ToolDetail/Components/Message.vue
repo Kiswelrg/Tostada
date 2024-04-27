@@ -40,7 +40,11 @@
                     </span>
                 </div>
             </div>
+
+            <!-- Reactions -->
             <div class="accessories empty:hidden h-fit indent-0 min-h-0 min-w-0 py-[0.125rem] relative"></div>
+
+            <!-- Actions -->
             <div class="buttonContainer absolute top-0 right-0">
                 <!-- if isGroupTop -top-16px -->
                 <div

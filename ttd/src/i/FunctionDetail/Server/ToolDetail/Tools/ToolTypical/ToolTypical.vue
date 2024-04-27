@@ -38,9 +38,7 @@
 import InputKing from '@/i/Global/InputKing/InputKing.vue'
 import ToolHead from '../../ToolHead/ToolHead.vue'
 import { ref, computed, watch } from 'vue'
-import { inject } from 'vue'
 import Message from '../../Components/Message.vue'
-import ToolDetail from '../../ToolDetail.vue'
 const props = defineProps([
     'tool-detail',
     'introToMsg'
