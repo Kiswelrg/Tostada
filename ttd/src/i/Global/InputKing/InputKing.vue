@@ -80,7 +80,10 @@ const onUpdateArgs = (v, k) => {
 }
 
 const chooseMethod = (code) => {
-    curMethod.value = code
+    if (curMethod.value !== code) {
+        isRunningTool.value = false
+        curMethod.value = code
+    }
 }
 
 const methodsList = computed(() => {

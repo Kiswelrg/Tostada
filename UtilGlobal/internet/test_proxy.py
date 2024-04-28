@@ -7,8 +7,8 @@ def check_port(ip, port):
     try:
         result = sock.connect_ex((ip, port))
         if result == 0:
-            return True
             print(f"Port {port} is open on {ip}")
+            return True
         else:
             print(f"Port {port} is NOT open on {ip}")
     except socket.error as err:
@@ -30,7 +30,8 @@ def get_url_via_proxy(url, proxy):
             print(f"Failed to get URL {url} via proxy {proxy}")
     except requests.exceptions.RequestException as err:
         # print(f"Error: {err}")
-        print('timed out', proxy)
+        # print('timed out', proxy)
+        pass
     return False
 
 if __name__ == '__main__':

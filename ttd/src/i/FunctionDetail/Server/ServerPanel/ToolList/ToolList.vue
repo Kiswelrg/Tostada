@@ -14,7 +14,9 @@
                 </div>
                 <div class=""></div>
             </div>
-            <div v-for="sub in section.tools" :key="sub.cid" @click="selectSubSection(sub.cid)" class="toolbutton text-white flex ml-3 mr-2 p-1 mb-0.5 hover:bg-hui-700 rounded" :class="{'bg-hui-700': selectedSubSection == sub.cid}">
+            <div v-for="sub in section.tools" :key="sub.cid" @click="selectSubSection(sub.cid)" class="toolbutton text-white flex ml-3 mr-2 p-1 mb-0.5 rounded" :class="{'bg-hui-700': selectedSubSection == sub.cid, 
+              'hover:bg-hui-500': selectedSubSection != sub.cid
+            }">
                 <div class="h-2 w-2 my-auto mx-1">
                     <img class="hashsvg" :src="chevron_url" alt="" />
                 </div>

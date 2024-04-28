@@ -11,7 +11,7 @@ def f_availableIpPort(method_detail):
         ipport['status'] = 0
         if check_port(ipport['ip'], ipport['port']):
             ipport['status'] = 1
-        if get_url_via_proxy('https://4.ipw.cn', geturl(ipport)):
+        if get_url_via_proxy('https://captive.apple.com', geturl(ipport)):
             ipport['status'] = 2
         r.append(ipport)
     return json.dumps(r, ensure_ascii=False)

@@ -8,7 +8,7 @@
                     id="menu-button"
                     aria-expanded="true"
                     aria-haspopup="true">
-                Functions
+                Bots
                 <svg class="-mr-1 h-3 w-3 text-gray-400"
                      viewBox="0 0 20 20"
                      fill="currentColor"
