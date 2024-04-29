@@ -124,11 +124,13 @@ const curMethodDetail = computed(() => {
 })
 
 async function runToolMethod() {
+  console.log('running tool method...')
   if (isRunningTool.value) return
   isRunningTool.value = true
   var form_data = new FormData()
   curArgs.value['method-name'] = curMethodDetail.value.display_name
   curArgs.value['method-code'] = curMethod.value
+  curArgs.value['sub_class'] = props.toolDetail['additional']['sub_class']
 
   for (var v in curArgs.value) {
     form_data.append(v, curArgs.value[v])
@@ -143,7 +145,6 @@ async function runToolMethod() {
       }
     }
   )
-  
   if (response.ok) {
     const text = await response.text()
     const r = jsonWithBigInt(text)
@@ -154,7 +155,6 @@ async function runToolMethod() {
   } else {
     console.log(response.status)
   }
-
   isRunningTool.value = false
 }
 

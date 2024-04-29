@@ -8,11 +8,11 @@
 </template>
 
 <script setup>
-import { ref, shallowRef } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import { watch } from 'vue';
 import ToolTypical from './Tools/ToolTypical/ToolTypical.vue'
 const props = defineProps([
-    'selectedToolId'
+    'selectedTool'
 ])
 
 const currentTab = ref('ToolTypical')
@@ -23,9 +23,18 @@ const tabs = shallowRef({
     'ToolTypical': ToolTypical,
 })
 
+const selectedToolId = computed(() => {
+  return props.selectedTool.cid
+})
+
+const selectedToolSubclass = computed(() => {
+  return props.selectedTool.sub_class
+})
+
+
 async function fetchToolDetail() {
   const response = await fetch(
-    `/api/i/tool/${props.selectedToolId}/`,
+    `/api/i/tool/${selectedToolSubclass.value}/${selectedToolId.value}/`,
     {
       method: "GET",
     }
@@ -51,7 +60,7 @@ async function fetchToolDetail() {
 }
 
 const watch_tool = watch(
-  () => props.selectedToolId,
+  () => selectedToolId.value,
   async (newValue, old) => {
     if ( typeof newValue === 'bigint' ) {
       await fetchToolDetail()

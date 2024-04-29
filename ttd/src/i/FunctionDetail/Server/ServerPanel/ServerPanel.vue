@@ -16,8 +16,8 @@ import { onMounted } from "vue"
 const emit = defineEmits([
     'selectToolById'
 ])
-function selectTool(id) {
-    emit('selectToolById', id)
+function selectTool(obj) {
+    emit('selectToolById', obj)
 }
 
 

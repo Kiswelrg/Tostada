@@ -1,3 +1,4 @@
+# Create your models here.
 from django.db import models
 
 
@@ -10,6 +11,7 @@ class Message(models.Model):
 
     class Meta:
         ordering = ['date_sent']
+        abstract = True
 
 
 # Create your models here.

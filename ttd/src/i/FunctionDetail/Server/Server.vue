@@ -1,7 +1,7 @@
 <template>
     <div class="server flex flex-row grow overflow-hidden">
       <ServerPanel @select-tool-by-id="onSelectToolById"/>
-      <ToolDetail :selected-tool-id="selectedToolId"/>
+      <ToolDetail :selected-tool="selectedTool"/>
     </div>
 </template>
 
@@ -9,10 +9,10 @@
 import ServerPanel from "./ServerPanel/ServerPanel.vue"
 import ToolDetail from "./ToolDetail/ToolDetail.vue"
 import { ref } from "vue";
-const selectedToolId = ref(-1);
+const selectedTool = ref({});
 
-function onSelectToolById(id) {
-  selectedToolId.value = id;
+function onSelectToolById(obj) {
+  selectedTool.value = obj;
 }
 
 </script>

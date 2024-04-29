@@ -218,29 +218,12 @@ class Tool(models.Model):
         ('2', 'private'),
         ('3', 'archived'),
     ]
-
-    server = models.ForeignKey(
-        ToolServer, on_delete=models.CASCADE, related_name='tools')
     name = models.CharField(max_length=255)
     description = models.TextField(blank = True)
 
     urlCode = models.PositiveBigIntegerField(
         default=model.getToolCode, unique=True, db_index=True)
     date_created = models.DateTimeField(default=timezone.now)
-    # type = models.CharField(
-    #     default='0',
-    #     max_length=2,
-    #     choices=[
-    #         ('0', 'blank'),
-    #         ('1', 'intput & output'),
-    #         ('2', 'exhibition'),
-    #         ('3', 'blog')
-    #     ])
-    category = models.ForeignKey(
-        CategoryInServer,
-        on_delete = models.CASCADE,
-        related_name = 'tools',
-    )
     status = models.CharField(
         max_length=2,
         choices=t_status,
@@ -253,15 +236,33 @@ class Tool(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name} in {self.server}"
+    
+
+    class Meta:
+        abstract = True
 
 
 class ToolOfIO(Tool):
+    category = models.ForeignKey(
+        CategoryInServer,
+        on_delete = models.CASCADE,
+        related_name = 'toolofios',
+    )
+    server = models.ForeignKey(
+        ToolServer, on_delete=models.CASCADE, related_name='toolofios')
     method_names = models.JSONField(default=EmptyJson, blank = True)
     input = models.JSONField(default=EmptyJson, null=True, blank = True)
     output = models.JSONField(default=EmptyJson, null=True, blank = True)
 
 
 class ToolOfChat(Tool):
+    category = models.ForeignKey(
+        CategoryInServer,
+        on_delete = models.CASCADE,
+        related_name = 'toolofchats',
+    )
+    server = models.ForeignKey(
+        ToolServer, on_delete=models.CASCADE, related_name='toolofchats')
     method_names = models.JSONField(default=EmptyJson, blank = True)
     bots = models.JSONField(default=EmptyJson, null=True, blank = True)
 
@@ -334,27 +335,43 @@ class UserServerRole(models.Model):
 
 
 # Default to be role-based table
-class UserToolRole(models.Model):
-    # auth_type = models.ForeignKey(
-    #     AuthorizationLevel,
-    #     on_delete=models.CASCADE,
-    #     related_name='user_tool_auths'
-    # )
-    # auth_value_bool = models.BooleanField(default=False)
+class UserToolOfIORole(models.Model):
     user = models.ForeignKey(
         'account.AUser',
         on_delete=models.CASCADE,
-        related_name='user_tool_auths'
+        related_name='user_toolofio_auths'
     )
     tool = models.ForeignKey(
-        Tool,
+        ToolOfIO,
         on_delete=models.CASCADE,
-        related_name='user_tool_auths'
+        related_name='user_toolofio_auths'
     )
     role = models.ForeignKey(ServerRole, verbose_name=_(
         "user role in the server"),
         on_delete=models.CASCADE,
-        related_name='user_tool_auths',
+        related_name='user_toolofio_auths',
+    )
+    date_added = models.DateTimeField(default=timezone.now)
+
+    def __str__(self) -> str:
+        return f"{self.user} in .. 服务器: {self.tool.server} .. 工具: {self.tool.name} .. 角色: {self.role.name}"
+
+
+class UserToolOfChatRole(models.Model):
+    user = models.ForeignKey(
+        'account.AUser',
+        on_delete=models.CASCADE,
+        related_name='user_toolofchat_auths'
+    )
+    tool = models.ForeignKey(
+        ToolOfChat,
+        on_delete=models.CASCADE,
+        related_name='user_toolofchat_auths'
+    )
+    role = models.ForeignKey(ServerRole, verbose_name=_(
+        "user role in the server"),
+        on_delete=models.CASCADE,
+        related_name='user_toolofchat_auths',
     )
     date_added = models.DateTimeField(default=timezone.now)
 

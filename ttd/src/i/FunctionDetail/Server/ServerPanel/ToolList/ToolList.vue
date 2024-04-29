@@ -14,7 +14,7 @@
                 </div>
                 <div class=""></div>
             </div>
-            <div v-for="sub in section.tools" :key="sub.cid" @click="selectSubSection(sub.cid)" class="toolbutton text-white flex ml-3 mr-2 p-1 mb-0.5 rounded" :class="{'bg-hui-700': selectedSubSection == sub.cid, 
+            <div v-for="sub in section.tools" :key="sub.cid" @click="selectSubSection(sub)" class="toolbutton text-white flex ml-3 mr-2 p-1 mb-0.5 rounded" :class="{'bg-hui-700': selectedSubSection == sub.cid, 
               'hover:bg-hui-500': selectedSubSection != sub.cid
             }">
                 <div class="h-2 w-2 my-auto mx-1">
@@ -46,9 +46,9 @@ let selectedSubSection = ref(-1)
 const server_detail = ref([])
 
 
-function selectSubSection(id) {
-    selectedSubSection.value = id;
-    emit('select-tool', id);
+function selectSubSection(obj) {
+    selectedSubSection.value = obj.cid;
+    emit('select-tool', obj);
 }
 
 
@@ -64,7 +64,7 @@ const watcher_server = watch(server, async (newQuestion, oldQuestion) => {
     }
     await fetchAToolServer(server.value.cid);
     if (server_detail.value && server_detail.value.length && server_detail.value[0].tools.length)
-      selectSubSection(server_detail.value[0].tools[0].cid);
+      selectSubSection(server_detail.value[0].tools[0]);
 }, { immediate: true})
 
 
@@ -75,7 +75,7 @@ const { stopped, stopWatcher } = useWatchOnce(
       for (let entry of newValue) {
         for (const [key, val] of Object.entries(entry.tools)) {
           if (!val) continue
-          selectSubSection(val.cid)
+          selectSubSection(val)
           return true
         }
       }
@@ -88,8 +88,8 @@ const { stopped, stopWatcher } = useWatchOnce(
 function setDefaultTool() {
     for (let entry of server_detail.value) {
         for (const [key, val] of Object.entries(entry.tools)) {
-            if (!val) continue;
-            selectSubSection(val.cid);
+            if (!val) continue
+            selectSubSection(val)
             return;
         }
     }
@@ -98,14 +98,14 @@ function setDefaultTool() {
 
 
 function setServerDetail(r) {
-    server_detail.value = [];
-    if (!('category' in r['tool_server'])) return;
+    server_detail.value = []
+    if (!('category' in r['tool_server'])) return
     for (const [k, v] of Object.entries(r['tool_server']['category'])) {
         server_detail.value.push({
             name: k,
             type: v[0]['category']['type'],
             tools: v
-        });
+        })
     }
 }
 
@@ -117,20 +117,20 @@ async function fetchAToolServer(cid) {
     {
       method: "GET",
     }
-  );
+  )
   
   if (response.ok) {
-    const t = await response.text();
+    const t = await response.text()
     const r = JSON.parse(t, (key, value) => {
       if (typeof value === 'string' && key === 'cid') {
-        return BigInt(value);
+        return BigInt(value)
       }
-      return value;
-    });
-    console.log(`Server (fetch status: ${r.r}): `, r);
-    setServerDetail(r);
+      return value
+    })
+    console.log(`Server (fetch status: ${r.r}): `, r)
+    setServerDetail(r)
   } else {
-    console.log(response.status);
+    console.log(response.status)
   }
 }
 
