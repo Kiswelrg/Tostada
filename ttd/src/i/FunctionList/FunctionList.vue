@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, toRaw } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
 import { getCookie } from '@/util/session';
 import { jsonWithBigInt } from '@/util/parse';
@@ -350,6 +350,16 @@ function clickFunctioner(e, cid){
   // Emit
   emit('update-active-server-tab', cid)
 }
+
+const watcher_orderedServers = watch(orderedServers, async (newQuestion, oldQuestion) => {
+    if (!orderedServers || !orderedServers.value) {
+      console.log(orderedServers.value)
+      return
+    }
+    if (orderedServers.value && orderedServers.value.length) {
+      emit('update-active-server-tab', orderedServers.value[0].cid)
+    }
+}, { immediate: true})
 
 </script>
 

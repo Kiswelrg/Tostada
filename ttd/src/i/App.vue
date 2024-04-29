@@ -51,7 +51,8 @@ onMounted(() => {
       if ( functionList.value['joinedServers'].length == 0 ) {
         console.log('open find-server panel');
       } else {
-        activeServerTab.value = functionList.value['joinedServers'][0]['cid']
+        // set default active server
+        // activeServerTab.value = functionList.value['joinedServers'][0]['cid']
         
       }
     
@@ -73,7 +74,7 @@ function setFunctionList(ss) {
 }
 
 function onUpdateActiveServerTab(cid) {
-  console.log('dude', cid)
+  console.log('app.vue set active server to =>', cid)
   activeServerTab.value = cid
 }
 

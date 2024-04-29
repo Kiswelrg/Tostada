@@ -47,8 +47,9 @@ const server_detail = ref([])
 
 
 function selectSubSection(obj) {
-    selectedSubSection.value = obj.cid;
-    emit('select-tool', obj);
+  console.log(obj.cid)
+  selectedSubSection.value = obj.cid;
+  emit('select-tool', obj);
 }
 
 
@@ -63,8 +64,7 @@ const watcher_server = watch(server, async (newQuestion, oldQuestion) => {
       return;
     }
     await fetchAToolServer(server.value.cid);
-    if (server_detail.value && server_detail.value.length && server_detail.value[0].tools.length)
-      selectSubSection(server_detail.value[0].tools[0]);
+    
 }, { immediate: true})
 
 

@@ -94,7 +94,7 @@ const methodsList = computed(() => {
 
 watch(methodsList, (newV) => {
     curArgs.value = {}
-    if (newV)
+    if (newV.value)
         for (const group of newV.groups) {
             for (const method of group.methods) {
                 if (curMethod.value != -1) break
