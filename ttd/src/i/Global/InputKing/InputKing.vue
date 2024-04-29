@@ -127,6 +127,9 @@ async function runToolMethod() {
   console.log('running tool method...')
   if (isRunningTool.value) return
   isRunningTool.value = true
+  setTimeout(()=>{
+    isRunningTool.value = false
+  }, 5000)
   var form_data = new FormData()
   curArgs.value['method-name'] = curMethodDetail.value.display_name
   curArgs.value['method-code'] = curMethod.value

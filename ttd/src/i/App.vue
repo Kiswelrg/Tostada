@@ -25,9 +25,9 @@ const route = useRoute();
 const router = useRouter();
 const originalServers = ref([])
 const orderedServers = computed(() => {
-  console.log(!originalServers.value, originalServers.value === undefined, originalServers.value.length === 0)
-  if (!originalServers.value || orderedServers.value === undefined || orderedServers.value.length === 0) return []
-  else return originalServers.value.toSorted((a, b) => {
+  if (!originalServers.value || originalServers.value === undefined || originalServers.value.length === 0) return []
+  console.log('updated!')
+  return originalServers.value.toSorted((a, b) => {
     if (a.order !== b.order) return a.order - b.order
     else {
       let date1 = new Date(a.date_added)
@@ -43,7 +43,7 @@ const functionList = computed(() => {
       { logoSrc: '/static/tool/main/user-solid.svg' },
       // Add more objects with image sources for direct messages
     ],
-    joinedServers: orderedServers,
+    joinedServers: orderedServers.value,
     serverButtons: [
       {
         logoSrc: '/static/tool/main/plus-solid.svg',
@@ -83,9 +83,7 @@ const activeServer = computed(() => {
 provide('active-server', activeServer)
 
 function setFunctionList(ss) {
-  console.log(`settings servers: `, ss['tool_servers'])
   originalServers.value = ss['tool_servers']
-  console.log(`after: `, originalServers.value)
 }
 
 function onUpdateActiveServerTab(cid) {

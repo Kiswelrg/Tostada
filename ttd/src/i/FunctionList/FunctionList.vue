@@ -160,8 +160,9 @@ const serverScale = (s) => {
 }
 
 const orderedServers = computed(() => {
-  if (!functionListRef.value) return []
-  return functionListRef.value.joinedServers.toSorted((a, b) => {
+  if (!props.functionList) return []
+  console.log(props.functionList.joinedServers)
+  return props.functionList.joinedServers.toSorted((a, b) => {
     if (a.order !== b.order) return a.order - b.order
     else {
       let date1 = new Date(a.date_added)
@@ -171,30 +172,6 @@ const orderedServers = computed(() => {
   })
   
 })
-
-// ordered + server_buttons
-const displayedServers = computed(() => {
-  if (!functionListRef.value) return []
-  return orderedServers.value.concat(functionListRef.value.serverButtons)
-})
-
-
-const strippedServers = computed(() => {
-  let keep_list = [
-    'order',
-    'date_added',
-    'cid'
-  ];
-  let r = [];
-  for (const s of orderedServers.value) {
-    let strippedServer = {};
-    for (const attribute of keep_list) {
-      strippedServer[attribute] = s[attribute];
-    }
-    r.push(strippedServer);
-  }
-  return r;
-});
 
 
 const startDragServer = (e, cid) => {
