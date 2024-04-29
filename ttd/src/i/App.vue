@@ -23,26 +23,39 @@ const activeServerTab = ref(BigInt(-1));
 const isMeActive = ref(true);
 const route = useRoute();
 const router = useRouter();
+const originalServers = ref([])
+const orderedServers = computed(() => {
+  console.log(!originalServers.value, originalServers.value === undefined, originalServers.value.length === 0)
+  if (!originalServers.value || orderedServers.value === undefined || orderedServers.value.length === 0) return []
+  else return originalServers.value.toSorted((a, b) => {
+    if (a.order !== b.order) return a.order - b.order
+    else {
+      let date1 = new Date(a.date_added)
+      let date2 = new Date(b.date_added)
+      return date1 - date2
+    }
+  })
+})
 
-const functionList = ref({
-  directMessages: [
-    { logoSrc: '/static/tool/main/user-solid.svg' },
-    // Add more objects with image sources for direct messages
-  ],
-  joinedServers: [
-    // Add more objects with image sources for joined servers
-  ],
-  serverButtons: [
-    {
-      logoSrc: '/static/tool/main/plus-solid.svg',
-      scale: 0.5
-    },
-    // Add more objects with image sources for direct messages
-  ],
-  placeholderCount: [
-    { logoSrc: '/static/favicon.svg' }
-  ]
-});
+const functionList = computed(() => {
+  return {
+    directMessages: [
+      { logoSrc: '/static/tool/main/user-solid.svg' },
+      // Add more objects with image sources for direct messages
+    ],
+    joinedServers: orderedServers,
+    serverButtons: [
+      {
+        logoSrc: '/static/tool/main/plus-solid.svg',
+        scale: 0.5
+      },
+      // Add more objects with image sources for direct messages
+    ],
+    placeholderCount: [
+      { logoSrc: '/static/favicon.svg' }
+    ]
+  }
+})
 
 onMounted(() => {
   (async () => {
@@ -60,7 +73,7 @@ onMounted(() => {
   })();
   isMeActive.value = route.meta.isMeActive
   
-});
+})
 
 
 const activeServer = computed(() => {
@@ -70,7 +83,9 @@ const activeServer = computed(() => {
 provide('active-server', activeServer)
 
 function setFunctionList(ss) {
-  functionList.value['joinedServers'] = ss['tool_servers']
+  console.log(`settings servers: `, ss['tool_servers'])
+  originalServers.value = ss['tool_servers']
+  console.log(`after: `, originalServers.value)
 }
 
 function onUpdateActiveServerTab(cid) {
