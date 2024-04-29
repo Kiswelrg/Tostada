@@ -12,7 +12,7 @@ def EmptyJson():
     return {}
 
 def getDefaultAdditional():
-    return {"type": "ToolTypical", "subclass":"ToolOfInputAndOutput"}
+    return {"type": "ToolTypical", "subclass":"ToolOfIO"}
 
 class ToolServer(models.Model):
     def cover_dir_path(instance, filename):
@@ -255,7 +255,7 @@ class Tool(models.Model):
         return f"{self.name} in {self.server}"
 
 
-class ToolOfInputAndOutput(Tool):
+class ToolOfIO(Tool):
     method_names = models.JSONField(default=EmptyJson, blank = True)
     input = models.JSONField(default=EmptyJson, null=True, blank = True)
     output = models.JSONField(default=EmptyJson, null=True, blank = True)

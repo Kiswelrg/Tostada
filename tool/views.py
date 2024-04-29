@@ -5,7 +5,7 @@ from django.http import Http404
 from django.utils.datastructures import MultiValueDictKeyError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from .models import ToolServer, Tool, UserServerRole, UserToolRole, ToolOfInputAndOutput, ToolOfChat
+from .models import ToolServer, Tool, UserServerRole, UserToolRole, ToolOfIO, ToolOfChat
 from UtilGlobal.print import printc
 from .util.ImportTool import import_function_from_file, importFunction
 import json
@@ -124,9 +124,9 @@ def fetch_tool(request, tool_code):
     }
     if 'subclass' not in tool.additional:
         pass
-    elif tool.additional['subclass'] == 'ToolOfInputAndOutput':
-        from .models import ToolOfInputAndOutput
-        tool_specific = get_object_or_404(ToolOfInputAndOutput, id = tool.id)
+    elif tool.additional['subclass'] == 'ToolOfIO':
+        from .models import ToolOfIO
+        tool_specific = get_object_or_404(ToolOfIO, id = tool.id)
         data['methods'] = tool_specific.method_names
     elif tool.additional['subclass'] == 'ToolOfChat':
         pass
@@ -134,7 +134,7 @@ def fetch_tool(request, tool_code):
 
 
 subtools = {
-    'ToolOfInputAndOutput': ToolOfInputAndOutput,
+    'ToolOfIO': ToolOfIO,
     'ToolOfChat': ToolOfChat
 }
 @require_POST
