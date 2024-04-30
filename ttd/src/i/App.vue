@@ -43,7 +43,7 @@ const functionList = computed(() => {
       { logoSrc: '/static/tool/main/user-solid.svg' },
       // Add more objects with image sources for direct messages
     ],
-    joinedServers: orderedServers.value,
+    joinedServers: originalServers.value,
     serverButtons: [
       {
         logoSrc: '/static/tool/main/plus-solid.svg',

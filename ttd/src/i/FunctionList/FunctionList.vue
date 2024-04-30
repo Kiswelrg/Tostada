@@ -133,8 +133,6 @@ const props = defineProps({
     functionList: Object,
 })
 
-const functionListRef = ref(props.functionList)
-
 
 const emit = defineEmits(
   [
@@ -159,9 +157,12 @@ const serverScale = (s) => {
   }
 }
 
+const ogServers = computed(() => {
+  return props.functionList.joinedServers
+})
+
 const orderedServers = computed(() => {
   if (!props.functionList) return []
-  console.log(props.functionList.joinedServers)
   return props.functionList.joinedServers.toSorted((a, b) => {
     if (a.order !== b.order) return a.order - b.order
     else {
@@ -328,13 +329,13 @@ function clickFunctioner(e, cid){
   emit('update-active-server-tab', cid)
 }
 
-const watcher_orderedServers = watch(orderedServers, async (newQuestion, oldQuestion) => {
-    if (!orderedServers || !orderedServers.value) {
-      console.log(orderedServers.value)
+const watcher_orderedServers = watch(ogServers, async (newS, oldS) => {
+    if (!newS) {
+      console.log(newS)
       return
     }
-    if (orderedServers.value && orderedServers.value.length) {
-      emit('update-active-server-tab', orderedServers.value[0].cid)
+    if (newS.length) {
+      emit('update-active-server-tab', newS[0].cid)
     }
 }, { immediate: true})
 
