@@ -20,7 +20,7 @@
                         <div class="scroller">
                             <div class="scroller-content">
                                 <ol class="messages-container">
-                                    <Message v-for="m in messages" v-bind:key="m.id" :msg="m"></Message>
+                                    <Message v-for="m in sortedMessages" v-bind:key="m.id" :msg="m"></Message>
                                 </ol>
                             </div>
                         </div>
@@ -38,7 +38,7 @@
 import InputKing from '@/i/Global/InputKing/InputKing.vue'
 import ToolHead from '../../ToolHead/ToolHead.vue'
 import { ref, computed, watch } from 'vue'
-import Message from '../../Components/Message.vue'
+import Message from '../../Components/Message/Message.vue'
 const props = defineProps([
     'tool-detail',
     'introToMsg'
@@ -68,30 +68,75 @@ const methods = computed(() => {
 
 const messages = ref([
     {
-        'a': 1,
-        'id': 2,
+        'nickname': 'Kiswelrg',
+        'date_sent': '2024-02-21T02:26:27Z',
+        'isEdited': {
+            'state': true,
+            'text': 'edited'
+        },
+        'content': [
+            {
+                'type': 'Link',
+                'display_name': 'link to somewhere',
+            }, 
+            {
+                'type': 'Text',
+                'content': ' and some text',
+            }
+        ],
         'isGroupHead': true,
         'avatar_src': '/static/@me/1F955.svg'
     },
     {
-        'a': 1,
-        'id': 3,
+        'nickname': 'Kiswelrg',
+        'date_sent': '2024-02-21T08:26:27Z',
+        'isEdited': {
+            'state': true,
+            'text': 'edited'
+        },
+        'content': [
+            {
+                'type': 'Link',
+                'display_name': 'some link',
+            }, 
+            {
+                'type': 'Text',
+                'content': 'asduifhaodf',
+            }
+        ],
         'isGroupHead': false,
         'avatar_src': '/static/@me/1F955.svg'
     },
     {
-        'a': 1,
-        'id': 3,
-        'isGroupHead': false,
-        'avatar_src': '/static/@me/1F955.svg'
-    },
-    {
-        'a': '<div style="color: red"> plain html element</div>',
-        'id': 4,
+        'nickname': 'Kiswelrg',
+        'date_sent': '2024-02-24T02:26:27Z',
+        'isEdited': {
+            'state': true,
+            'text': 'edited'
+        },
+        'content': [
+            {
+                'type': 'Link',
+                'display_name': 'dude',
+            }, 
+            {
+                'type': 'Text',
+                'content': ' the end',
+            }
+        ],
         'isGroupHead': true,
         'avatar_src': '/static/@me/1F955.svg'
     },
 ])
+
+const sortedMessages = computed(() => {
+    if (!messages || !messages.value || !messages.value.length) return []
+    return messages.value.toSorted((a,b) => {
+        const d1 = new Date(a['date_sent'])
+        const d2 = new Date(b['date_sent'])
+        return d1 - d2
+    })
+})
 
 watch(filtered_intro, (newV) => {
     props.introToMsg(newV)

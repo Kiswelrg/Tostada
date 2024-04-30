@@ -15,29 +15,26 @@
                     class="header overflow-hidden relative leading-[1.375rem] text-[hsl( 214 calc( 1 * 8.1%) 61.2% / 1)] whitespace-break-spaces">
                     <span class="messageUsername mr-1">
                         <span
-                              class="username text-base leading-[1.375rem] font-medium text-[hsl( 220 calc( 1 * 13%) 95.5% / 1)] inline align-baseline relative overflow-hidden">kiswelrg
+                              class="username text-base leading-[1.375rem] font-medium text-[hsl( 220 calc( 1 * 13%) 95.5% / 1)] inline align-baseline relative overflow-hidden">{{ props.msg.nickname }}
                         </span>
                     </span>
                     <div
                          class="timestamp text-xs leading-[1.375rem] text-text-muted align-baseline ml-1 inline-block h-6 cursor-default pointer-events-none font-medium">
                         <time class="message-timestamp">
-                            <i class="separator">14:20</i>
+                            <i class="separator">{{ time }}</i>
                         </time>
                     </div>
                 </h3>
 
                 <span v-if="!msg['isGroupHead']" class="compact-timestamp text-[11px] inline-block opacity-0 indent-0 font-text-muted mr-1 text-right select-none w-14 h-[1.375rem] left-0 absolute">
-                    <time title="Today at 12:39 PM" datetime="2024-03-15T04:39:20.353Z" class="pointer-events-none indent-0 text-text-muted text-right select-none leading-[22px]">12:39 PM</time>
+                    <time title="Today at 12:39 PM" datetime="2024-03-15T04:39:20.353Z" class="pointer-events-none indent-0 text-text-muted text-right select-none leading-[22px]">{{ time_XM }}</time>
                 </span>
 
                 <div
-                     class="message-content pl-[72px] -ml-[72px] select-text overflow-hidden relative indent-0 text-base leading-[1.375rem] whitespace-break-spaces break-words text-[color:hsl( 210 calc( 1 * 9.1%) 87.1% / 1)]  font-light">
-                    <a class="message-text anchor"><span>some link</span></a>
-                    <span class="message-text normal">some text</span>
-                    <span
-                          class="timestamp text-xs leading-[1.375rem] text-text-muted align-baseline inline-block h-6 cursor-default pointer-events-none font-light">
-                        <span class="edited text-625 select-none mx-1">(edited)</span>
-                    </span>
+                    class="message-content pl-[72px] -ml-[72px] select-text overflow-hidden relative indent-0 text-base leading-[1.375rem] whitespace-break-spaces break-words text-[color:hsl( 210 calc( 1 * 9.1%) 87.1% / 1)]  font-light">
+                    
+                    <component v-for="item in msg['content']" :is="tabs[item['type']]" :msg-item="item"></component>
+                    <Edited v-if="msg['isEdited']['state']" :is-edited="msg['isEdited']"></Edited>
                 </div>
             </div>
 
@@ -76,13 +73,36 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed } from 'vue';
+import { computed, shallowRef, ref } from 'vue'
+import Edited from './Content/Edited.vue'
+import Link from './Content/Link.vue'
+import Text from './Content/Text.vue'
+
+const tabs = shallowRef({
+    'Text': Text,
+    'Link': Link,
+    'Edited': Edited
+})
+
 const props = defineProps({
   msg: Object,
 })
 
 const isGroupHead = computed(() => {
-    return props.msg?.value?.isGroupHead ?? false;
+    return props.msg?.value?.isGroupHead ?? false
+})
+
+const time = computed(() => {
+    if (!props.msg || !props.msg['date_sent']) return ''
+    const d = new Date(props.msg['date_sent'])
+    return `${d.getHours()}:${d.getMinutes()}`
+})
+
+const time_XM = computed(() => {
+    if (!props.msg || !props.msg['date_sent']) return ''
+    const d = new Date(props.msg['date_sent'])
+    const m = d.getHours() >= 12 ? 'P' : 'A'
+    return `${d.getHours()}:${d.getMinutes()} ${m}M`
 })
 
 </script>
