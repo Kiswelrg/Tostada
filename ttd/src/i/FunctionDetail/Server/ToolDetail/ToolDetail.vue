@@ -50,7 +50,6 @@ async function fetchToolDetail() {
     })
     if (r.r) {
       tool_detail.value = r.tool
-      console.log(r.tool)
     } else {
       console.log(r)
     }

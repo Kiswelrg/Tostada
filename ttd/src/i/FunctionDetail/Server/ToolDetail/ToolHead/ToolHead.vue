@@ -6,7 +6,7 @@
                     <img class="hashsvg h-full" :src="hashtag_url" alt="">
                 </div>
                 <div class="toolname text-start h-6 w-full pl-1 flex items-center">
-                    <span class="text-xs/semibold text-white">{{ title }}</span>
+                    <span class="text-[11px] text-semibold text-white">{{ title }}</span>
                 </div>
                 
 
@@ -16,7 +16,7 @@
             </div>
             <div class="toolintro flex">
                 <div class="toolname text-start h-6 w-full pl-1 flex items-center">
-                    <span class="text-[12px] font-semibold text-[#adadad]">{{ intro }}</span>
+                    <span class="text-[9px] font-semibold text-[#adadad]">{{ intro }}</span>
                 </div>
             </div>
         </div>

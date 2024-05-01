@@ -12,7 +12,6 @@
 import ServerHead from "./ServerHead/ServerHead.vue"
 import ToolList from "./ToolList/ToolList.vue"
 import UserBar from "@/i/Global/UserBar/UserBar.vue"
-import { onMounted } from "vue"
 const emit = defineEmits([
     'selectToolById'
 ])

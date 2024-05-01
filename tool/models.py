@@ -201,6 +201,9 @@ class CategoryInServer(models.Model):
         ]
         '''
         )
+    urlCode = models.PositiveBigIntegerField(default=model.getCategoryCode, unique=True, db_index=True)
+    order = models.PositiveIntegerField(default=0)
+    
     def __str__(self):
         return f"{self.name} in {self.server}"
 

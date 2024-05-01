@@ -39,3 +39,9 @@ def getToolCode():
         random_value = random.randint(1e18, 2**63 - 1)
         if not models.Tool.objects.filter(urlCode=random_value).exists():
             return random_value
+        
+def getCategoryCode():
+    while True:
+        random_value = random.randint(1e18, 2**63 - 1)
+        if not models.CategoryInServer.objects.filter(urlCode=random_value).exists():
+            return random_value

@@ -5,7 +5,7 @@ from django.http import Http404
 from django.utils.datastructures import MultiValueDictKeyError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from .models import ToolServer, UserServerRole, UserToolOfIORole, UserToolOfChatRole, ToolOfIO, ToolOfChat
+from .models import ToolServer, UserServerRole, UserToolOfIORole, UserToolOfChatRole, ToolOfIO, ToolOfChat, CategoryInServer
 from UtilGlobal.print import printc
 from .util.ImportTool import import_function_from_file, importFunction
 import json
@@ -75,6 +75,27 @@ def reorderServers(request):
     return JsonResponse({'msg': 'reorder success','r': True})
 
 
+def reorderServerCategorys(request):
+    try:
+        change_list = json.loads(request.POST['change_list'])
+    except MultiValueDictKeyError:
+        raise Http404('Damn')
+    change_list = {int(c['cid']):c for c in change_list}
+    # Verify user auth
+
+    # use custom decorator to check if logged in
+
+    # Search targetted servers
+    r = CategoryInServer.objects.filter(server__owner__username = request.session['username'], urlCode__in = change_list.keys())
+    print(change_list)
+    for c_in_s in r:
+        if c_in_s.order != change_list[c_in_s.urlCode]['old_order']:
+            raise Http404('Damn')
+        c_in_s.order = change_list[c_in_s.urlCode]['order']
+        c_in_s.save()
+    return JsonResponse({'msg': 'reorder success','r': True})
+
+
 # Fetch a specific tool server by its urlCode
 def fetch_tool_server(request, tool_server_code):
     tool_server = get_object_or_404(ToolServer, urlCode=tool_server_code)
@@ -116,13 +137,19 @@ def fetch_tool_server(request, tool_server_code):
                 "description": tool.description,
                 "sub_class": k,
                 "category": {
-                    'type': tool.category.get_type_display()
+                    'type': tool.category.get_type_display(),
+                    'order': tool.category.order,
+                    'cid': str(tool.category.urlCode)
                 }
             }
             if tool.category.name not in category_dict:
-                category_dict[tool.category.name] = [t]
+                category_dict[tool.category.name] = {
+                    'tools': [t],
+                    'order': tool.category.order,
+                    'cid': str(tool.category.urlCode)
+                }
             else:
-                category_dict[tool.category.name].append(t)
+                category_dict[tool.category.name]['tools'].append(t)
 
     print(category_dict)
     if tools and len(tools):

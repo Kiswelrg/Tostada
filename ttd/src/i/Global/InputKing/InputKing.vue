@@ -69,7 +69,6 @@ onMounted(() => {
 })
 
 
-const isDropMenuOpen = ref(false)
 const isRunningTool = ref(false)
 
 const curMethod = ref(-1)

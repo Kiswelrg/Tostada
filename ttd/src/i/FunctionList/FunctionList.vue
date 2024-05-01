@@ -71,8 +71,8 @@
              @drop.prevent="onDropServer($event, -1)">
           <div class="absolute w-0.5 h-2 white block left-0 inset-y-auto">
           </div>
-          <!-- Your joined servers icons here -->
-          <span class="icon inline-block w-12 h-12">
+          <!-- Your 2-buttons here -->
+          <span class="icon inline-block w-12 h-12 bg-text-muted rounded-full">
             <img :src="server.logoSrc"
                  alt="Server"
                  class="icon relative m-full h-full mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out"

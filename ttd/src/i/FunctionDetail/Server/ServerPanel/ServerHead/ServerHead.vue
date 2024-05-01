@@ -4,7 +4,7 @@
     <div class="wrapper m-0 w-full h-full">
         <div class="flex flex-row px-4 py-3">
             <div class="h-6 w-6 my-auto">
-                <img class="h-full" :src="thumb_url" alt="">
+                <img class="h-full" :src="speech_balloon" alt="">
             </div>
             <div class="servername text-start h-6 w-full pl-1">
                 <span class="text-xs text-white truncate">{{ server?server.name:'undefined' }}</span>
@@ -24,11 +24,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { inject } from 'vue';
-const thumb_url = '/static/tool/main/thumb.svg';
+import { ref } from 'vue'
+import { inject } from 'vue'
+const thumb_url = '/static/tool/main/thumb.svg'
+const speech_balloon = '/static/Server/ServerHead/1F4AC.svg'
+const server = inject('active-server')
 
-const server = inject('active-server');
 </script>
 
 <style lang="scss">
