@@ -330,12 +330,12 @@ function clickFunctioner(e, cid){
 }
 
 const watcher_orderedServers = watch(ogServers, async (newS, oldS) => {
-    if (!newS) {
-      console.log(newS)
+    if (!orderedServers.value) {
+      console.log(orderedServers.value)
       return
     }
-    if (newS.length) {
-      emit('update-active-server-tab', newS[0].cid)
+    if (orderedServers.value.length) {
+      emit('update-active-server-tab', orderedServers.value[0].cid)
     }
 }, { immediate: true})
 

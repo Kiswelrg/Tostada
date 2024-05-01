@@ -33,7 +33,7 @@
                 <div
                     class="message-content pl-[72px] -ml-[72px] select-text overflow-hidden relative indent-0 text-base leading-[1.375rem] whitespace-break-spaces break-words text-[color:hsl( 210 calc( 1 * 9.1%) 87.1% / 1)]  font-light">
                     
-                    <component v-for="item in msg['content']" :is="tabs[item['type']]" :msg-item="item"></component>
+                    <component v-for="(item, index) in msg['contents']" :key="index" :is="tabs[item['type']]" :msg-item="item"></component>
                     <Edited v-if="msg['isEdited']['state']" :is-edited="msg['isEdited']"></Edited>
                 </div>
             </div>

@@ -60,73 +60,34 @@ const filtered_intro = computed(() => {
     return undefined
 })
 
-const methods = computed(() => {
-    if (props.toolDetail === undefined) return undefined
-    if ('methods' in props.toolDetail) return props.toolDetail.methods
-})
-
 
 const messages = ref([
     {
         'nickname': 'Kiswelrg',
         'date_sent': '2024-02-21T02:26:27Z',
+        'id': 438597598,
         'isEdited': {
             'state': true,
             'text': 'edited'
         },
-        'content': [
+        'contents': [
+            {
+                'type': 'Text',
+                'content': 'Welcome to ',
+            },
             {
                 'type': 'Link',
-                'display_name': 'link to somewhere',
+                'display_name': 'Tostada.com',
+                'url': 'http://tostada.com'
             }, 
             {
                 'type': 'Text',
-                'content': ' and some text',
+                'content': ', select some method Bot to use tools!',
             }
         ],
         'isGroupHead': true,
         'avatar_src': '/static/@me/1F955.svg'
-    },
-    {
-        'nickname': 'Kiswelrg',
-        'date_sent': '2024-02-21T08:26:27Z',
-        'isEdited': {
-            'state': true,
-            'text': 'edited'
-        },
-        'content': [
-            {
-                'type': 'Link',
-                'display_name': 'some link',
-            }, 
-            {
-                'type': 'Text',
-                'content': 'asduifhaodf',
-            }
-        ],
-        'isGroupHead': false,
-        'avatar_src': '/static/@me/1F955.svg'
-    },
-    {
-        'nickname': 'Kiswelrg',
-        'date_sent': '2024-02-24T02:26:27Z',
-        'isEdited': {
-            'state': true,
-            'text': 'edited'
-        },
-        'content': [
-            {
-                'type': 'Link',
-                'display_name': 'dude',
-            }, 
-            {
-                'type': 'Text',
-                'content': ' the end',
-            }
-        ],
-        'isGroupHead': true,
-        'avatar_src': '/static/@me/1F955.svg'
-    },
+    }
 ])
 
 const sortedMessages = computed(() => {
@@ -144,7 +105,7 @@ watch(filtered_intro, (newV) => {
 
 
 const onAddMessage = (l) => {
-    console.log(l)
+    messages.value.push(l)
 }
 
 
