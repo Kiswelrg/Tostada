@@ -1,5 +1,5 @@
 <template>
-    <a class="message-text anchor" :href="msgURL" :style="{'display': [msgDisplay], 'font-size': [msgFSize]}"><span>{{ props.msgItem?.display_name }}</span></a>
+    <a class="message-text anchor text-[color:var(--text-link)]" :href="msgURL" :style="{'display': [msgDisplay], 'font-size': [msgFSize]}"><span>{{ props.msgItem?.display_name }}</span></a>
 </template>
 
 <script setup>

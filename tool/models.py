@@ -94,6 +94,7 @@ class ToolServer(models.Model):
                         category = data['categories'][i]
                     ) for i in range(3)
                 ] if with_tool else []
+        tools[0].isServerEntry = True
         data['tools'] = tools
         return data
 
@@ -223,9 +224,8 @@ class Tool(models.Model):
     ]
     name = models.CharField(max_length=255)
     description = models.TextField(blank = True)
-
-    urlCode = models.PositiveBigIntegerField(
-        default=model.getToolCode, unique=True, db_index=True)
+    isServerEntry = models.BooleanField(default=False)
+    
     date_created = models.DateTimeField(default=timezone.now)
     status = models.CharField(
         max_length=2,
@@ -246,6 +246,8 @@ class Tool(models.Model):
 
 
 class ToolOfIO(Tool):
+    urlCode = models.PositiveBigIntegerField(
+        default=model.getToolOfIOCode, unique=True, db_index=True)
     category = models.ForeignKey(
         CategoryInServer,
         on_delete = models.CASCADE,
@@ -259,6 +261,8 @@ class ToolOfIO(Tool):
 
 
 class ToolOfChat(Tool):
+    urlCode = models.PositiveBigIntegerField(
+        default=model.getToolOfChatCode, unique=True, db_index=True)
     category = models.ForeignKey(
         CategoryInServer,
         on_delete = models.CASCADE,

@@ -135,6 +135,7 @@ def fetch_tool_server(request, tool_server_code):
                 "cid": str(tool.urlCode),
                 "name": tool.name,
                 "description": tool.description,
+                "isServerEntry": tool.isServerEntry,
                 "sub_class": k,
                 "category": {
                     'type': tool.category.get_type_display(),

@@ -91,7 +91,7 @@ const { stopped, stopWatcher } = useWatchOnce(server_detail,
       for (let entry of newValue) {
         for (const [key, val] of Object.entries(entry.tools)) {
           if (!val) continue
-          selectSubSection(val)
+          selectSubSection(jsonWithBigInt(val))
           return true
         }
       }

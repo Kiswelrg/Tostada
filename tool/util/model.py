@@ -33,11 +33,18 @@ def getToolServerCode():
         if not models.ToolServer.objects.filter(urlCode=random_value).exists():
             return random_value
 
-def getToolCode():
+def getToolOfIOCode():
     # return getXCode('Tool',201,10)
     while True:
         random_value = random.randint(1e18, 2**63 - 1)
-        if not models.Tool.objects.filter(urlCode=random_value).exists():
+        if not models.ToolOfIO.objects.filter(urlCode=random_value).exists():
+            return random_value
+        
+def getToolOfChatCode():
+    # return getXCode('Tool',201,10)
+    while True:
+        random_value = random.randint(1e18, 2**63 - 1)
+        if not models.ToolOfChat.objects.filter(urlCode=random_value).exists():
             return random_value
         
 def getCategoryCode():

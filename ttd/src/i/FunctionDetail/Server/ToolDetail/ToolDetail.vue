@@ -11,6 +11,7 @@
 import { computed, ref, shallowRef } from 'vue'
 import { watch } from 'vue';
 import ToolTypical from './Tools/ToolTypical/ToolTypical.vue'
+import { jsonWithBigInt } from '@/util/parse'
 const props = defineProps([
     'selectedTool'
 ])
@@ -42,16 +43,11 @@ async function fetchToolDetail() {
   
   if (response.ok) {
     const t = await response.text()
-    const r = JSON.parse(t, (key, value) => {
-      if (typeof value === 'string' && key === 'cid') {
-        return BigInt(value);
-      }
-      return value;
-    })
+    const r = jsonWithBigInt(t)
     if (r.r) {
       tool_detail.value = r.tool
     } else {
-      console.log(r)
+      console.log(r, typeof(r))
     }
   } else {
     console.log(response.status)

@@ -3,8 +3,9 @@
         
         <div class="toolbody flex flex-col flex-1 overflow-y-auto w-full">
             <ToolHead :title="toolDetail?.name" :intro="toolDetail?.description + ' id: ' + selectedToolId" class="flex-none"/>
-            <div class="belly w-full overflow-y-auto flex-1">
-                <div class="introduction">
+            <div class="belly flex-1 flex flex-col justify-end w-full overflow-y-auto">
+                <Welcome></Welcome>
+                <div class="introduction hidden">
                     <div class="introwrapper flex flex-col items-left text-left">
                         <div v-if="!intro?.length" class="paragraph px-2 py-1 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
                             Another option you have is choosing the number of syllables in the words you speak. You probably have never considered this option before, but you have it every time you open your mouth and speak. You make so many choices like this that you never even think about, but you have the choice with each one. What are you going to do with this knowledge?
@@ -20,6 +21,8 @@
                         <div class="scroller">
                             <div class="scroller-content">
                                 <ol class="messages-container">
+
+                                    <Message v-for="m in messagedIntro" v-bind:key="m.id" :msg="m"></Message>
                                     <Message v-for="m in sortedMessages" v-bind:key="m.id" :msg="m"></Message>
                                 </ol>
                             </div>
@@ -27,6 +30,8 @@
                     </div>
                 </div>
             </div>
+        
+            <div class="w-full h-3 block invisible"></div>
         </div>
         
         <InputKing class="flex-none" :tool-detail="toolDetail" @add-message="onAddMessage"/>
@@ -37,6 +42,7 @@
 <script setup>
 import InputKing from '@/i/Global/InputKing/InputKing.vue'
 import ToolHead from '../../ToolHead/ToolHead.vue'
+import Welcome from '../../Welcome/Welcome.vue'
 import { ref, computed, watch } from 'vue'
 import Message from '../../Components/Message/Message.vue'
 const props = defineProps([
@@ -55,8 +61,36 @@ const intro = computed(() => {
 })
 
 const filtered_intro = computed(() => {
-    if (props.toolDetail)
+    if (props.toolDetail){
         return props.toolDetail['additional']['intro']?.filter(obj => !obj.hasOwnProperty('type'))
+    }
+    return undefined
+})
+
+const messagedIntro = computed(() => {
+    let r = []
+    if (props.toolDetail){
+        let intros = props.toolDetail['additional']['intro']?.filter(obj => !obj.hasOwnProperty('type'))
+        for (const i in intros) {
+            let ito = intros[i]
+            r.push({
+                'nickname': 'Kiswelrg',
+                'date_sent': '2024-02-21T02:26:27Z',
+                'id': 0,
+                'isEdited': {
+                    'state': false,
+                    'text': 'edited'
+                },
+                'contents': ito.content.map(obj => ({
+                    'type': 'Text',
+                    'content': obj
+                })),
+                'isGroupHead':  i == 0 ? true : false,
+                'avatar_src': '/static/@me/1F955.svg'
+            })
+        }
+        return r
+    }
     return undefined
 })
 
@@ -78,11 +112,11 @@ const messages = ref([
             {
                 'type': 'Link',
                 'display_name': 'Tostada.com',
-                'url': 'http://tostada.com'
+                'url': '#'
             }, 
             {
                 'type': 'Text',
-                'content': ', select some method Bot to use tools!',
+                'content': ', start using tools by sending messages!',
             }
         ],
         'isGroupHead': true,
