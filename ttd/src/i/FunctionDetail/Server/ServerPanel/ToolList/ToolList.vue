@@ -26,7 +26,7 @@
           <div 
             v-for="sub in section.tools" 
             :key="sub.cid" 
-            @click="selectSubSection(sub)" 
+            @click="selectSubSection(jsonWithBigInt(sub))" 
             class="toolbutton text-white flex ml-3 mr-2 p-1 mb-0.5 rounded" 
             :class="{'bg-hui-700': selectedSubSection == sub.cid, 
             'hover:bg-hui-500': selectedSubSection != sub.cid}"
@@ -105,8 +105,8 @@ function setDefaultTool() {
     for (let entry of server_detail.value) {
         for (const [key, val] of Object.entries(entry.tools)) {
             if (!val) continue
-            selectSubSection(val)
-            return;
+            selectSubSection(jsonWithBigInt(val))
+            return
         }
     }
     return;
@@ -114,8 +114,6 @@ function setDefaultTool() {
 
 
 const startDragCategory = (e, cid) => {
-  // var d = new Date(server.date_added)
-  // console.log(e.target, server, d)
   e.dataTransfer.dropEffect = 'move'
   e.dataTransfer.effectAllowed = 'move'
   e.dataTransfer.setData('cid', cid)

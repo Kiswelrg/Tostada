@@ -8,6 +8,15 @@ export const jsonWithBigInt = (input) => {
   // Create a new object with the same properties as the original
   const newObj = Array.isArray(obj) ? [...obj] : { ...obj };
 
+
+  if (newObj instanceof Array) {
+    let r = []
+    for (const o of newObj) 
+      if (o instanceof Array || o instanceof Object)
+        r.push(jsonWithBigInt(o))
+    return r
+  }
+
   // Recursively reset 'id' properties in nested objects
   for (const key in newObj) {
     if (newObj.hasOwnProperty(key)) {

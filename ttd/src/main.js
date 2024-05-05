@@ -10,7 +10,8 @@ import clickOutside from './util/directives/clickOutside'
 library.add(
     faSmile,
     faPen,
-    faEllipsisH
+    faEllipsisH,
+    
 )
 
 const app = createApp(App).use(router)

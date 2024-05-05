@@ -10,7 +10,8 @@
     "backend": "json-server --watch db.json --port 5000"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.36",
+    "'": "file:awesome.me/kit-c74918d6b2@latest'",
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-brands-svg-icons": "^5.15.4",
     "@fortawesome/free-regular-svg-icons": "^5.15.4",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
