@@ -61,7 +61,6 @@ const props = defineProps([
 
 const emit = defineEmits([
     'add-message',
-    
 ])
 
 onMounted(() => {
@@ -70,7 +69,6 @@ onMounted(() => {
 
 
 const isRunningTool = ref(false)
-
 const curMethod = ref(-1)
 const curArgs = ref({})
 
