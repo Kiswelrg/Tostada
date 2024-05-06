@@ -12,8 +12,10 @@ export const jsonWithBigInt = (input) => {
   if (newObj instanceof Array) {
     let r = []
     for (const o of newObj) 
-      if (o instanceof Array || o instanceof Object)
+      if (typeof o === 'object')
         r.push(jsonWithBigInt(o))
+      else
+        r.push(o)
     return r
   }
 

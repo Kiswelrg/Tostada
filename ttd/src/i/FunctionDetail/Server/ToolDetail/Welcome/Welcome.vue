@@ -6,12 +6,12 @@
       <FontAwesomeIcon :icon="faHashtag" class="text-[#cbcbcb] h-4 w-4" />
     </div>
     <h3 class="my-2 text-4sdouble text-[color:var(--header-primary)] font-bold">
-      Welcome to #main!
+      Welcome to #{{ props.toolDetail?.name }}!
     </h3>
     <div
       class="description text-4s text-[var(--header-secondary)] font-normal"
     >
-      This is the start of the #main channel. 
+      This is the start of the #{{ props.toolDetail?.name }} channel. 
       <span>大厅聊天室</span>
     </div>
     <div class="buttonContainer mt-2">
@@ -41,6 +41,9 @@
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faHashtag, faPen } from '@fortawesome/free-solid-svg-icons'
+const props = defineProps([
+  'tool-detail'
+])
 
 </script>
 

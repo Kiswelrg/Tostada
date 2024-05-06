@@ -4,7 +4,7 @@
         <div class="toolbody flex flex-col flex-1 overflow-y-auto w-full">
             <ToolHead :title="toolDetail?.name" :intro="toolDetail?.description + ' id: ' + selectedToolId" class="flex-none"/>
             <div class="belly flex-1 flex flex-col justify-end w-full overflow-y-auto">
-                <Welcome></Welcome>
+                <Welcome :tool-detail="props.toolDetail"></Welcome>
                 <div class="introduction hidden">
                     <div class="introwrapper flex flex-col items-left text-left">
                         <div v-if="!intro?.length" class="paragraph px-2 py-1 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">

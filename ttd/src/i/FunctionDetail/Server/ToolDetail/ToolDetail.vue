@@ -46,6 +46,7 @@ async function fetchToolDetail() {
     const r = jsonWithBigInt(t)
     if (r.r) {
       tool_detail.value = r.tool
+      console.log(`Tool (fetch status: ${r.r}): `, r.tool)
     } else {
       console.log(r, typeof(r))
     }

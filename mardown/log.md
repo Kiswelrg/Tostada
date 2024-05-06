@@ -1,5 +1,5 @@
 ### To-Do
-select default server in 'orderedServers'
+
 
 
 ! change the logo dir when changing the datecreated

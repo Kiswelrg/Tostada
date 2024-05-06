@@ -122,12 +122,16 @@ const curMethodDetail = computed(() => {
 })
 
 async function runToolMethod() {
-  console.log('running tool method...')
+  // forbit running constantly
   if (isRunningTool.value) return
   isRunningTool.value = true
+
+  // set RunTool button available in 5 seconds
   setTimeout(()=>{
     isRunningTool.value = false
   }, 5000)
+
+  // set method
   var form_data = new FormData()
   curArgs.value['method-name'] = curMethodDetail.value.display_name
   curArgs.value['method-code'] = curMethod.value

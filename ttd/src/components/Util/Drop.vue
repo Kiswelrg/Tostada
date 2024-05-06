@@ -105,11 +105,7 @@ const chooseMethod = (code) => {
 }
 
 const methods = computed(() => {
-    let res = undefined
-    if (props.methodsList)
-        res = props.methodsList['groups']
-    if (res?.length) return res
-    return [{
+    let res = [{
         index: 1,
         methods: [{
             code: -1,
@@ -118,6 +114,9 @@ const methods = computed(() => {
             output: []
         }]
     }]
+    if (props.methodsList)
+        return (props.methodsList['groups']).concat(res)
+    return res
 })
 
 const isUsingDefault = ref(false)
