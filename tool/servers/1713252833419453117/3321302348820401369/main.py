@@ -1,4 +1,5 @@
 import yaml
+import subprocess
 
 
 def embedVmess2Clash(vmess_dict, clash_dict):
@@ -57,6 +58,15 @@ def embedVmess2ClashFile(vmess_path, clash_path):
     vmess_data = load_yaml_config(vmess_path)
 
     return embedVmess2Clash(vmess_data, config_data)
+
+def vmess2clash(subconverter_executable):
+    # Run an executable without parameters
+    # subprocess.run(["/home/wxy/tool/subconverter/subconverter"])
+
+    # Run an executable with parameters
+    r = subprocess.run([subconverter_executable, "-g"], capture_output=True, text=True)
+    'SUCCESS' in r.stderr.rsplit('\n', 4)[-4]
+
 
 if __name__ == '__main__':
     embedVmess2ClashFile('/home/wxy/tool/test_subconverter_output.yaml', "/home/wxy/Downloads/AgentNEO.yml")
