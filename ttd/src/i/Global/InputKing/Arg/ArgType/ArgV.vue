@@ -1,6 +1,6 @@
 <template>
 
-    <div class="args relative flex flex-col w-full h-fit bg-arg-base relative rounded-t-[4px] pt-1" save="bottom-[var(--m-inputking-height)] translate-x-[var(--m-inputking-l-idt)]">
+    <div class="args relative flex flex-col w-full h-fit bg-arg-base relative rounded-t-[4px] pt-1" save="bottom-[var(--m-inputking-height)] translate-x-[var(--m-inputking-l-indent)]">
         <div 
             @wheel.prevent="handleWheel"
             ref="arg"
@@ -76,7 +76,7 @@ watch(arg, () => {
 <style lang="scss">
 :root {
     --m-inputking-height: 53px;
-    --m-inputking-l-idt: 24px;
+    --m-inputking-l-indent: 24px;
     --m-onearg-h: 18px;
     --m-args-rounded-offset: 8px;
 }

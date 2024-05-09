@@ -5,15 +5,15 @@
             <div class="left-buttons h-full flex items-center ml-2">
                 <div class="flex">
                     <div class="h-8 w-8 bg-[#2f2f2f] rounded-full">
-
+                        <!-- display current Bot -->
                     </div>
                 </div>
             </div>
             <div class="main-input items-center w-full h-full flex mx-2">
 
-                <div class="flex rounded-md shadow-sm w-full h-full">
+                <div class="flex rounded-md shadow-sm w-full h-full text-3s">
                     <div class="flex">
-                        <input type="text" placeholder="Message here" class="w-full text-md my-2 bg-inputking-bg outline-none font-light"
+                        <input type="text" :placeholder="curPlaceHolder" class="w-full text-md my-2 bg-inputking-bg outline-none font-light"
                         @keyup.enter="runToolMethod">
                     </div>
                 </div>
@@ -22,11 +22,10 @@
             <div class="main-input items-center w-16 flex mx-2">
 
                 <div class="flex shadow-sm w-16 h-8">
-                    <!-- <input type="submit" class="border-[1px] w-full h-8 rounded-md text-[12px] my-auto bg-[#2f3135] hover:bg-[#4f5258] outline-none font-light"> -->
                     <div class="h-full">
                         <Drop class="h-8 w-16" :down="false" 
                         @on-choose-method="chooseMethod"
-                        :cur-method="curMethod"
+                        :cur-method="curMethodCode"
                         :height="30" :menu-gap="6" :has-icon="false" :methods-list="methodsList"></Drop>
                     </div>
                 </div>
@@ -69,19 +68,27 @@ onMounted(() => {
 
 
 const isRunningTool = ref(false)
-const curMethod = ref(-1)
+const curMethodCode = ref(0)
+const curMethod = ref({})
 const curArgs = ref({})
 
 const onUpdateArgs = (v, k) => {
     curArgs.value[k] = v;
 }
 
-const chooseMethod = (code) => {
-    if (curMethod.value !== code) {
+const chooseMethod = (m) => {
+    if (curMethodCode.value !== m.code) {
+        curMethod.value = m
         isRunningTool.value = false
-        curMethod.value = code
+        curMethodCode.value = m.code
     }
 }
+
+const curPlaceHolder = computed(() => {
+    if (curMethod.value.description === undefined || curMethod.value.description === '')
+        return 'Message Here...'
+    return curMethod.value.description
+})
 
 const methodsList = computed(() => {
     if (props.toolDetail)
@@ -94,14 +101,14 @@ watch(methodsList, (newV) => {
     if (newV && newV.groups !== undefined){
         for (const group of newV.groups) {
             for (const method of group.methods) {
-                if (curMethod.value != -1) break
-                curMethod.value = method.code
+                if (curMethodCode.value != -1) break
+                curMethodCode.value = method.code
             }
-            if (curMethod.value != -1) break
+            if (curMethodCode.value != -1) break
         }
     }
     else
-        curMethod.value = -1
+        curMethodCode.value = -1
 })
 
 const methodDetail = (c) => {
@@ -117,8 +124,8 @@ const methodDetail = (c) => {
 }
 
 const curMethodDetail = computed(() => {
-    if (curMethod.value == -1) return {}
-    return methodDetail(curMethod.value)
+    if (curMethodCode.value == -1) return {}
+    return methodDetail(curMethodCode.value)
 })
 
 async function runToolMethod() {
@@ -134,7 +141,7 @@ async function runToolMethod() {
   // set method
   var form_data = new FormData()
   curArgs.value['method-name'] = curMethodDetail.value.display_name
-  curArgs.value['method-code'] = curMethod.value
+  curArgs.value['method-code'] = curMethodCode.value
   curArgs.value['sub_class'] = props.toolDetail['additional']['sub_class']
 
   for (var v in curArgs.value) {
@@ -170,7 +177,7 @@ async function runToolMethod() {
 <style lang="scss">
 :root {
     --m-inputking-height: 53px;
-    --m-inputking-l-idt: 24px;
+    --m-inputking-l-indent: 24px;
 }
 </style>
 <style lang="scss" scoped></style>

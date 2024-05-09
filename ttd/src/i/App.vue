@@ -1,7 +1,7 @@
 <template>
   <div class="main flex flex-row grow h-full w-full min-h-[250px]">
     <FunctionList :functionList="functionList" 
-    @updateServerList="fetchToolServers" 
+    @updateServerList="fetchServers" 
     @updateServerListOffline="updateServersOrderOffline" 
     @update-active-server-tab="onUpdateActiveServerTab" 
     @go-tab="onGoTab"></FunctionList>
@@ -59,7 +59,7 @@ const functionList = computed(() => {
 
 onMounted(() => {
   (async () => {
-    await fetchToolServers()
+    await fetchServers()
     if ( route.name == 'tool-root') {
       if ( functionList.value['joinedServers'].length == 0 ) {
         console.log('open find-server panel');
@@ -106,7 +106,7 @@ function onGoTab(path) {
   }
 }
 
-async function fetchToolServers() {
+async function fetchServers() {
   const response = await fetch(
     "/api/i/user/tool_servers/",
     {

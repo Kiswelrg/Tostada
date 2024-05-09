@@ -13,7 +13,7 @@ def randomId(N, opt):
 
 def getXCode(name,base,r):
     f = {
-        'ToolServer': (models.ToolServer),
+        'Server': (models.Server),
         'Tool': (models.Tool),
     }[name]
     
@@ -26,25 +26,25 @@ def getXCode(name,base,r):
     return int(a)
 
 
-def getToolServerCode():
-    # return getXCode('ToolServer',355,7)
+def getServerCode():
+    # return getXCode('Server',355,7)
     while True:
         random_value = random.randint(1e18, 2**63 - 1)
-        if not models.ToolServer.objects.filter(urlCode=random_value).exists():
+        if not models.Server.objects.filter(urlCode=random_value).exists():
             return random_value
 
-def getToolOfIOCode():
+def getChannelOfIOCode():
     # return getXCode('Tool',201,10)
     while True:
         random_value = random.randint(1e18, 2**63 - 1)
-        if not models.ToolOfIO.objects.filter(urlCode=random_value).exists():
+        if not models.ChannelOfIO.objects.filter(urlCode=random_value).exists():
             return random_value
         
-def getToolOfChatCode():
+def getChannelOfChatCode():
     # return getXCode('Tool',201,10)
     while True:
         random_value = random.randint(1e18, 2**63 - 1)
-        if not models.ToolOfChat.objects.filter(urlCode=random_value).exists():
+        if not models.ChannelOfChat.objects.filter(urlCode=random_value).exists():
             return random_value
         
 def getCategoryCode():

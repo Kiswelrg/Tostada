@@ -145,7 +145,7 @@ const emit = defineEmits(
 
 onMounted(() => {
   (async () => {
-    // await fetchToolServers();
+    // await fetchServers();
   })();
   
 });

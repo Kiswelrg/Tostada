@@ -11,12 +11,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='toolofchat',
+            model_name='channelofchat',
             name='isServerEntry',
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='toolofio',
+            model_name='channelofio',
             name='isServerEntry',
             field=models.BooleanField(default=False),
         ),

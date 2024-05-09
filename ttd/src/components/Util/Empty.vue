@@ -10,7 +10,8 @@ const count = ref(0)
 
 <template>
   <div class="flex m-auto w-fit gap-4">
-    {{ helloText }}
+    <div v-html="helloText">
+    </div>
   </div>
 </template>
 

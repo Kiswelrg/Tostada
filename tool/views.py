@@ -5,29 +5,29 @@ from django.http import Http404
 from django.utils.datastructures import MultiValueDictKeyError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from .models import ToolServer, UserServerRole, UserToolOfIORole, UserToolOfChatRole, ToolOfIO, ToolOfChat, CategoryInServer
+from .models import Server, UserServerRole, UserChannelOfIORole, UserChannelOfChatRole, ChannelOfIO, ChannelOfChat, CategoryInServer
 from UtilGlobal.print import printc
 from .util.ImportTool import import_function_from_file, importFunction
 import json
 
 tool_classes = [
-    ToolOfIO,
-    ToolOfChat
+    ChannelOfIO,
+    ChannelOfChat
 ]
 
 tool_class_full = {
-    'ToolOfIO': ToolOfIO,
-    'ToolOfChat': ToolOfChat
+    'ChannelOfIO': ChannelOfIO,
+    'ChannelOfChat': ChannelOfChat
 }
 
 tool_role_short = {
-    'io': UserToolOfIORole,
-    'chat': UserToolOfChatRole
+    'io': UserChannelOfIORole,
+    'chat': UserChannelOfChatRole
 }
 
 tool_class_short = {
-    'io': ToolOfIO,
-    'chat': ToolOfChat
+    'io': ChannelOfIO,
+    'chat': ChannelOfChat
 }
 
 
@@ -39,7 +39,7 @@ def Home(request):
 
 # Fetch all tool servers that a user has joined
 def fetch_user_tool_servers(request):
-    # tool_servers = ToolServer.objects.filter(user_server_auths__user__username=request.session['username'])
+    # tool_servers = Server.objects.filter(user_server_auths__user__username=request.session['username'])
     u_s_role = UserServerRole.objects.filter(user__username=request.session['username'])
     data = [
         {
@@ -98,7 +98,7 @@ def reorderServerCategorys(request):
 
 # Fetch a specific tool server by its urlCode
 def fetch_tool_server(request, tool_server_code):
-    tool_server = get_object_or_404(ToolServer, urlCode=tool_server_code)
+    tool_server = get_object_or_404(Server, urlCode=tool_server_code)
     tools = {}
     data = {
         "cid": str(tool_server.urlCode),
@@ -183,10 +183,10 @@ def fetch_tool(request, tool_class, tool_code):
     }
     if 'sub_class' not in tool.additional:
         pass
-    elif Sub_Tool.__name__ == 'ToolOfIO':
-        tool_specific = get_object_or_404(ToolOfIO, id = tool.id)
+    elif Sub_Tool.__name__ == 'ChannelOfIO':
+        tool_specific = get_object_or_404(ChannelOfIO, id = tool.id)
         data['methods'] = tool_specific.method_names
-    elif Sub_Tool.__name__ == 'ToolOfChat':
+    elif Sub_Tool.__name__ == 'ChannelOfChat':
         pass
     return JsonResponse({"tool": data, "r": True})
 

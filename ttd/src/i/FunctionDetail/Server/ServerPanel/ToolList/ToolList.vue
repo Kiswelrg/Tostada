@@ -80,7 +80,7 @@ const watcher_server = watch(server, async (newQuestion, oldQuestion) => {
     if (!server || !server.value) {
       return;
     }
-    await fetchAToolServer(server.value.cid);
+    await fetchAServer(server.value.cid);
     
 }, { immediate: true})
 
@@ -223,7 +223,7 @@ const orderedSD = computed(() => {
 })
 
 
-async function fetchAToolServer(cid) {
+async function fetchAServer(cid) {
   const response = await fetch(
     `/api/i/tool_server/${cid}/?tools=1`,
     {

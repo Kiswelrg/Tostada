@@ -12,9 +12,9 @@ def EmptyJson():
     return {}
 
 def getDefaultAdditional():
-    return {"type": "ToolTypical", "subclass":"ToolOfIO"}
+    return {"type": "ToolTypical", "subclass":"ChannelOfIO"}
 
-class ToolServer(models.Model):
+class Server(models.Model):
     def cover_dir_path(instance, filename):
         return f'cover/server-{instance.urlCode}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
 
@@ -30,7 +30,7 @@ class ToolServer(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank = True)
     urlCode = models.PositiveBigIntegerField(
-        default=model.getToolServerCode, unique=True, db_index=True)
+        default=model.getServerCode, unique=True, db_index=True)
     date_created = models.DateTimeField(default=timezone.now)
     type = models.CharField(
         default='0',
@@ -88,7 +88,7 @@ class ToolServer(models.Model):
             
         }
         tools = [
-                    ToolOfChat.objects.create(
+                    ChannelOfChat.objects.create(
                         name = names[i][1],
                         server = self,
                         category = data['categories'][i]
@@ -151,7 +151,7 @@ class ToolServer(models.Model):
             for item in save_list:
                 item.save()
 
-@receiver(models.signals.post_delete, sender=ToolServer)
+@receiver(models.signals.post_delete, sender=Server)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
     """
     Deletes file from filesystem
@@ -161,19 +161,19 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
         if os.path.isfile(instance.logo.path):
             os.remove(instance.logo.path)
 
-@receiver(models.signals.pre_save, sender=ToolServer)
+@receiver(models.signals.pre_save, sender=Server)
 def auto_delete_file_on_change(sender, instance, **kwargs):
     """
     Deletes old file from filesystem
-    when corresponding `ToolServer` object is updated
+    when corresponding `Server` object is updated
     with new file.
     """
     if not instance.pk:
         return False
 
     try:
-        old_file = ToolServer.objects.get(pk=instance.pk).logo
-    except ToolServer.DoesNotExist:
+        old_file = Server.objects.get(pk=instance.pk).logo
+    except Server.DoesNotExist:
         return False
 
     if old_file == '':
@@ -186,7 +186,7 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
 
 class CategoryInServer(models.Model):
     name = models.CharField(max_length=100)
-    server = models.ForeignKey(ToolServer, on_delete=models.CASCADE, related_name='categories')
+    server = models.ForeignKey(Server, on_delete=models.CASCADE, related_name='categories')
     type = models.CharField(
         default='0',
         max_length=2,
@@ -245,31 +245,31 @@ class Tool(models.Model):
         abstract = True
 
 
-class ToolOfIO(Tool):
+class ChannelOfIO(Tool):
     urlCode = models.PositiveBigIntegerField(
-        default=model.getToolOfIOCode, unique=True, db_index=True)
+        default=model.getChannelOfIOCode, unique=True, db_index=True)
     category = models.ForeignKey(
         CategoryInServer,
         on_delete = models.CASCADE,
-        related_name = 'toolofios',
+        related_name = 'channelofios',
     )
     server = models.ForeignKey(
-        ToolServer, on_delete=models.CASCADE, related_name='toolofios')
+        Server, on_delete=models.CASCADE, related_name='channelofios')
     method_names = models.JSONField(default=EmptyJson, blank = True)
     input = models.JSONField(default=EmptyJson, null=True, blank = True)
     output = models.JSONField(default=EmptyJson, null=True, blank = True)
 
 
-class ToolOfChat(Tool):
+class ChannelOfChat(Tool):
     urlCode = models.PositiveBigIntegerField(
-        default=model.getToolOfChatCode, unique=True, db_index=True)
+        default=model.getChannelOfChatCode, unique=True, db_index=True)
     category = models.ForeignKey(
         CategoryInServer,
         on_delete = models.CASCADE,
-        related_name = 'toolofchats',
+        related_name = 'channelofchats',
     )
     server = models.ForeignKey(
-        ToolServer, on_delete=models.CASCADE, related_name='toolofchats')
+        Server, on_delete=models.CASCADE, related_name='channelofchats')
     method_names = models.JSONField(default=EmptyJson, blank = True)
     bots = models.JSONField(default=EmptyJson, null=True, blank = True)
 
@@ -303,7 +303,7 @@ class AuthorizationLevel(models.Model):
 class ServerRole(models.Model):
     name = models.CharField(max_length=64)
     server = models.ForeignKey(
-        ToolServer, on_delete=models.CASCADE, related_name='server_roles')
+        Server, on_delete=models.CASCADE, related_name='server_roles')
     description = models.CharField(max_length=512, default='')
     auth = models.ManyToManyField(
         AuthorizationLevel, related_name='server_roles')
@@ -328,7 +328,7 @@ class UserServerRole(models.Model):
         related_name='user_server_auths'
     )
     server = models.ForeignKey(
-        ToolServer,
+        Server,
         on_delete=models.CASCADE,
         related_name='user_server_auths'
     )
@@ -342,21 +342,21 @@ class UserServerRole(models.Model):
 
 
 # Default to be role-based table
-class UserToolOfIORole(models.Model):
+class UserChannelOfIORole(models.Model):
     user = models.ForeignKey(
         'account.AUser',
         on_delete=models.CASCADE,
-        related_name='user_toolofio_auths'
+        related_name='user_channelofio_auths'
     )
     tool = models.ForeignKey(
-        ToolOfIO,
+        ChannelOfIO,
         on_delete=models.CASCADE,
-        related_name='user_toolofio_auths'
+        related_name='user_channelofio_auths'
     )
     role = models.ForeignKey(ServerRole, verbose_name=_(
         "user role in the server"),
         on_delete=models.CASCADE,
-        related_name='user_toolofio_auths',
+        related_name='user_channelofio_auths',
     )
     date_added = models.DateTimeField(default=timezone.now)
 
@@ -364,21 +364,21 @@ class UserToolOfIORole(models.Model):
         return f"{self.user} in .. 服务器: {self.tool.server} .. 工具: {self.tool.name} .. 角色: {self.role.name}"
 
 
-class UserToolOfChatRole(models.Model):
+class UserChannelOfChatRole(models.Model):
     user = models.ForeignKey(
         'account.AUser',
         on_delete=models.CASCADE,
-        related_name='user_toolofchat_auths'
+        related_name='user_channelofchat_auths'
     )
     tool = models.ForeignKey(
-        ToolOfChat,
+        ChannelOfChat,
         on_delete=models.CASCADE,
-        related_name='user_toolofchat_auths'
+        related_name='user_channelofchat_auths'
     )
     role = models.ForeignKey(ServerRole, verbose_name=_(
         "user role in the server"),
         on_delete=models.CASCADE,
-        related_name='user_toolofchat_auths',
+        related_name='user_channelofchat_auths',
     )
     date_added = models.DateTimeField(default=timezone.now)
 

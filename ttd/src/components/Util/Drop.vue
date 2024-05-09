@@ -18,7 +18,7 @@
                           clip-rule="evenodd" />
                 </svg>
             </button>
-            <div class="h-full w-4 absolute right-[-4px] top-0 content-top text-black z-10 text-[8px]">({{ methodsNum }})</div>
+            <div class="h-full w-4 absolute right-[-4px] top-0 content-top text-black z-10 text-[8px]">({{ currentMethodIdx }})</div>
         </div>
 
         <!--
@@ -40,14 +40,14 @@
              aria-labelledby="menu-button"
              tabindex="-1">
             <div
-                v-for="group in methods"
+                v-for="group in methods.toReversed()"
                 :key="group.index"
                 class="py-[1.5px]"
                 role="none">
                 <div
-                    v-for="method in group.methods"
+                    v-for="method in group.methods.toReversed()"
                     :key="method.code"
-                    :class="{'pl-2': !props.hasIcon, 'pl-2': props.hasIcon, 'bg-white': props.curMethod == method.code || isUsingDefault, 'hover:bg-dark-interactive-normal': props.curMethod != method.code && !isUsingDefault}"
+                    :class="{'pl-2': !props.hasIcon, 'pl-2': props.hasIcon, 'bg-white': isMethodActive(method.global_index), 'hover:bg-dark-interactive-normal': !isMethodActive(method.global_index)}"
                     class="menu-item flex items-center mx-1 hover:text-black rounded-sm">
                     <div :class="{'hidden': !props['hasIcon']}" class="item-icon px-0">
                         <div class="flex">
@@ -55,8 +55,8 @@
                         </div>
                     </div>
                     <a href="#"
-                        :class="{'pl-2': !props.hasIcon, 'pl-0.5': props.hasIcon, 'text-black': props.curMethod == method.code || isUsingDefault, 'text-dark-interactive-normal': props.curMethod != method.code && !isUsingDefault}"
-                        @click="chooseMethod(method.code)"
+                        :class="{'pl-2': !props.hasIcon, 'pl-0.5': props.hasIcon, 'text-black': isMethodActive(method.global_index),'text-dark-interactive-normal': !isMethodActive(method.global_index)}"
+                        @click="chooseMethod(method)"
                         class="inline-block break-words max-w-32 min-w-[57px] pr-4 py-0.5 text-[10px] hover:text-black"
                         role="menuitem"
                         tabindex="-1"
@@ -86,6 +86,13 @@ const props = defineProps([
     'methods-list',
     'cur-method'
 ])
+const currentMethodIdx = ref(0)
+const isUsingDefault = ref(false)
+const isDropMenuOpen = ref(true);
+
+const isMethodActive = (g_idx) => {
+    return g_idx == currentMethodIdx.value
+}
 
 const methodsNum = computed(() => {
   if (props.methodsList) {
@@ -99,9 +106,9 @@ const methodsNum = computed(() => {
   return 0;
 });
 
-
-const chooseMethod = (code) => {
-    emit('onChooseMethod', code)
+const chooseMethod = (m) => {
+    currentMethodIdx.value = m.global_index
+    emit('onChooseMethod', m)
 }
 
 const methods = computed(() => {
@@ -109,23 +116,45 @@ const methods = computed(() => {
         index: 1,
         methods: [{
             code: -1,
+            global_index: 0,
             display_name: '默认',
             input: [],
             output: []
         }]
     }]
-    if (props.methodsList)
-        return (props.methodsList['groups']).concat(res)
+    if (props.methodsList) {
+        let global_index = 1
+        for (const i in props.methodsList['groups']) {
+            const group = props.methodsList['groups'][i]
+            if (!group) continue
+            let g = {
+                index: group.index,
+                methods: []
+            }
+            for (const m of group.methods) {
+                g.methods.push({
+                    code: m.code,
+                    global_index: global_index,
+                    display_name: m.display_name,
+                    description: m.description,
+                    input: m.input,
+                    output: m.output
+                })
+                global_index++
+            }
+            res.push(g)
+        }
+        // return res.concat(props.methodsList['groups'])
+    }
+        
     return res
 })
 
-const isUsingDefault = ref(false)
 watch(methods, (newl) => {
     if (newl.length && props.curMethod === -1) isUsingDefault.value = true
     else isUsingDefault.value = false
 })
 
-const isDropMenuOpen = ref(true);
 
 const closeMenu = () => {
     if (!isDropMenuOpen.value) return;
