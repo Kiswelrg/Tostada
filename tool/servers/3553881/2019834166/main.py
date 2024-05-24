@@ -16,7 +16,7 @@ def f_availableIpPort(method_detail):
         ipport['status'] = '⚫'
         if check_port(ipport['ip'], ipport['port']):
             ipport['status'] = '🟡'
-        if get_url_via_proxy('https://captive.apple.com', geturl(ipport)):
+        if get_url_via_proxy('https://baidu.com', geturl(ipport)):
             ipport['status'] = '🟢'
         r.append({
             'type': 'Text',
