@@ -1,4 +1,4 @@
-### ToDo
+### Archived
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
@@ -8,6 +8,8 @@
 |msg|reaction part|   |   ||
 |Tool Input|Function Selection Dropdown|   |   |✅|
 |FunctionList|Default Button|Find Servers|   ||
+
+### ToDo
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
