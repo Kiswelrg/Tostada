@@ -5,29 +5,29 @@ from django.http import Http404
 from django.utils.datastructures import MultiValueDictKeyError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from .models import Server, UserServerRole, UserChannelOfIORole, UserChannelOfChatRole, ChannelOfIO, ChannelOfChat, CategoryInServer
+from .models import Server, UserServerRole, UserChannelOfChatRole, UserChannelOfVoiceRole, ChannelOfChat, ChannelOfVoice, CategoryInServer
 from UtilGlobal.print import printc
 from .util.ImportTool import import_function_from_file, importFunction
 import json
 
 tool_classes = [
-    ChannelOfIO,
-    ChannelOfChat
+    ChannelOfChat,
+    ChannelOfVoice
 ]
 
 tool_class_full = {
-    'ChannelOfIO': ChannelOfIO,
-    'ChannelOfChat': ChannelOfChat
+    'ChannelOfChat': ChannelOfChat,
+    'ChannelOfVoice': ChannelOfVoice
 }
 
 tool_role_short = {
-    'io': UserChannelOfIORole,
-    'chat': UserChannelOfChatRole
+    'io': UserChannelOfChatRole,
+    'chat': UserChannelOfVoiceRole
 }
 
 tool_class_short = {
-    'io': ChannelOfIO,
-    'chat': ChannelOfChat
+    'io': ChannelOfChat,
+    'chat': ChannelOfVoice
 }
 
 
@@ -183,10 +183,10 @@ def fetch_tool(request, tool_class, tool_code):
     }
     if 'sub_class' not in tool.additional:
         pass
-    elif Sub_Tool.__name__ == 'ChannelOfIO':
-        tool_specific = get_object_or_404(ChannelOfIO, id = tool.id)
-        data['methods'] = tool_specific.method_names
     elif Sub_Tool.__name__ == 'ChannelOfChat':
+        tool_specific = get_object_or_404(ChannelOfChat, id = tool.id)
+        data['methods'] = tool_specific.method_names
+    elif Sub_Tool.__name__ == 'ChannelOfVoice':
         pass
     return JsonResponse({"tool": data, "r": True})
 
@@ -195,7 +195,7 @@ def fetch_tool(request, tool_class, tool_code):
 def run_tool(request, tool_code):
     printc([request.POST, tool_code], isList=True, color=[255,255,0])
     tool_class = request.POST['sub_class']
-    # add = Tool.objects.get(urlCode = tool_code).additional
+    # add = Channel.objects.get(urlCode = tool_code).additional
     methods = (tool_class_full[tool_class].objects.get(urlCode = tool_code).method_names)
     server_code = methods['tool'].strip().split('/')[0]
     method_detail = None

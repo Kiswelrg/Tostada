@@ -1,28 +1,10 @@
-### Archived
-
-|Type|Detail|1|2|Finished|
-|---|---|---|---|---|
-|code template|stoppable watcher|@/util/watcher.js|   |✅|
-|msg|msg block|with head/avatar|   |✅|
-|msg|msg block|without|   |✅|
-|msg|reaction part|   |   ||
-|Tool Input|Function Selection Dropdown|   |   |✅|
-|FunctionList|Default Button|Find Servers|   ||
-
-### ToDo
-
-|Type|Detail|1|2|Finished|
-|---|---|---|---|---|
-|msg|database msg|store msg in db||
-|msg|delete msg|be able to delete||
-|channel|create invite|invite user to `Channel`||
-|msg|mention|create `mention` in msg||
-|user|`timeout` user|||
-|user|`ban` user|||
-|user|`kick` user|||
+### Notes
 
 
 
-### Tips
+! change the logo dir when changing the datecreated
 
- - don't forget ending slash in .vue url that starts with `api`, it will cause django to return redirections
+Rewrite user log out view  👀
+    don't login to the admin page is the right move maybe
+    
+Make Server List items draggable  

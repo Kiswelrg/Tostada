@@ -12,7 +12,7 @@ def EmptyJson():
     return {}
 
 def getDefaultAdditional():
-    return {"type": "ToolTypical", "subclass":"ChannelOfIO"}
+    return {"type": "ToolTypical", "subclass":"ChannelOfChat"}
 
 class Server(models.Model):
     def cover_dir_path(instance, filename):
@@ -88,7 +88,7 @@ class Server(models.Model):
             
         }
         tools = [
-                    ChannelOfChat.objects.create(
+                    ChannelOfVoice.objects.create(
                         name = names[i][1],
                         server = self,
                         category = data['categories'][i]
@@ -209,7 +209,7 @@ class CategoryInServer(models.Model):
         return f"{self.name} in {self.server}"
 
 
-class Tool(models.Model):
+class Channel(models.Model):
     def cover_dir_path(instance, filename):
         return f'cover/tool-{instance.urlCode}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
 
@@ -245,22 +245,7 @@ class Tool(models.Model):
         abstract = True
 
 
-class ChannelOfIO(Tool):
-    urlCode = models.PositiveBigIntegerField(
-        default=model.getChannelOfIOCode, unique=True, db_index=True)
-    category = models.ForeignKey(
-        CategoryInServer,
-        on_delete = models.CASCADE,
-        related_name = 'channelofios',
-    )
-    server = models.ForeignKey(
-        Server, on_delete=models.CASCADE, related_name='channelofios')
-    method_names = models.JSONField(default=EmptyJson, blank = True)
-    input = models.JSONField(default=EmptyJson, null=True, blank = True)
-    output = models.JSONField(default=EmptyJson, null=True, blank = True)
-
-
-class ChannelOfChat(Tool):
+class ChannelOfChat(Channel):
     urlCode = models.PositiveBigIntegerField(
         default=model.getChannelOfChatCode, unique=True, db_index=True)
     category = models.ForeignKey(
@@ -270,6 +255,21 @@ class ChannelOfChat(Tool):
     )
     server = models.ForeignKey(
         Server, on_delete=models.CASCADE, related_name='channelofchats')
+    method_names = models.JSONField(default=EmptyJson, blank = True)
+    input = models.JSONField(default=EmptyJson, null=True, blank = True)
+    output = models.JSONField(default=EmptyJson, null=True, blank = True)
+
+
+class ChannelOfVoice(Channel):
+    urlCode = models.PositiveBigIntegerField(
+        default=model.getChannelOfVoiceCode, unique=True, db_index=True)
+    category = models.ForeignKey(
+        CategoryInServer,
+        on_delete = models.CASCADE,
+        related_name = 'channelofvoices',
+    )
+    server = models.ForeignKey(
+        Server, on_delete=models.CASCADE, related_name='channelofvoices')
     method_names = models.JSONField(default=EmptyJson, blank = True)
     bots = models.JSONField(default=EmptyJson, null=True, blank = True)
 
@@ -342,28 +342,6 @@ class UserServerRole(models.Model):
 
 
 # Default to be role-based table
-class UserChannelOfIORole(models.Model):
-    user = models.ForeignKey(
-        'account.AUser',
-        on_delete=models.CASCADE,
-        related_name='user_channelofio_auths'
-    )
-    tool = models.ForeignKey(
-        ChannelOfIO,
-        on_delete=models.CASCADE,
-        related_name='user_channelofio_auths'
-    )
-    role = models.ForeignKey(ServerRole, verbose_name=_(
-        "user role in the server"),
-        on_delete=models.CASCADE,
-        related_name='user_channelofio_auths',
-    )
-    date_added = models.DateTimeField(default=timezone.now)
-
-    def __str__(self) -> str:
-        return f"{self.user} in .. 服务器: {self.tool.server} .. 工具: {self.tool.name} .. 角色: {self.role.name}"
-
-
 class UserChannelOfChatRole(models.Model):
     user = models.ForeignKey(
         'account.AUser',
@@ -379,6 +357,28 @@ class UserChannelOfChatRole(models.Model):
         "user role in the server"),
         on_delete=models.CASCADE,
         related_name='user_channelofchat_auths',
+    )
+    date_added = models.DateTimeField(default=timezone.now)
+
+    def __str__(self) -> str:
+        return f"{self.user} in .. 服务器: {self.tool.server} .. 工具: {self.tool.name} .. 角色: {self.role.name}"
+
+
+class UserChannelOfVoiceRole(models.Model):
+    user = models.ForeignKey(
+        'account.AUser',
+        on_delete=models.CASCADE,
+        related_name='user_channelofvoice_auths'
+    )
+    tool = models.ForeignKey(
+        ChannelOfVoice,
+        on_delete=models.CASCADE,
+        related_name='user_channelofvoice_auths'
+    )
+    role = models.ForeignKey(ServerRole, verbose_name=_(
+        "user role in the server"),
+        on_delete=models.CASCADE,
+        related_name='user_channelofvoice_auths',
     )
     date_added = models.DateTimeField(default=timezone.now)
 

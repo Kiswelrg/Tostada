@@ -14,11 +14,11 @@ def randomId(N, opt):
 def getXCode(name,base,r):
     f = {
         'Server': (models.Server),
-        'Tool': (models.Tool),
+        'Channel': (models.Channel),
     }[name]
     
     bot = pow(10, r - 4)
-    head = pow(10, r - 3) 
+    head = pow(10, r - 3)
     a = random.randint(bot, head-1) + base*head
 
     while f.objects.filter(urlCode = a).exists():
@@ -33,18 +33,18 @@ def getServerCode():
         if not models.Server.objects.filter(urlCode=random_value).exists():
             return random_value
 
-def getChannelOfIOCode():
-    # return getXCode('Tool',201,10)
-    while True:
-        random_value = random.randint(1e18, 2**63 - 1)
-        if not models.ChannelOfIO.objects.filter(urlCode=random_value).exists():
-            return random_value
-        
 def getChannelOfChatCode():
-    # return getXCode('Tool',201,10)
+    # return getXCode('Channel',201,10)
     while True:
         random_value = random.randint(1e18, 2**63 - 1)
         if not models.ChannelOfChat.objects.filter(urlCode=random_value).exists():
+            return random_value
+        
+def getChannelOfVoiceCode():
+    # return getXCode('Channel',201,10)
+    while True:
+        random_value = random.randint(1e18, 2**63 - 1)
+        if not models.ChannelOfVoice.objects.filter(urlCode=random_value).exists():
             return random_value
         
 def getCategoryCode():
