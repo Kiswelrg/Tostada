@@ -45,6 +45,7 @@ import ToolHead from '../../ToolHead/ToolHead.vue'
 import Welcome from '../../Welcome/Welcome.vue'
 import { ref, computed, watch } from 'vue'
 import Message from '../../Components/Message/Message.vue'
+import { useWatchOnce } from '@/util/watcher'
 const props = defineProps([
     'tool-detail',
     'introToMsg'
@@ -124,6 +125,7 @@ const messages = ref([
     }
 ])
 
+
 const sortedMessages = computed(() => {
     if (!messages || !messages.value || !messages.value.length) return []
     return messages.value.toSorted((a,b) => {
@@ -133,6 +135,7 @@ const sortedMessages = computed(() => {
     })
 })
 
+
 watch(filtered_intro, (newV) => {
     props.introToMsg(newV)
 })
@@ -141,6 +144,24 @@ watch(filtered_intro, (newV) => {
 const onAddMessage = (l) => {
     messages.value.push(l)
 }
+
+const chatSocket = ref(undefined)
+const { stopped, stopWatcher } = useWatchOnce(() => props.toolDetail,
+  (newValue, old) => {
+    if (newValue !== undefined && newValue.cid !== undefined) {
+        const urlString = import.meta.env.VITE_BACKEND_URL;
+        const url = new URL(urlString);
+        chatSocket.value = new WebSocket(
+            `ws://${url.host}/ws/chat/${newValue.cid}/`
+        )
+        chatSocket.value.onopen = function(e) {
+            console.log("WebSocket connection established");
+        };
+        return true
+    }
+    return false
+  }
+)
 
 
 </script>

@@ -11,6 +11,7 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth import authenticate, login, logout
 
 from UtilGlobal.print import printc
 import hashlib
@@ -104,12 +105,16 @@ def DoSignIn(request):
         printc([f'real:  {request.session["code"]}', f'given: {request.POST["code"]}'], isList = True)
         msg = 1
     else:
-        u = AUser.objects.filter(username = request.POST['username']).first()
-        if u and check_password(pwd, u.password):
+        username = request.POST['username']
+        u = AUser.objects.filter(username = username).first()
+        # if u and check_password(pwd, u.password):
+        user = authenticate(request, username = username, password = pwd)
+        if u and user is not None:
             state = True
             msg = 11
             request.session['isLoggedIn'] = True
-            request.session['username'] = request.POST['username']
+            request.session['username'] = username
+            login(request, user)
         else:
             msg = 2
             if u:
@@ -191,6 +196,7 @@ def DoLogOut(request):
         del request.session['isLoggedIn']
     if request.session.has_key('username'):
         del request.session['username']
+    logout(request)
     return JsonResponse({'r': 1})
 
 
@@ -199,6 +205,7 @@ def LogOut(request):
         del request.session['isLoggedIn']
     if request.session.has_key('username'):
         del request.session['username']
+    logout(request)
     return HttpResponseRedirect(reverse('account:login'))
 
 
