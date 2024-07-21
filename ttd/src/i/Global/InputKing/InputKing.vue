@@ -1,6 +1,9 @@
 <template>
     <div class="inputking flex flex-col px-2 h-fit w-full grow-0 shrink-0 bg-[#313338] z-10">
-        <Arg :cur-method-detail="curMethodDetail" :cur-args="curArgs" v-if="Object.keys(curMethodDetail).length !== 0" @update-args="onUpdateArgs"></Arg>
+        <Arg :cur-method-detail="curMethodDetail"
+             :cur-args="curArgs"
+             v-if="Object.keys(curMethodDetail).length !== 0"
+             @update-args="onUpdateArgs"></Arg>
         <div class="wrapper flex justify-between mb-1 bg-[#383a40] w-full h-[44.32px] rounded-lg z-[2]">
             <div class="left-buttons h-full flex items-center ml-2">
                 <div class="flex">
@@ -13,8 +16,11 @@
 
                 <div class="flex rounded-md shadow-sm w-full h-full text-3s">
                     <div class="flex">
-                        <input type="text" :placeholder="curPlaceHolder" class="w-full text-md my-2 bg-inputking-bg outline-none font-light"
-                        @keyup.enter="runToolMethod">
+                        <input type="text"
+                               :placeholder="curPlaceHolder"
+                               class="w-full text-md my-2 bg-inputking-bg outline-none font-light"
+                               v-model="mainInputText"
+                               @keyup.enter="runToolMethod">
                     </div>
                 </div>
 
@@ -23,10 +29,14 @@
 
                 <div class="flex shadow-sm w-16 h-8">
                     <div class="h-full">
-                        <Drop class="h-8 w-16" :down="false" 
-                        @on-choose-method="chooseMethod"
-                        :cur-method="curMethodCode"
-                        :height="30" :menu-gap="6" :has-icon="false" :methods-list="methodsList"></Drop>
+                        <Drop class="h-8 w-16"
+                              :down="false"
+                              @on-choose-method="chooseMethod"
+                              :cur-method="curMethodCode"
+                              :height="30"
+                              :menu-gap="6"
+                              :has-icon="false"
+                              :methods-list="methodsList"></Drop>
                     </div>
                 </div>
 
@@ -44,7 +54,7 @@
             </div>
         </div>
         <div class="h-[3px] w-full bg-white rounded-lg"></div>
-        
+
     </div>
 </template>
 
@@ -56,6 +66,7 @@ import { jsonWithBigInt } from '@/util/parse'
 import { getCookie } from '@/util/session'
 const props = defineProps([
     'tool-detail',
+    'chat-socket'
 ])
 
 const emit = defineEmits([
@@ -63,10 +74,10 @@ const emit = defineEmits([
 ])
 
 onMounted(() => {
-    
+
 })
 
-
+const mainInputText = ref('')
 const isRunningTool = ref(false)
 const curMethodCode = ref(0)
 const curMethod = ref({})
@@ -98,7 +109,7 @@ const methodsList = computed(() => {
 
 watch(methodsList, (newV) => {
     curArgs.value = {}
-    if (newV && newV.groups !== undefined){
+    if (newV && newV.groups !== undefined) {
         for (const group of newV.groups) {
             for (const method of group.methods) {
                 if (curMethodCode.value != -1) break
@@ -128,46 +139,67 @@ const curMethodDetail = computed(() => {
     return methodDetail(curMethodCode.value)
 })
 
-async function runToolMethod() {
-  // forbit running constantly
-  if (isRunningTool.value) return
-  isRunningTool.value = true
-
-  // set RunTool button available in 5 seconds
-  setTimeout(()=>{
-    isRunningTool.value = false
-  }, 5000)
-
-  // set method
-  var form_data = new FormData()
-  curArgs.value['method-name'] = curMethodDetail.value.display_name
-  curArgs.value['method-code'] = curMethodCode.value
-  curArgs.value['sub_class'] = props.toolDetail['additional']['sub_class']
-
-  for (var v in curArgs.value) {
-    form_data.append(v, curArgs.value[v])
-  }
-  const response = await fetch(
-    `/api/i/runtool/${props.toolDetail.cid}/`,
-    {
-      method: "POST",
-      body: form_data,
-      headers: {
-        "X-CSRFToken": getCookie("csrftoken")
-      }
+const sendMessageInChannel = () => {
+    if (mainInputText.value == '') return
+    const d = {
+        'type': 'normal',
+        'channel_cid': (props.toolDetail.cid).toString(),
+        'content': mainInputText.value,
+        'is_private': false,
+        'mentioned_user': undefined,
+        'tool_used': undefined,
     }
-  )
-  if (response.ok) {
-    const text = await response.text()
-    const r = jsonWithBigInt(text)
-    console.log(`RunTool (fetch status: ${r.r}): `)
-    const d = JSON.parse(r.data)
-    emit('add-message', d)
+    props.chatSocket.send(JSON.stringify({
+        'message': d
+    }));
+    mainInputText.value = '';
+}
 
-  } else {
-    console.log(response.status)
-  }
-  isRunningTool.value = false
+async function runToolMethod() {
+    // no tool method
+    if (curMethodCode.value == 0 || curMethodCode.value == -1) {
+        sendMessageInChannel()
+        return
+    }
+    // forbit running constantly
+    if (isRunningTool.value) return
+    isRunningTool.value = true
+
+    // set RunTool button available in 5 seconds
+    setTimeout(() => {
+        isRunningTool.value = false
+    }, 5000)
+
+    // set method
+    var form_data = new FormData()
+    curArgs.value['method-name'] = curMethodDetail.value.display_name
+    curArgs.value['method-code'] = curMethodCode.value
+    curArgs.value['sub_class'] = props.toolDetail['additional']['sub_class']
+
+    for (var v in curArgs.value) {
+        form_data.append(v, curArgs.value[v])
+    }
+    const response = await fetch(
+        `/api/i/runtool/${props.toolDetail.cid}/`,
+        {
+            method: "POST",
+            body: form_data,
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken")
+            }
+        }
+    )
+    if (response.ok) {
+        const text = await response.text()
+        const r = jsonWithBigInt(text)
+        console.log(`RunTool (fetch status: ${r.r}): `)
+        const d = JSON.parse(r.data)
+        emit('add-message', d)
+
+    } else {
+        console.log(response.status)
+    }
+    isRunningTool.value = false
 }
 
 

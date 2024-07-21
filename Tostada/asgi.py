@@ -13,14 +13,13 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 import message.routing
+from channels.security.websocket import AllowedHostsOriginValidator
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Tostada.settings')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
-        URLRouter(
-            message.routing.websocket_urlpatterns
-        )
-    ),
+    "websocket": AllowedHostsOriginValidator(
+            AuthMiddlewareStack(URLRouter(message.routing.websocket_urlpatterns))
+        ),
 })

@@ -39,17 +39,25 @@ class RedisChatStorage(ChatStorage):
     # async def initialize(self):
     #     pass
 
-    async def add_active_user(self, channel_id, user_id):
-        await self.redis.sadd(f'active_users:{channel_id}', user_id)
+    async def add_active_user(self, channel_cid, user_id):
+        await self.redis.sadd(f'active_users:{channel_cid}', user_id)
 
-    async def remove_user(self, channel_id, user_id):
-        await self.redis.srem(f'active_users:{channel_id}', user_id)
+    async def remove_user(self, channel_cid, user_id):
+        return await self.redis.srem(f'active_users:{channel_cid}', user_id)
 
-    async def get_active_users(self, channel_id):
-        return await self.redis.smembers(f'active_users:{channel_id}')
+    async def get_active_users(self, channel_cid):
+        key = f'active_users:{channel_cid}'
+        exists = await self.redis.exists(key)
+        if exists:
+            return await self.redis.smembers(key)
+        else:
+            return None  # or an empty list, or however you want to handle this case
 
-    async def is_in_channel(self, channel_id, user_id):
-        return await self.redis.sismember(f'active_users:{channel_id}', user_id)
+    async def is_channel_exist(self, channel_cid):
+        return await self.redis.exists(f'active_users:{channel_cid}')
+
+    async def is_user_in_channel(self, channel_cid, user_id):
+        return await self.redis.sismember(f'active_users:{channel_cid}', user_id)
     
 
 class CassandraChatStorage(ChatStorage):

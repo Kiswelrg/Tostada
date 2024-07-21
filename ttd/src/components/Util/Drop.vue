@@ -117,7 +117,7 @@ const methods = computed(() => {
         methods: [{
             code: -1,
             global_index: 0,
-            display_name: '默认',
+            display_name: '聊天',
             input: [],
             output: []
         }]

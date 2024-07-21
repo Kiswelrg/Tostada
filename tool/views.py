@@ -39,6 +39,7 @@ def Home(request):
 
 # Fetch all tool servers that a user has joined
 def fetch_user_tool_servers(request):
+    print(request.user)
     # tool_servers = Server.objects.filter(user_server_auths__user__username=request.session['username'])
     u_s_role = UserServerRole.objects.filter(user__username=request.session['username'])
     data = [

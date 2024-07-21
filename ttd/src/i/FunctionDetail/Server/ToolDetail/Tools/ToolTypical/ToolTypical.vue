@@ -34,7 +34,7 @@
             <div class="w-full h-3 block invisible"></div>
         </div>
         
-        <InputKing class="flex-none" :tool-detail="toolDetail" @add-message="onAddMessage"/>
+        <InputKing class="flex-none" :tool-detail="toolDetail" :chat-socket="chatSocket" @add-message="onAddMessage"/>
     </div>
 
 </template>
@@ -46,6 +46,8 @@ import Welcome from '../../Welcome/Welcome.vue'
 import { ref, computed, watch } from 'vue'
 import Message from '../../Components/Message/Message.vue'
 import { useWatchOnce } from '@/util/watcher'
+import { getCookie } from '@/util/session'
+const chatSocket = ref(undefined)
 const props = defineProps([
     'tool-detail',
     'introToMsg'
@@ -78,7 +80,7 @@ const messagedIntro = computed(() => {
                 'nickname': 'Kiswelrg',
                 'date_sent': '2024-02-21T02:26:27Z',
                 'id': 0,
-                'isEdited': {
+                'is_edited': {
                     'state': false,
                     'text': 'edited'
                 },
@@ -98,13 +100,30 @@ const messagedIntro = computed(() => {
 
 const messages = ref([
     {
-        'nickname': 'Kiswelrg',
-        'date_sent': '2024-02-21T02:26:27Z',
-        'id': 438597598,
-        'isEdited': {
-            'state': true,
-            'text': 'edited'
+        'sender': {
+            'nickname': 'Kis',
+            'username': 'Kiswelrg',
         },
+        'mentioned_user': {
+            'nickname': 'Kis',
+            'username': 'Kiswelrg',
+        },
+        'tool_used': {
+            'name': 'Welcome',
+            'description': 'Welcome to Tostada.com, start using tools by sending messages!',
+            'app_name': 'some_app'
+        },
+        'time_sent': '2024-02-21T02:26:27Z',
+        'type': 'normal',
+        'cid': 438597598,
+        'is_edited': {
+            'state': true,
+            'text': 'edited',
+            'last_edited': '2024-02-21T02:26:27Z'
+        },
+        'is_group_head': true,
+        'is_private': false,
+        'avatar_src': '/static/@me/1F955.svg',
         'contents': [
             {
                 'type': 'Text',
@@ -120,8 +139,6 @@ const messages = ref([
                 'content': ', start using tools by sending messages!',
             }
         ],
-        'isGroupHead': true,
-        'avatar_src': '/static/@me/1F955.svg'
     }
 ])
 
@@ -145,18 +162,31 @@ const onAddMessage = (l) => {
     messages.value.push(l)
 }
 
-const chatSocket = ref(undefined)
 const { stopped, stopWatcher } = useWatchOnce(() => props.toolDetail,
   (newValue, old) => {
     if (newValue !== undefined && newValue.cid !== undefined) {
-        const urlString = import.meta.env.VITE_BACKEND_URL;
-        const url = new URL(urlString);
+        const urlString = import.meta.env.VITE_BACKEND_URL
+        const url = new URL(urlString)
         chatSocket.value = new WebSocket(
             `ws://${url.host}/ws/chat/${newValue.cid}/`
         )
         chatSocket.value.onopen = function(e) {
-            console.log("WebSocket connection established");
-        };
+            console.log("WS/CHAT connection established")
+        }
+        chatSocket.value.onmessage = function(e) {
+            const data = JSON.parse(e.data)
+            console.log('Got message:')
+            console.log(data)
+        }
+
+        chatSocket.value.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly')
+        }
+
+        chatSocket.value.onerror = function(error) {
+            console.error('WebSocket Error: ', error)
+        }
+
         return true
     }
     return false

@@ -6,7 +6,7 @@
             <div class="belly overflow-y-auto">
                 <div class="introduction">
                     <div class="introwrapper flex flex-col items-left text-center">
-                        <div v-for="_ in 2" class="">
+                        <div v-for="_ in 2" class="hidden">
                             <span class="text-sm text-left text-2s">小炒计算器(1)、clash config合成器(2+)、</span>
                             <span class="text-sm text-left text-2s">便利贴(big)</span>
                         </div>

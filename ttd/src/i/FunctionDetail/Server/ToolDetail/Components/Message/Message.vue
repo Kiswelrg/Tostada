@@ -2,20 +2,20 @@
     <li class="messageListItem group my-0 border-1 border-solid border-white min-h-1 hover:bg-[#2e3035] w-full outline-none relative">
         <div
             class="message select-text break-words relative pr-12 py-[0.125rem] pl-[72px] mt-0"
-            :class="{'mt-[1.0625rem]': msg['isGroupHead'], 'min-h-[1.375rem]': !msg['isGroupHead'], 'min-h-[2.75rem]': msg['isGroupHead']}"
+            :class="{'mt-[1.0625rem]': msg['is_group_head'], 'min-h-[1.375rem]': !msg['is_group_head'], 'min-h-[2.75rem]': msg['is_group_head']}"
             >
             <div class="message-contents static ml-0 pl-0 indent-0">
                 <img 
-                    v-if="msg['isGroupHead']"
+                    v-if="msg['is_group_head']"
                     :src="msg['avatar_src']"
                     alt=""
                     class="avatar pointer-events-auto [alt]:indent-[-9999px] absolute left-4 mt-[calc(4px-0.125rem)] w-10 h-10 rounded-[50%] overflow-hidden cursor-pointer select-none z-[1]">
                 <h3
-                    v-if="msg['isGroupHead']"
+                    v-if="msg['is_group_head']"
                     class="header overflow-hidden relative leading-[1.375rem] text-[hsl( 214 calc( 1 * 8.1%) 61.2% / 1)] whitespace-break-spaces">
                     <span class="messageUsername mr-1">
                         <span
-                              class="username text-base leading-[1.375rem] font-medium text-[hsl( 220 calc( 1 * 13%) 95.5% / 1)] inline align-baseline relative overflow-hidden">{{ props.msg.nickname }}
+                              class="username text-base leading-[1.375rem] font-medium text-[hsl( 220 calc( 1 * 13%) 95.5% / 1)] inline align-baseline relative overflow-hidden">{{ props.msg.sender.username }}
                         </span>
                     </span>
                     <div
@@ -26,7 +26,7 @@
                     </div>
                 </h3>
 
-                <span v-if="!msg['isGroupHead']" class="compact-timestamp text-[11px] inline-block opacity-0 indent-0 font-text-muted mr-1 text-right select-none w-14 h-[1.375rem] left-0 absolute">
+                <span v-if="!msg['is_group_head']" class="compact-timestamp text-[11px] inline-block opacity-0 indent-0 font-text-muted mr-1 text-right select-none w-14 h-[1.375rem] left-0 absolute">
                     <time title="Today at 12:39 PM" datetime="2024-03-15T04:39:20.353Z" class="pointer-events-none indent-0 text-text-muted text-right select-none leading-[22px]">{{ time_XM }}</time>
                 </span>
 
@@ -34,7 +34,7 @@
                     class="message-content pl-[72px] -ml-[72px] select-text overflow-hidden relative indent-0 text-base leading-[1.375rem] whitespace-break-spaces break-words text-[color:hsl( 210 calc( 1 * 9.1%) 87.1% / 1)]  font-light">
                     
                     <component v-for="(item, index) in msg['contents']" :key="index" :is="tabs[item['type']]" :msg-item="item" class="text-[color:var(--text-normal)] text-3s"></component>
-                    <Edited v-if="msg['isEdited']['state']" :is-edited="msg['isEdited']"></Edited>
+                    <Edited v-if="msg['is_edited']['state']" :is-edited="msg['is_edited']"></Edited>
                 </div>
             </div>
 
@@ -45,7 +45,7 @@
             <div class="buttonContainer absolute top-0 right-0">
                 <!-- if isGroupTop -top-16px -->
                 <div
-                     class="buttons z-[1] isGroupHead -top-[25px] absolute right-0 py-0 pl-8 pr-[14px] opacity-0 group-hover:opacity-1">
+                     class="buttons z-[1] is_group_head -top-[25px] absolute right-0 py-0 pl-8 pr-[14px] opacity-0 group-hover:opacity-1">
                     <div
                          class="buttons-wrapper bg-msgbutton-primary buttonlist-shadow grid grid-flow-col box-border h-8 rounded items-center justify-start select-none transition-shadow duration-100 ease-out relative overflow-hidden z-10">
                         <div
@@ -88,19 +88,19 @@ const props = defineProps({
   msg: Object,
 })
 
-const isGroupHead = computed(() => {
-    return props.msg?.value?.isGroupHead ?? false
+const is_group_head = computed(() => {
+    return props.msg?.value?.is_group_head ?? false
 })
 
 const time = computed(() => {
-    if (!props.msg || !props.msg['date_sent']) return ''
-    const d = new Date(props.msg['date_sent'])
+    if (!props.msg || !props.msg['time_sent']) return ''
+    const d = new Date(props.msg['time_sent'])
     return `${d.getHours()}:${d.getMinutes()}`
 })
 
 const time_XM = computed(() => {
-    if (!props.msg || !props.msg['date_sent']) return ''
-    const d = new Date(props.msg['date_sent'])
+    if (!props.msg || !props.msg['time_sent']) return ''
+    const d = new Date(props.msg['time_sent'])
     const m = d.getHours() >= 12 ? 'P' : 'A'
     return `${d.getHours()}:${d.getMinutes()} ${m}M`
 })
@@ -117,7 +117,7 @@ const time_XM = computed(() => {
 
 <style lang="scss" scoped>
 /* Define a custom class with the --elevation-stroke variable */
-.isGroupHead {
+.is_group_head {
     top: -16px;
 }
 

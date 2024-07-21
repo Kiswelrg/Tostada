@@ -327,6 +327,7 @@ class UserServerRole(models.Model):
         on_delete=models.CASCADE,
         related_name='user_server_auths'
     )
+    nickname = models.CharField(max_length=64, blank=True)
     server = models.ForeignKey(
         Server,
         on_delete=models.CASCADE,

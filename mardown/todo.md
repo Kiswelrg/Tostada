@@ -13,6 +13,7 @@
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
+|msg|database msg|before ws connection, check channel/server permission||
 |msg|database msg|store msg in db||
 |msg|delete msg|be able to delete||
 |channel|create invite|invite user to `Channel`||

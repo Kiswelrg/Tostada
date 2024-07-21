@@ -57,7 +57,6 @@ INSTALLED_APPS = [
     'tool',
     'message',
     'project',
-    'msg',
 ]
 
 MIDDLEWARE = [
