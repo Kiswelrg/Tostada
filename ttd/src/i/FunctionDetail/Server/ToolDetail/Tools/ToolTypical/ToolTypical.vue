@@ -48,6 +48,7 @@ import Message from '../../Components/Message/Message.vue'
 import { useWatchOnce } from '@/util/watcher'
 import { getCookie } from '@/util/session'
 const chatSocket = ref(undefined)
+const reconnectAttempts = ref(0);
 const props = defineProps([
     'tool-detail',
     'introToMsg'
@@ -110,7 +111,7 @@ const messages = ref([
         },
         'tool_used': {
             'name': 'Welcome',
-            'description': 'Welcome to Tostada.com, start using tools by sending messages!',
+            'description': 'some_tool desc',
             'app_name': 'some_app'
         },
         'time_sent': '2024-02-21T02:26:27Z',
@@ -119,7 +120,7 @@ const messages = ref([
         'is_edited': {
             'state': true,
             'text': 'edited',
-            'last_edited': '2024-02-21T02:26:27Z'
+            'last_edit': '2024-02-21T02:26:27Z'
         },
         'is_group_head': true,
         'is_private': false,
@@ -136,7 +137,7 @@ const messages = ref([
             }, 
             {
                 'type': 'Text',
-                'content': ', start using tools by sending messages!',
+                'content': ', start using tools by selecting a Bot at the bottom right corner and send messages!',
             }
         ],
     }
@@ -167,26 +168,43 @@ const { stopped, stopWatcher } = useWatchOnce(() => props.toolDetail,
     if (newValue !== undefined && newValue.cid !== undefined) {
         const urlString = import.meta.env.VITE_BACKEND_URL
         const url = new URL(urlString)
-        chatSocket.value = new WebSocket(
-            `ws://${url.host}/ws/chat/${newValue.cid}/`
-        )
-        chatSocket.value.onopen = function(e) {
-            console.log("WS/CHAT connection established")
-        }
-        chatSocket.value.onmessage = function(e) {
-            const data = JSON.parse(e.data)
-            console.log('Got message:')
-            console.log(data)
-        }
+        const connect = () => {
+            chatSocket.value = new WebSocket(
+                `ws://${url.host}/ws/chat/${newValue.cid}/`
+            )
+            chatSocket.value.onopen = function(e) {
+                console.log("WS/CHAT connection established")
+                reconnectAttempts.value = 0
+            }
+            chatSocket.value.onmessage = function(e) {
+                const data = JSON.parse(e.data)
+                console.log('Got message: ')
+                console.log(data)
+                for (d of data){
+                    if (d.type == 'chat_message'){
+                        messages.value.push(d['message'])
+                    }
 
-        chatSocket.value.onclose = function(e) {
-            console.error('Chat socket closed unexpectedly')
-        }
+                }
+            }
 
-        chatSocket.value.onerror = function(error) {
-            console.error('WebSocket Error: ', error)
-        }
+            chatSocket.value.onclose = function(e) {
+                console.error('Chat socket closed unexpectedly')
+                if (reconnectAttempts.value < 6) {
+                    const time = Math.pow(2, reconnectAttempts.value) * 1000;
+                    console.log(`Reconnecting in ${time / 1000} seconds...`);
+                    setTimeout(connect, time);
+                    reconnectAttempts.value++;
+                } else {
+                    console.error('Max reconnection attempts reached. Could not reconnect.');
+                }
+            }
 
+            chatSocket.value.onerror = function(error) {
+                console.error('WebSocket Error: ', error)
+            }
+        }
+        connect()
         return true
     }
     return false

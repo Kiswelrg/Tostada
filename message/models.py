@@ -4,7 +4,7 @@ from .util import getDirectMessageCode, getGroupMessageCode
 
 
 class Message(models.Model):
-    content = models.TextField()
+    contents = models.JSONField(blank=True, null=True)
     time_sent = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
     is_edited = models.BooleanField(default=False)

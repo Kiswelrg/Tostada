@@ -139,12 +139,22 @@ const curMethodDetail = computed(() => {
     return methodDetail(curMethodCode.value)
 })
 
+// for now, 
+const text2MsgContents = () => {
+    let res = []
+    res.push({
+        'type': 'Text',
+        'content': mainInputText.value
+    })
+    return res
+}
+
 const sendMessageInChannel = () => {
     if (mainInputText.value == '') return
     const d = {
         'type': 'normal',
         'channel_cid': (props.toolDetail.cid).toString(),
-        'content': mainInputText.value,
+        'contents': text2MsgContents(),
         'is_private': false,
         'mentioned_user': undefined,
         'tool_used': undefined,

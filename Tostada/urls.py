@@ -31,4 +31,6 @@ urlpatterns = [
     re_path(r'^(?:api/)?account/', include('account.urls', namespace = 'account')),
     path('favicon.svg', lambda request: HttpResponseRedirect('/static/favicon.svg')),
     path('favicon.ico', lambda request: HttpResponseRedirect('/static/favicon.svg')),
+
+# this is for dev only, change before going to production
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

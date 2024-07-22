@@ -32,15 +32,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     @database_sync_to_async
     def save_groupmessage(self, message, GM_type = 'normal'):
-        print(message)
-        GroupMessage.objects.create(
+        msg = GroupMessage.objects.create(
             sender=AUser.objects.get(id=self.user.id),
             is_private=message['is_private'],
             channel=ChannelOfChat.objects.get(urlCode=self.channel_cid),
             _type=GM_type,
-            content=json.dumps(message)
+            contents=json.dumps(message['contents'])
         )
-        return True
+        return msg
 
     @require_login
     async def connect(self):
@@ -66,7 +65,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_channel_name,
             {
                 'type': 'user_join',
-                'username': self.user.username
+                'data': [
+                    {'username': self.user.username}
+                ]
             }
         )
 
@@ -85,7 +86,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_channel_name,
             {
                 'type': 'user_leave',
-                'username': self.user.username
+                'data': [
+                    {'username': self.user.username}
+                ]
             }
         )
 
@@ -99,19 +102,37 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = text_data_json['message']
 
         try:
-            chat_msg = await self.save_groupmessage(message)
+            msg = await self.save_groupmessage(message)
 
             # Send message to room group
             await self.channel_layer.group_send(
                 self.room_channel_name,
                 {
                     'type': 'chat_message',
-                    'message': message,
-                    'username': self.user.username
+                    'data': [
+                        {
+                            'message': {
+                                'sender': {
+                                    'username': self.user.username,
+                                },
+                                'mentioned_user': {},
+                                'tool_used': {},
+                                'time_sent': msg.time_sent.isoformat(),
+                                'type': msg._type,
+                                'cid': msg.urlCode,
+                                'is_edited': {
+                                    'state': msg.is_edited,
+                                    'text': 'edited',
+                                    'last_edit':msg.last_edit.isoformat(),
+                                },
+                                'is_private': msg.is_private,
+                                'contents': json.loads(msg.contents), # load in frontend, save some performance for Django
+                            }
+                        }
+                    ]
                 }
             )
         except Exception as e:
-            raise e
             await self.send(text_data=json.dumps({
                 'error': 'Failed to save message'
             }))
@@ -120,15 +141,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @require_login
     async def chat_message(self, event):
-        print(f'Msg: {event}')
+        data = event['data']
+        for me
         message = event['message']
-        username = event['username']
+        print(f'Msg: {message["contents"]}')
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'chat_message',
             'message': message,
-            'username': username
         }))
 
     async def user_join(self, event):
