@@ -147,8 +147,8 @@ const messages = ref([
 const sortedMessages = computed(() => {
     if (!messages || !messages.value || !messages.value.length) return []
     return messages.value.toSorted((a,b) => {
-        const d1 = new Date(a['date_sent'])
-        const d2 = new Date(b['date_sent'])
+        const d1 = new Date(a['time_sent'])
+        const d2 = new Date(b['time_sent'])
         return d1 - d2
     })
 })
@@ -178,19 +178,18 @@ const { stopped, stopWatcher } = useWatchOnce(() => props.toolDetail,
             }
             chatSocket.value.onmessage = function(e) {
                 const data = JSON.parse(e.data)
-                console.log('Got message: ')
-                console.log(data)
-                for (d of data){
-                    if (d.type == 'chat_message'){
-                        messages.value.push(d['message'])
-                    }
-
-                }
+                console.log('Got messages: ')
+                if (data['type'] == 'chat_message') {
+                    messages.value.push.apply(messages.value, data['messages'])
+                } else if (data['type'] == 'history_message') {
+                    messages.value.push.apply(messages.value, data['messages'])
+                } else if (data['type'] == 'chat_message_delete') {
+                } 
             }
 
             chatSocket.value.onclose = function(e) {
                 console.error('Chat socket closed unexpectedly')
-                if (reconnectAttempts.value < 6) {
+                if (reconnectAttempts.value < 12) {
                     const time = Math.pow(2, reconnectAttempts.value) * 1000;
                     console.log(`Reconnecting in ${time / 1000} seconds...`);
                     setTimeout(connect, time);

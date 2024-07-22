@@ -4,6 +4,8 @@ from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
 from django.utils import timezone
+# from asgiref.sync import sync_to_async
+from django.shortcuts import get_object_or_404
 from .models import GroupMessage
 from tool.models import ChannelOfChat
 from account.models import AUser
@@ -43,6 +45,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @require_login
     async def connect(self):
+        if self.storage.redis is None:
+            await self.storage.initialize()
         self.channel_cid = self.scope['url_route']['kwargs']['channel_cid']
         self.room_channel_name = f'chat_{self.channel_cid}'
         self.user = self.scope['user']
@@ -55,8 +59,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         
         # Add user to active users
-        if self.storage.is_user_in_channel(self.channel_cid, self.user.id):
-            self.storage.add_active_user(self.channel_cid, self.user.id)
+        if await self.storage.is_user_in_channel(self.channel_cid, self.user.id):
+            await self.storage.add_active_user(self.channel_cid, self.user.id)
 
         await self.accept()
 
@@ -70,10 +74,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 ]
             }
         )
+        await self.fetch_messages()
 
     async def disconnect(self, close_code):
         # Remove user from active users
-        self.storage.remove_user(self.channel_cid, self.user.id)
+        await self.storage.remove_user(self.channel_cid, self.user.id)
 
         # Leave room group
         await self.channel_layer.group_discard(
@@ -92,12 +97,58 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
+    @require_login
+    async def fetch_messages(self):
+        pass
+        if not self.storage.is_channel_exist(self.channel_cid):
+            await self.send(text_data=json.dumps({
+                'error': 'Channel does not exist'
+            }))
+            return
+        
+
+        @database_sync_to_async
+        def get_messages():
+            channel = get_object_or_404(ChannelOfChat, urlCode=self.channel_cid)
+            return list(channel.all_msgs.all()[:50])  # Use .all() before slicing
+
+        msgs = await get_messages()
+
+
+        await self.channel_layer.group_send(
+            self.room_channel_name,
+            {
+                'type': 'history_message',
+                'messages': [{
+                    'sender': {
+                        'username': self.user.username,
+                    },
+                    'mentioned_user': {},
+                    'tool_used': {},
+                    'time_sent': msg.time_sent.isoformat(),
+                    'type': msg._type,
+                    'cid': msg.urlCode,
+                    'is_edited': {
+                        'state': msg.is_edited,
+                        'text': 'edited',
+                        'last_edit':msg.last_edit.isoformat(),
+                    },
+                    'is_private': msg.is_private,
+                    'contents': json.loads(msg.contents), # load in frontend, save some performance for Django
+                } for msg in msgs]
+                
+            }
+        )
+
 
     @require_login
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
         if text_data_json.get('command') == 'get_active_users':
             await self.get_active_users(None)
+            return
+        if text_data_json.get('command') == 'delete_message':
+            await self.delete_message(text_data_json['message_cid'])
             return
         message = text_data_json['message']
 
@@ -109,27 +160,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.room_channel_name,
                 {
                     'type': 'chat_message',
-                    'data': [
-                        {
-                            'message': {
-                                'sender': {
-                                    'username': self.user.username,
-                                },
-                                'mentioned_user': {},
-                                'tool_used': {},
-                                'time_sent': msg.time_sent.isoformat(),
-                                'type': msg._type,
-                                'cid': msg.urlCode,
-                                'is_edited': {
-                                    'state': msg.is_edited,
-                                    'text': 'edited',
-                                    'last_edit':msg.last_edit.isoformat(),
-                                },
-                                'is_private': msg.is_private,
-                                'contents': json.loads(msg.contents), # load in frontend, save some performance for Django
-                            }
-                        }
-                    ]
+                    'messages': [{
+                        'sender': {
+                            'username': self.user.username,
+                        },
+                        'mentioned_user': {},
+                        'tool_used': {},
+                        'time_sent': msg.time_sent.isoformat(),
+                        'type': msg._type,
+                        'cid': msg.urlCode,
+                        'is_edited': {
+                            'state': msg.is_edited,
+                            'text': 'edited',
+                            'last_edit':msg.last_edit.isoformat(),
+                        },
+                        'is_private': msg.is_private,
+                        'contents': json.loads(msg.contents), # load in frontend, save some performance for Django
+                    }]
+                    
                 }
             )
         except Exception as e:
@@ -138,33 +186,88 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }))
             print(f'Error saving msg: {e}')
 
+    
+    @require_login
+    async def delete_message(self, message_cid):
+        @database_sync_to_async
+        def delete_message_from_db():
+            try:
+                message = GroupMessage.objects.get(urlCode=message_cid, sender=self.user)
+                message.delete()
+                return True
+            except GroupMessage.DoesNotExist:
+                return False
+
+        success = await delete_message_from_db()
+        if success:
+            # Notify all clients about the deletion
+            await self.channel_layer.group_send(
+                self.room_channel_name,
+                {
+                    'type': 'message_deleted',
+                    'message_id': message_cid,
+                }
+            )
+        else:
+            await self.send(text_data=json.dumps({
+                'error': 'Failed to delete message'
+            }))
+
 
     @require_login
     async def chat_message(self, event):
-        data = event['data']
-        for me
-        message = event['message']
-        print(f'Msg: {message["contents"]}')
+        msgs = event['messages']
+        print(f'Msg: {[msg["contents"] for msg in msgs]}')
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'chat_message',
-            'message': message,
+            'messages': msgs,
         }))
+
+
+    @require_login
+    async def history_message(self, event):
+        msgs = event['messages']
+        print(f'Msg: {[msg["contents"] for msg in msgs]}')
+
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'type': 'history_message',
+            'messages': msgs,
+        }))
+
+    @require_login
+    async def message_deleted(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'message_deleted',
+            'message_cid': event['message_cid'],
+        }))
+
 
     async def user_join(self, event):
         # Send message about new user to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'user_join',
-            'username': event['username']
+            'users': [
+                {
+                    'username': user['username']
+                } for user in event['data']
+            ]
         }))
+
 
     async def user_leave(self, event):
         # Send message about user leaving to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'user_leave',
-            'username': event['username']
+            'users': [
+                {
+                    'username': user['username']
+                } for user in event['data']
+            ]
         }))
+
 
     @require_login
     async def get_active_users(self, event):
