@@ -116,7 +116,7 @@ const messages = ref([
         },
         'time_sent': '2024-02-21T02:26:27Z',
         'type': 'normal',
-        'cid': 438597598,
+        'cid': 0,
         'is_edited': {
             'state': true,
             'text': 'edited',
@@ -163,10 +163,57 @@ const onAddMessage = (l) => {
     messages.value.push(l)
 }
 
+const mergeLists = (newList) => {
+    const oldList = sortedMessages.value;
+    let i = 0, j = 0;
+    const mergedList = [];
+    const len1 = oldList.length;
+    const len2 = newList.length;
+
+    while (i < len1 && j < len2) {
+        if (oldList[i].cid === newList[j].cid) {
+            // If the IDs match, check time_sent
+            if (oldList[i].time_sent === newList[j].time_sent) {
+                mergedList.push(newList[j]);
+                i++;
+                j++;
+            } else {
+                // Handle the case where time_sent doesn't match
+                // Assuming you want to skip updating in this case
+                console.error(`2 msgs have identical id!`, oldList[i], newList[i])
+                // and we still push the newList item into mergeList, in case the loop goes deadlock
+                mergedList.push(newList[j]);
+                j++;
+            }
+        } else if (oldList[i].time_sent < newList[j].time_sent) {
+            mergedList.push(oldList[i]);
+            i++;
+        } else {
+            mergedList.push(newList[j]);
+            j++;
+        }
+    }
+
+    // Add remaining items from oldList
+    while (i < len1) {
+        mergedList.push(oldList[i]);
+        i++;
+    }
+
+    // Add remaining items from newList
+    while (j < len2) {
+        mergedList.push(newList[j]);
+        j++;
+    }
+    return mergedList;
+}
+
+
 const { stopped, stopWatcher } = useWatchOnce(() => props.toolDetail,
   (newValue, old) => {
     if (newValue !== undefined && newValue.cid !== undefined) {
         const urlString = import.meta.env.VITE_BACKEND_URL
+        console.log(urlString)
         const url = new URL(urlString)
         const connect = () => {
             chatSocket.value = new WebSocket(
@@ -182,7 +229,7 @@ const { stopped, stopWatcher } = useWatchOnce(() => props.toolDetail,
                 if (data['type'] == 'chat_message') {
                     messages.value.push.apply(messages.value, data['messages'])
                 } else if (data['type'] == 'history_message') {
-                    messages.value.push.apply(messages.value, data['messages'])
+                    messages.value = mergeLists(data['messages'])
                 } else if (data['type'] == 'chat_message_delete') {
                 } 
             }
