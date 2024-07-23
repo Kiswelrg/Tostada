@@ -229,7 +229,8 @@ const { stopped, stopWatcher } = useWatchOnce(() => props.toolDetail,
                 if (data['type'] == 'chat_message') {
                     messages.value.push.apply(messages.value, data['messages'])
                 } else if (data['type'] == 'history_message') {
-                    messages.value = mergeLists(data['messages'])
+                    // messages.value = mergeLists(data['messages'])
+                    messages.value = data['messages']
                 } else if (data['type'] == 'chat_message_delete') {
                 } 
             }
