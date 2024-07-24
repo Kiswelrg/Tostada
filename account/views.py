@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth import authenticate, login, logout
 
+from project.snowflake import snowflake_generator
 from UtilGlobal.print import printc
 import hashlib
 import json
@@ -25,7 +26,6 @@ from account.models import AUser
 
 
 def Home(request):
-    print('hit unknown')
     return render(request, 'index.html')
 
 

@@ -8,16 +8,18 @@
 |msg|reaction part|   |   ||
 |Channel Input|Function Selection Dropdown|   |   |✅|
 |FunctionList|Default Button|Find Servers|   ||
+|msg|database msg|store msg in db||✅|
 
 ### ToDo
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
+|django|database PK|change some models to use snowflake ID and modify PK scheme (using compound ones)||
 |msg|database msg|before ws connection, check channel/server permission||
-|msg|database msg|store msg in db||
 |msg|delete msg|be able to delete||
 |channel|create invite|invite user to `Channel`||
 |msg|mention|create `mention` in msg||
+|urls|serve media with permission|||
 |user|`timeout` user|||
 |user|`ban` user|||
 |user|`kick` user|||
