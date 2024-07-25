@@ -14,7 +14,8 @@
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
-|django|database PK|change some models to use snowflake ID and modify PK scheme (using compound ones)||
+|django|database PK|change some models to use compound PK||
+|django|database PK|change some models to use snowflake ID||
 |msg|database msg|before ws connection, check channel/server permission||
 |msg|delete msg|be able to delete||
 |channel|create invite|invite user to `Channel`||
