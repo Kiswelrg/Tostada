@@ -1,4 +1,4 @@
-import random,string
+import random
 from . import models
 
 def getDirectMessageCode():

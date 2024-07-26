@@ -5,8 +5,8 @@ from django.http import Http404
 from django.utils.datastructures import MultiValueDictKeyError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from .models import Server, UserServerRole, UserChannelOfChatRole, UserChannelOfVoiceRole, ChannelOfChat, ChannelOfVoice, CategoryInServer
-from project.snowflake import snowflake_generator
+from .models import Server, UserServerRole, ChannelOfChat, ChannelOfVoice, CategoryInServer
+from .models import UserChannelOfChatRole, UserChannelOfVoiceRole
 from UtilGlobal.print import printc
 from .util.ImportTool import import_function_from_file, importFunction
 import json
@@ -130,6 +130,7 @@ def fetch_tool_server(request, tool_server_code):
             # Get the corresponding tool objects
             if tool_querys.exists():
                 tools[k] = tool_class_short[k].objects.filter(id__in=tool_querys)
+        
     
     category_dict = {}
     for k, tool_set in tools.items():
@@ -172,6 +173,7 @@ def fetch_tool(request, tool_class, tool_code):
     if not UserServerRole.objects.filter(server=tool.server, user__username=request.session['username']).exists():
         if not tool_role_short[tool_class].objects.filter(user__username=request.session['username'], tool=tool).exists():
             return JsonResponse({"r": False})
+        
     
     data = {
         "cid": str(tool.urlCode),
@@ -200,7 +202,7 @@ def run_tool(request, tool_code):
     tool_class = request.POST['sub_class']
     # add = Channel.objects.get(urlCode = tool_code).additional
     methods = (tool_class_full[tool_class].objects.get(urlCode = tool_code).method_names)
-    server_code = methods['tool'].strip().split('/')[0]
+    # server_code = methods['tool'].strip().split('/')[0]
     method_detail = None
     for g in methods['groups']:
         for m in g['methods']:

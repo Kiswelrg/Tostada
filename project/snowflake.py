@@ -15,7 +15,7 @@ def make_bucket(snowflake_id):
        # seconds since the DISCORD_EPOCH.
        timestamp = snowflake_id >> 22
    return int(timestamp / BUCKET_SIZE)
-  
+
   
 def make_buckets(start_id, end_id=None):
    return range(make_bucket(start_id), make_bucket(end_id) + 1)
@@ -49,4 +49,33 @@ class SnowflakeIDGenerator:
         return (timestamp << 22) | (self.machine_id << 12) | self.sequence
 
 # Global instance
-snowflake_generator = SnowflakeIDGenerator()
+# snowflake_generator = SnowflakeIDGenerator()
+
+tool_server_snowflake_generator = SnowflakeIDGenerator()
+def getToolServerSnowflakeID():
+    return tool_server_snowflake_generator.generate()
+
+tool_channelofchat_snowflake_generator = SnowflakeIDGenerator()
+def getToolChannelOfChatSnowflakeID():
+    return tool_channelofchat_snowflake_generator.generate()
+
+tool_channelofvoice_snowflake_generator = SnowflakeIDGenerator()
+def getToolChannelOfVoiceSnowflakeID():
+    return tool_channelofvoice_snowflake_generator.generate()
+
+tool_categoryinserver_snowflake_generator = SnowflakeIDGenerator()
+def getToolCategoryInServerSnowflakeID():
+    return tool_categoryinserver_snowflake_generator.generate()
+
+message_directmessage_snowflake_generator = SnowflakeIDGenerator()
+def getMessageDirectMessageSnowflakeID():
+    return message_directmessage_snowflake_generator.generate()
+
+message_groupmessage_snowflake_generator = SnowflakeIDGenerator()
+def getMessageGroupMessageSnowflakeID():
+    return message_groupmessage_snowflake_generator.generate()
+
+account_auser_snowflake_generator = SnowflakeIDGenerator()
+def getAccountAUserSnowflakeID():
+    return account_auser_snowflake_generator.generate()
+

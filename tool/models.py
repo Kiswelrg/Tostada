@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.dispatch import receiver
+from project.snowflake import getToolServerSnowflakeID, getToolChannelOfChatSnowflakeID, getToolChannelOfVoiceSnowflakeID, getToolCategoryInServerSnowflakeID
 import os
 
 from .util import model
@@ -30,7 +31,7 @@ class Server(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank = True)
     urlCode = models.PositiveBigIntegerField(
-        default=model.getServerCode, unique=True, db_index=True)
+        default=getToolServerSnowflakeID, unique=True, db_index=True, primary_key=True)
     date_created = models.DateTimeField(default=timezone.now)
     type = models.CharField(
         default='0',
@@ -151,6 +152,8 @@ class Server(models.Model):
             for item in save_list:
                 item.save()
 
+
+
 @receiver(models.signals.post_delete, sender=Server)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
     """
@@ -184,9 +187,10 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
         if os.path.isfile(old_file.path):
             os.remove(old_file.path)
 
+
 class CategoryInServer(models.Model):
     name = models.CharField(max_length=100)
-    server = models.ForeignKey(Server, on_delete=models.CASCADE, related_name='categories')
+    server = models.ForeignKey(Server, on_delete=models.CASCADE, related_name='categories', to_field='urlCode', null=True)
     type = models.CharField(
         default='0',
         max_length=2,
@@ -202,13 +206,14 @@ class CategoryInServer(models.Model):
         ]
         '''
         )
-    urlCode = models.PositiveBigIntegerField(default=model.getCategoryCode, unique=True, db_index=True)
+    urlCode = models.PositiveBigIntegerField(default=getToolCategoryInServerSnowflakeID, unique=True, db_index=True, primary_key=True)
     order = models.PositiveIntegerField(default=0)
     
     def __str__(self):
         return f"{self.name} in {self.server}"
 
 
+# Abstract Class
 class Channel(models.Model):
     def cover_dir_path(instance, filename):
         return f'cover/tool-{instance.urlCode}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
@@ -247,29 +252,33 @@ class Channel(models.Model):
 
 class ChannelOfChat(Channel):
     urlCode = models.PositiveBigIntegerField(
-        default=model.getChannelOfChatCode, unique=True, db_index=True)
+        default=getToolChannelOfChatSnowflakeID, unique=True, db_index=True, primary_key=True)
     category = models.ForeignKey(
         CategoryInServer,
         on_delete = models.CASCADE,
         related_name = 'channelofchats',
+        to_field='urlCode',
+        null=True
     )
     server = models.ForeignKey(
-        Server, on_delete=models.CASCADE, related_name='channelofchats')
+        Server, on_delete=models.CASCADE, related_name='channelofchats', to_field='urlCode', null=True)
     method_names = models.JSONField(default=EmptyJson, blank = True)
-    input = models.JSONField(default=EmptyJson, null=True, blank = True)
-    output = models.JSONField(default=EmptyJson, null=True, blank = True)
+    inputs = models.JSONField(default=EmptyJson, null=True, blank = True)
+    outputs = models.JSONField(default=EmptyJson, null=True, blank = True)
 
 
 class ChannelOfVoice(Channel):
     urlCode = models.PositiveBigIntegerField(
-        default=model.getChannelOfVoiceCode, unique=True, db_index=True)
+        default=getToolChannelOfVoiceSnowflakeID, unique=True, db_index=True, primary_key=True)
     category = models.ForeignKey(
         CategoryInServer,
         on_delete = models.CASCADE,
         related_name = 'channelofvoices',
+        to_field='urlCode',
+        null=True
     )
     server = models.ForeignKey(
-        Server, on_delete=models.CASCADE, related_name='channelofvoices')
+        Server, on_delete=models.CASCADE, related_name='channelofvoices', to_field='urlCode', null=True)
     method_names = models.JSONField(default=EmptyJson, blank = True)
     bots = models.JSONField(default=EmptyJson, null=True, blank = True)
 
@@ -303,7 +312,7 @@ class AuthorizationLevel(models.Model):
 class ServerRole(models.Model):
     name = models.CharField(max_length=64)
     server = models.ForeignKey(
-        Server, on_delete=models.CASCADE, related_name='server_roles')
+        Server, on_delete=models.CASCADE, related_name='server_roles', to_field='urlCode', null=True)
     description = models.CharField(max_length=512, default='')
     auth = models.ManyToManyField(
         AuthorizationLevel, related_name='server_roles')
@@ -331,7 +340,9 @@ class UserServerRole(models.Model):
     server = models.ForeignKey(
         Server,
         on_delete=models.CASCADE,
-        related_name='user_server_auths'
+        related_name='user_server_auths',
+        to_field='urlCode',
+        null=True
     )
     role = models.ForeignKey(ServerRole, verbose_name=_(
         "user role in the server"), on_delete=models.CASCADE, related_name='user_server_auths')
@@ -349,7 +360,7 @@ class UserChannelOfChatRole(models.Model):
         on_delete=models.CASCADE,
         related_name='user_channelofchat_auths'
     )
-    tool = models.ForeignKey(
+    channel = models.ForeignKey(
         ChannelOfChat,
         on_delete=models.CASCADE,
         related_name='user_channelofchat_auths'
@@ -371,7 +382,7 @@ class UserChannelOfVoiceRole(models.Model):
         on_delete=models.CASCADE,
         related_name='user_channelofvoice_auths'
     )
-    tool = models.ForeignKey(
+    channel = models.ForeignKey(
         ChannelOfVoice,
         on_delete=models.CASCADE,
         related_name='user_channelofvoice_auths'
@@ -385,3 +396,6 @@ class UserChannelOfVoiceRole(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user} in .. 服务器: {self.tool.server} .. 工具: {self.tool.name} .. 角色: {self.role.name}"
+    
+
+

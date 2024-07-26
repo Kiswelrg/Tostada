@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import AuthorizationLevel, Server, ServerRole, UserServerRole, UserChannelOfVoiceRole, UserChannelOfChatRole
+from .models import AuthorizationLevel, Server, ServerRole, UserServerRole
+from .models import UserChannelOfVoiceRole, UserChannelOfChatRole
 from .models import ChannelOfChat, ChannelOfVoice
 from .models import CategoryInServer
 

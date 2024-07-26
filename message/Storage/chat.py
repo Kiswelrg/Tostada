@@ -45,13 +45,13 @@ class RedisChatStorage(ChatStorage):
 
     async def add_active_user(self, channel_cid, user_id):
         if self.redis.scard(f'active_users:{channel_cid}' == 0):
-            self.redis.sadd(f'active_channels', channel_cid)
+            self.redis.sadd('active_channels', channel_cid)
         self.redis.sadd(f'active_users:{channel_cid}', user_id)
 
     async def remove_user(self, channel_cid, user_id):
         r = self.redis.srem(f'active_users:{channel_cid}', user_id)
-        if self.redis.scard(f'active_users:{channel_cid}' == 0):
-                self.redis.srem(f'active_channels', channel_cid)
+        if self.redis.scard(f'active_users:{channel_cid}') == 0:
+                self.redis.srem('active_channels', channel_cid)
         return r
 
     async def get_active_users(self, channel_cid):

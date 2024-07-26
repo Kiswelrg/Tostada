@@ -4,8 +4,14 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 from .util import getUserCode
 from django.dispatch import receiver
+from project.snowflake import getAccountAUserSnowflakeID
 import os
+
+
+
 # Create your models here.
+    
+
 class AUser(User):
     def cover_dir_path(instance, filename):
         return f'cover/user-{instance.urlCode}/' + instance.date_add.strftime('%Y-%m-%d/' + filename)
@@ -28,7 +34,7 @@ class AUser(User):
     #         ),
     #     ]
     # )
-    urlCode = models.PositiveBigIntegerField(default=getUserCode, unique=True, db_index=True)
+    urlCode = models.PositiveBigIntegerField(default=getAccountAUserSnowflakeID, unique=True, db_index=True, primary_key=True)
     # password = models.CharField(max_length=64)
     # sex = models.CharField(default='2',max_length = 2,choices = {('0', '男'),('1', '女'),('2', '0b01')})
     age = models.PositiveSmallIntegerField(default=None,blank=True,null=True)
@@ -41,6 +47,7 @@ class AUser(User):
 
     def __str__(self) -> str:
         return f"{self.username}({self.urlCode})"
+    
 
     
 
