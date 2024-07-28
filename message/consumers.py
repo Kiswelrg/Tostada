@@ -99,7 +99,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @require_login
     async def fetch_messages(self):
-        pass
+        
         if not self.storage.is_channel_exist(self.channel_cid):
             await self.send(text_data=json.dumps({
                 'error': 'Channel does not exist'

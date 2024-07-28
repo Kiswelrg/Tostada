@@ -5,22 +5,23 @@
 |code template|stoppable watcher|@/util/watcher.js|   |✅|
 |msg|msg block|with head/avatar|   |✅|
 |msg|msg block|without|   |✅|
-|msg|reaction part|   |   ||
 |Channel Input|Function Selection Dropdown|   |   |✅|
-|FunctionList|Default Button|Find Servers|   ||
 |msg|database msg|store msg in db||✅|
+|django|database PK|change some models to use snowflake ID||✅|
 
 ### ToDo
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
-|django|database PK|change some models to use compound PK||
-|django|database PK|change some models to use snowflake ID||
-|msg|database msg|before ws connection, check channel/server permission||
 |msg|delete msg|be able to delete||
+|msg|group_head|auto change msg to group_head||
+|django|database PK|change some models to use compound PK||
+|msg|database msg|before ws connection, check channel/server permission||
 |channel|create invite|invite user to `Channel`||
 |msg|mention|create `mention` in msg||
 |urls|serve media with permission|||
+|msg|reaction part|   |   ||
+|FunctionList|Default Button|Find Servers functionality|||
 |user|`timeout` user|||
 |user|`ban` user|||
 |user|`kick` user|||

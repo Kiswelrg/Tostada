@@ -20,7 +20,7 @@ class AUser(User):
         return f'avatar/user-{instance.urlCode}/' + instance.date_add.strftime('%Y-%m-%d/' + filename)
     
     name = models.CharField(max_length=20,default='some_user')
-    # username = models.CharField(                                                        #只能包含_和数字 开头不能有数字或_ _不能2连 结尾不能_
+    # username = models.CharField(  #只能包含_和数字 开头不能有数字或_ _不能2连 结尾不能_
     #     unique=True,
     #     null=False,
     #     blank=False,

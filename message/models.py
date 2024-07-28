@@ -1,5 +1,6 @@
 # Create your models here.
 from django.db import models
+import json
 # from .util import getDirectMessageCode, getGroupMessageCode
 from project.snowflake import getMessageDirectMessageSnowflakeID, getMessageGroupMessageSnowflakeID
 
@@ -27,14 +28,14 @@ class DirectMessage(Message):
     class Meta:
         ordering = ['time_sent']
     def __str__(self):
-        return self.msg_content
+        return ', '.join([c['content'] for c in json.loads(self.contents)])
 
 
 
 class GroupMessage(Message):
     sender = models.ForeignKey('account.AUser', on_delete=models.SET_NULL, related_name='sent_group_messages2', null=True)
-    receiver = models.ForeignKey('account.AUser', on_delete=models.SET_NULL, related_name='received_group_messages2', null=True)
-    mentioned_user = models.ForeignKey("account.AUser", on_delete=models.SET_NULL, related_name='mentioned_msgs2', null=True)
+    receiver = models.ForeignKey('account.AUser', on_delete=models.SET_NULL, related_name='received_group_messages2', null=True, blank=True)
+    mentioned_user = models.ForeignKey("account.AUser", on_delete=models.SET_NULL, related_name='mentioned_msgs2', null=True, blank=True)
 
     is_private = models.BooleanField(default=False)
     channel = models.ForeignKey("tool.ChannelOfChat", on_delete=models.SET_NULL, related_name='all_msgs', to_field='urlCode', null=True)
@@ -44,4 +45,4 @@ class GroupMessage(Message):
     class Meta:
         ordering = ['time_sent']
     def __str__(self):
-        return self.msg_content
+        return ', '.join([c['content'] for c in json.loads(self.contents)])

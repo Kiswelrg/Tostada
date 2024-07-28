@@ -76,16 +76,16 @@ onMounted(() => {
     })();
 })
 
-const watcher_server = watch(server, async (newQuestion, oldQuestion) => {
-    if (!server || !server.value) {
-      return;
+const watcher_server = watch(server, async (newS, oldS) => {
+    if (server === undefined || server.value === undefined) {
+      return
     }
-    await fetchAServer(server.value.cid);
-    
+    await fetchAServer(server.value.cid)
 }, { immediate: true})
 
 
-const { stopped, stopWatcher } = useWatchOnce(server_detail,
+// const { stopped, stopWatcher } = useWatchOnce(server_detail,
+const watchServerDetail = watch(server_detail,
   (newValue, old) => {
     if (Array.isArray(newValue) && newValue.length > 0) {
       for (let entry of newValue) {

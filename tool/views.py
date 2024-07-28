@@ -45,10 +45,10 @@ def fetch_user_tool_servers(request):
     u_s_role = UserServerRole.objects.filter(user__username=request.session['username'])
     data = [
         {
-            "cid": str(us.server.urlCode),
-            "name": us.server.name,
-            "description": us.server.description,
-            "logoSrc": '/media/default/server/logo/logo.svg' if us.server.logo == '' else us.server.logo.url,
+            "cid": str(us.role.server.urlCode),
+            "name": us.role.server.name,
+            "description": us.role.server.description,
+            "logoSrc": '/media/default/server/logo/logo.svg' if us.role.server.logo == '' else us.role.server.logo.url,
             "order": us.order,
             "date_added": us.date_added.strftime("%Y-%m-%dT%H:%M:%SZ")
         } for us in u_s_role
@@ -115,7 +115,7 @@ def fetch_tool_server(request, tool_server_code):
     if 'tools' not in request.GET or not request.GET['tools'] == '1':
         return JsonResponse({"tool_server": data, "r": True, "type": "no-tool"})
     
-    if UserServerRole.objects.filter(user__username=request.session['username'], server = tool_server).exists():
+    if UserServerRole.objects.filter(user__username=request.session['username'], role__server = tool_server).exists():
         # If already a member of the server, (return all types of tools)
         for k, v in tool_class_short.items():
             tools[k] = v.objects.filter(server=tool_server)
@@ -170,7 +170,7 @@ def fetch_tool(request, tool_class, tool_code):
     tool = get_object_or_404(Sub_Tool, urlCode=tool_code)
     # user_tool = None
 
-    if not UserServerRole.objects.filter(server=tool.server, user__username=request.session['username']).exists():
+    if not UserServerRole.objects.filter(role__server=tool.server, user__username=request.session['username']).exists():
         if not tool_role_short[tool_class].objects.filter(user__username=request.session['username'], tool=tool).exists():
             return JsonResponse({"r": False})
         
@@ -189,7 +189,7 @@ def fetch_tool(request, tool_class, tool_code):
     if 'sub_class' not in tool.additional:
         pass
     elif Sub_Tool.__name__ == 'ChannelOfChat':
-        tool_specific = get_object_or_404(ChannelOfChat, id = tool.id)
+        tool_specific = get_object_or_404(ChannelOfChat, pk = tool.pk)
         data['methods'] = tool_specific.method_names
     elif Sub_Tool.__name__ == 'ChannelOfVoice':
         pass

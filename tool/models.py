@@ -337,13 +337,13 @@ class UserServerRole(models.Model):
         related_name='user_server_auths'
     )
     nickname = models.CharField(max_length=64, blank=True)
-    server = models.ForeignKey(
-        Server,
-        on_delete=models.CASCADE,
-        related_name='user_server_auths',
-        to_field='urlCode',
-        null=True
-    )
+    # server = models.ForeignKey(
+    #     Server,
+    #     on_delete=models.CASCADE,
+    #     related_name='user_server_auths',
+    #     to_field='urlCode',
+    #     null=True
+    # )
     role = models.ForeignKey(ServerRole, verbose_name=_(
         "user role in the server"), on_delete=models.CASCADE, related_name='user_server_auths')
     date_added = models.DateTimeField(default=timezone.now)

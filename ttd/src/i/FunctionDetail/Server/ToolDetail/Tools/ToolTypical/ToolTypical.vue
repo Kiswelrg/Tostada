@@ -209,49 +209,58 @@ const mergeLists = (newList) => {
 }
 
 
+const connect = (url, tool) => {
+    chatSocket.value = new WebSocket(
+        `ws://${url.host}/ws/chat/${tool.cid}/`
+    )
+    chatSocket.value.onopen = function(e) {
+        console.log("WS/CHAT connection established")
+        reconnectAttempts.value = 0
+    }
+    chatSocket.value.onmessage = function(e) {
+        const data = JSON.parse(e.data)
+        console.log('Got messages: ')
+        if (data['type'] == 'chat_message') {
+            messages.value.push.apply(messages.value, data['messages'])
+        } else if (data['type'] == 'history_message') {
+            // messages.value = mergeLists(data['messages'])
+            messages.value = data['messages']
+        } else if (data['type'] == 'chat_message_delete') {
+        } 
+    }
+
+    chatSocket.value.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly')
+        if (reconnectAttempts.value < 12) {
+            const time = Math.pow(2, reconnectAttempts.value) * 1000;
+            console.log(`Reconnecting in ${time / 1000} seconds...`);
+            setTimeout(connect, time);
+            reconnectAttempts.value++;
+        } else {
+            console.error('Max reconnection attempts reached. Could not reconnect.');
+        }
+    }
+
+    chatSocket.value.onerror = function(error) {
+        console.error('WebSocket Error: ', error)
+    }
+}
+
+
+const onToolDetailChange = watch(() => props.toolDetail, (newValue, old) => {
+    if (chatSocket.value === undefined) return false
+    const urlString = import.meta.env.VITE_BACKEND_URL
+    const url = new URL(urlString)
+    connect(url, newValue)
+})
+
+
 const { stopped, stopWatcher } = useWatchOnce(() => props.toolDetail,
   (newValue, old) => {
     if (newValue !== undefined && newValue.cid !== undefined) {
         const urlString = import.meta.env.VITE_BACKEND_URL
-        console.log(urlString)
         const url = new URL(urlString)
-        const connect = () => {
-            chatSocket.value = new WebSocket(
-                `ws://${url.host}/ws/chat/${newValue.cid}/`
-            )
-            chatSocket.value.onopen = function(e) {
-                console.log("WS/CHAT connection established")
-                reconnectAttempts.value = 0
-            }
-            chatSocket.value.onmessage = function(e) {
-                const data = JSON.parse(e.data)
-                console.log('Got messages: ')
-                if (data['type'] == 'chat_message') {
-                    messages.value.push.apply(messages.value, data['messages'])
-                } else if (data['type'] == 'history_message') {
-                    // messages.value = mergeLists(data['messages'])
-                    messages.value = data['messages']
-                } else if (data['type'] == 'chat_message_delete') {
-                } 
-            }
-
-            chatSocket.value.onclose = function(e) {
-                console.error('Chat socket closed unexpectedly')
-                if (reconnectAttempts.value < 12) {
-                    const time = Math.pow(2, reconnectAttempts.value) * 1000;
-                    console.log(`Reconnecting in ${time / 1000} seconds...`);
-                    setTimeout(connect, time);
-                    reconnectAttempts.value++;
-                } else {
-                    console.error('Max reconnection attempts reached. Could not reconnect.');
-                }
-            }
-
-            chatSocket.value.onerror = function(error) {
-                console.error('WebSocket Error: ', error)
-            }
-        }
-        connect()
+        connect(url, newValue)
         return true
     }
     return false

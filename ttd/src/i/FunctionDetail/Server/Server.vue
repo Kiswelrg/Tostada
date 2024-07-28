@@ -17,6 +17,6 @@ function onSelectTool(obj) {
 
 </script>
 
-<style lang="scss" setup>
+<style lang="scss">
 
 </style>
