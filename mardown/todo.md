@@ -15,6 +15,8 @@
 |---|---|---|---|---|
 |msg|delete msg|be able to delete||
 |msg|group_head|auto change msg to group_head||
+|msg|image|upload image in txt||
+|media|serve|serve media using view||
 |django|database PK|change some models to use compound PK||
 |msg|database msg|before ws connection, check channel/server permission||
 |channel|create invite|invite user to `Channel`||

@@ -8,6 +8,7 @@
     <MeVue v-if="isMeActive"></MeVue>
     <ServerVue v-else :server="activeServer"></ServerVue>
   </div>
+  <LayerB></LayerB>
 </template>
 
 <script setup>
@@ -15,6 +16,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { provide } from 'vue';
 
+import LayerB from '@/components/Layer/LayerB.vue';
 import FunctionList from './FunctionList/FunctionList.vue';
 import ServerVue from '@/i/FunctionDetail/Server/Server.vue';
 import MeVue from '@/i/FunctionDetail/me/me.vue';
@@ -143,6 +145,12 @@ const updateServersOrderOffline = (r, use_old) => {
 
 
 <style lang="scss">
+:root {
+  --primary-800: hsl( 220 calc( 1 * 8.1%) 7.3% / 1);
+  --background-floating: color-mix(in oklab, var(--primary-800) 100%, var(--theme-base-color, black) var(--theme-base-color-amount, 0%));
+  --shadow-high: 0 12px 24px 0 hsla(0, 0%, 0%, 0.24);
+}
+
 .main {
   height: 100%;
   overflow: hidden;
