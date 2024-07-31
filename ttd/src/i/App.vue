@@ -145,10 +145,12 @@ const updateServersOrderOffline = (r, use_old) => {
 
 
 <style lang="scss">
+@import "@/styles/global.scss";
+
 :root {
-  --primary-800: hsl( 220 calc( 1 * 8.1%) 7.3% / 1);
   --background-floating: color-mix(in oklab, var(--primary-800) 100%, var(--theme-base-color, black) var(--theme-base-color-amount, 0%));
   --shadow-high: 0 12px 24px 0 hsla(0, 0%, 0%, 0.24);
+  --interactive-normal: color-mix(in oklab, var(--primary-330) 100%, var(--theme-text-color, black) var(--theme-text-color-amount, 0%));
 }
 
 .main {
