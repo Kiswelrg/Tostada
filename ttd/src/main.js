@@ -3,7 +3,7 @@ import '@/style.css'
 import App from './App.vue'
 import router from './router'
 import { library, icon } from '@fortawesome/fontawesome-svg-core'
-import { faSmile, faPen, faEllipsisH, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { faSmile, faPen, faEllipsisH, faArrowLeft, faTrash, faClipboard, faPaperclip } from '@fortawesome/free-solid-svg-icons'
 import clickOutside from './util/directives/clickOutside'
 
 
@@ -12,6 +12,7 @@ library.add(
     faPen,
     faEllipsisH,
     faArrowLeft,
+    faTrash, faClipboard, faPaperclip
 )
 
 const app = createApp(App).use(router)

@@ -88,7 +88,7 @@ const props = defineProps([
 ])
 const currentMethodIdx = ref(0)
 const isUsingDefault = ref(false)
-const isDropMenuOpen = ref(true);
+const isDropMenuOpen = ref(false)
 
 const isMethodActive = (g_idx) => {
     return g_idx == currentMethodIdx.value

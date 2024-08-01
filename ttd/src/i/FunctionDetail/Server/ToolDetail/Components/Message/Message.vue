@@ -59,9 +59,11 @@
                                                class="block h-5 w-5 object-contain text-red" />
                         </div>
                         <div
+                            @click="openMsgMenu($event)"
                              class="button z-10 text-interactive-normal hover:bg-msgbutton-hover flex items-center justify-center h-6 p-1 min-w-6 flex-zauto cursor-pointer relative box-content pointer-events-auto">
                             <font-awesome-icon :icon="['fas', 'ellipsis-h']"
-                                               class="block h-5 w-5 object-contain" />
+                                               class="block h-5 w-5 object-contain"
+                                               />
                         </div>
                     </div>
                 </div>
@@ -73,10 +75,12 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, shallowRef, ref } from 'vue'
+import { computed, shallowRef, ref, inject } from 'vue'
 import Edited from './Content/Edited.vue'
 import Link from './Content/Link.vue'
 import Text from './Content/Text.vue'
+
+const openPopup = inject('open-popup')
 
 const tabs = shallowRef({
     'Text': Text,
@@ -104,6 +108,11 @@ const time_XM = computed(() => {
     const m = d.getHours() >= 12 ? 'P' : 'A'
     return `${d.getHours()}:${d.getMinutes()} ${m}M`
 })
+
+const openMsgMenu = (e) => {
+    openPopup('MsgMenu', e.currentTarget.getBoundingClientRect(), e.currentTarget)
+}
+
 
 </script>
 

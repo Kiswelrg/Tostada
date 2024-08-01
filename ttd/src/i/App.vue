@@ -7,8 +7,8 @@
     @go-tab="onGoTab"></FunctionList>
     <MeVue v-if="isMeActive"></MeVue>
     <ServerVue v-else :server="activeServer"></ServerVue>
+    <LayerB ref="layerB"></LayerB>
   </div>
-  <LayerB></LayerB>
 </template>
 
 <script setup>
@@ -20,6 +20,14 @@ import LayerB from '@/components/Layer/LayerB.vue';
 import FunctionList from './FunctionList/FunctionList.vue';
 import ServerVue from '@/i/FunctionDetail/Server/Server.vue';
 import MeVue from '@/i/FunctionDetail/me/me.vue';
+
+
+const layerB = ref(null)
+const openPopup = (action, coords, target) => {
+  layerB.value.open(action, coords, target)
+}
+
+provide('open-popup', openPopup)
 
 const activeServerTab = ref(BigInt(-1));
 const isMeActive = ref(true);

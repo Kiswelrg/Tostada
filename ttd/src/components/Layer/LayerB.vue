@@ -1,14 +1,80 @@
 <template>
     <div class="absolute h-screen w-screen">
-        <Popups v-if="showPopups"></Popups>
+        <Popups v-if="showMsgMenu"
+                ref="popup"
+                v-click-outside="[closePopup, msgMenuTrigger]"
+                :popup-type="popupType"
+                :style="popupPosition"></Popups>
     </div>
 </template>
 
 <script setup>
 import Popups from './Popup/Popups.vue'
-import { ref } from 'vue'
+import { computed, ref, nextTick } from 'vue'
 
-const showPopups = ref(true)
+const popup = ref(null)
+
+const showMsgMenu = ref(false)
+const msgMenuTrigger = ref(undefined)
+
+const popupTypes = ref([
+    'MsgMenu'
+])
+
+const popupIndex = ref(0)
+
+const popupType = computed(() => {
+    return popupTypes.value[popupIndex.value]
+})
+
+const popupPosition = ref({
+    'right': 0,
+    'top': 0,
+    'max-height': 'fit-content'
+})
+
+const open = async (action, coords, target) => {
+    showMsgMenu.value = true
+    await nextTick()
+    const itemW = popup.value.$el.offsetWidth
+    const itemH = popup.value.$el.offsetHeight
+    if (action === 'MsgMenu') {
+        // coords being the bounding rect of the triggering button(ellipse)
+        const h = document.documentElement.clientHeight || window.innerHeight || 0
+        const w = document.documentElement.clientWidth || window.innerWidth || 0
+        if (h <= itemH + 20 || w <= itemW + 20) {
+            console.log('not enough space')
+            popupPosition.value = {
+                'right': (w - coords.left + 7).toString() + 'px',
+                'bottom': '20px',
+                'max-height': (h - 20).toString() + 'px',
+            }
+        } else if (coords.top + itemH + 20 > h) {
+            popupPosition.value = {
+                'right': (w - coords.left + 7).toString() + 'px',
+                'bottom': '20px',
+                'max-height': 'fit-content',
+            }
+        } else {
+            popupPosition.value = {
+                'right': (w - coords.left + 7).toString() + 'px',
+                'bottom': (h - coords.top - itemH).toString() + 'px',
+                'max-height': 'fit-content',
+            }
+        }
+        msgMenuTrigger.value = target
+        
+    }
+}
+
+const closePopup = () => {
+    showMsgMenu.value = false
+}
+
+defineExpose({
+  open
+});
+
 
 </script>
 
