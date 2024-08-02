@@ -147,9 +147,9 @@ const messages = ref([
 const sortedMessages = computed(() => {
     if (!messages || !messages.value || !messages.value.length) return []
     return messages.value.toSorted((a,b) => {
-        const d1 = new Date(a['time_sent'])
-        const d2 = new Date(b['time_sent'])
-        return d1 - d2
+        // const d1 = new Date(a['time_sent'])
+        // const d2 = new Date(b['time_sent'])
+        return a['cid'] - b['cid']
     })
 })
 
@@ -208,6 +208,19 @@ const mergeLists = (newList) => {
     return mergedList;
 }
 
+const isTimeClose = (oldT, newT) => {
+    const d1 = new Date(oldT)
+    const d2 = new Date(newT)
+    const diffInMs = Math.abs(d2 - d1)
+    const interval = 60 * 60 * 1000
+    return diffInMs < interval
+}
+
+
+const isMsgsClose = (oldM, newM) => {
+    return oldM['sender']['username'] === newM['sender']['username'] && isTimeClose(oldM['time_sent'], newM['time_sent'])
+}
+
 
 const connect = (url, tool) => {
     chatSocket.value = new WebSocket(
@@ -225,6 +238,16 @@ const connect = (url, tool) => {
         } else if (data['type'] == 'history_message') {
             // messages.value = mergeLists(data['messages'])
             messages.value = data['messages']
+
+            sortedMessages.value[0]['is_group_head'] = true
+            for (let idx=1; idx < sortedMessages.value.length; idx++) {
+                const pre = sortedMessages.value[idx-1]
+                let cur = sortedMessages.value[idx]
+                if (!isMsgsClose(pre, cur)) {
+                    cur['is_group_head'] = true
+                }
+            }
+
         } else if (data['type'] == 'chat_message_delete') {
         } 
     }
@@ -233,8 +256,10 @@ const connect = (url, tool) => {
         console.error('Chat socket closed unexpectedly')
         if (reconnectAttempts.value < 12) {
             const time = Math.pow(2, reconnectAttempts.value) * 1000;
+            const urlString = import.meta.env.VITE_BACKEND_URL
+            const url = new URL(urlString)
             console.log(`Reconnecting in ${time / 1000} seconds...`);
-            setTimeout(connect, time);
+            setTimeout(connect, time, url, props.toolDetail);
             reconnectAttempts.value++;
         } else {
             console.error('Max reconnection attempts reached. Could not reconnect.');

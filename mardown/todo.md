@@ -8,13 +8,15 @@
 |Channel Input|Function Selection Dropdown|   |   |✅|
 |msg|database msg|store msg in db||✅|
 |django|database PK|change some models to use snowflake ID||✅|
+|msg|group_head|auto change msg to group_head||✅|
+|msg|msg menu|open and close robustly||✅|
+|msg|socket|change socket to handle multiple channels||🤺|
 
 ### ToDo
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
 |msg|delete msg|be able to delete||
-|msg|group_head|auto change msg to group_head||
 |msg|image|upload image in txt||
 |media|serve|serve media using view||
 |django|database PK|change some models to use compound PK||

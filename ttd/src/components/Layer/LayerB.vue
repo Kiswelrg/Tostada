@@ -1,5 +1,5 @@
 <template>
-    <div class="absolute h-screen w-screen">
+    <div class="absolute h-screen w-screen pointer-events-none">
         <Popups v-if="showMsgMenu"
                 ref="popup"
                 v-click-outside="[closePopup, msgMenuTrigger]"
@@ -39,16 +39,13 @@ const popupPosition = ref({
 })
 
 const open = async (action, coords, target) => {
-    console.log('opening popup')
     if (msgMenuTrigger.value !== undefined) {
         if (target !== msgMenuTrigger.value) {
-            console.log('menu opened, clicking on another button')
             showMsgMenu.value = false
             msgMenuTrigger.value = undefined
         } else {
             showMsgMenu.value = false
             msgMenuTrigger.value = undefined
-            console.log('here')
             return
         }
     }

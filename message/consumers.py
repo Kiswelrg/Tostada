@@ -114,7 +114,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         msgs = await get_messages()
 
-
         await self.channel_layer.group_send(
             self.room_channel_name,
             {
@@ -122,6 +121,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'messages': [{
                     'sender': {
                         'username': self.user.username,
+                        'avatar': await database_sync_to_async(lambda: get_object_or_404(AUser, id=self.user.id).avatar.url)()
                     },
                     'mentioned_user': {},
                     'tool_used': {},

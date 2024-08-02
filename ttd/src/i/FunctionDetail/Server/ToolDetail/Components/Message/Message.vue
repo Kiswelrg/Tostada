@@ -7,7 +7,7 @@
             <div class="message-contents static ml-0 pl-0 indent-0">
                 <img 
                     v-if="msg['is_group_head']"
-                    :src="msg['avatar_src']"
+                    :src="backend_url() + msg.sender.avatar"
                     alt=""
                     class="avatar pointer-events-auto [alt]:indent-[-9999px] absolute left-4 mt-[calc(4px-0.125rem)] w-10 h-10 rounded-[50%] overflow-hidden cursor-pointer select-none z-[1]">
                 <h3
@@ -21,7 +21,7 @@
                     <div
                          class="timestamp text-xs leading-[1.375rem] text-text-muted align-baseline ml-1 inline-block h-6 cursor-default pointer-events-none font-medium">
                         <time class="message-timestamp">
-                            <i class="separator">{{ time }}</i>
+                            <i class="separator">{{ detailedTime }}</i>
                         </time>
                     </div>
                 </h3>
@@ -45,7 +45,9 @@
             <div class="buttonContainer absolute top-0 right-0">
                 <!-- if isGroupTop -top-16px -->
                 <div
-                     class="buttons z-[1] is_group_head -top-[25px] absolute right-0 py-0 pl-8 pr-[14px] opacity-0 group-hover:opacity-1">
+                     class="buttons z-[1] absolute right-0 py-0 pl-8 pr-[14px] opacity-0 group-hover:opacity-1"
+                     :class="{'-top-[16px]': msg['is_group_head'], '-top-[25px]': !msg['is_group_head']}"
+                     >
                     <div
                          class="buttons-wrapper bg-msgbutton-primary buttonlist-shadow grid grid-flow-col box-border h-8 rounded items-center justify-start select-none transition-shadow duration-100 ease-out relative overflow-hidden z-10">
                         <div
@@ -80,6 +82,10 @@ import Edited from './Content/Edited.vue'
 import Link from './Content/Link.vue'
 import Text from './Content/Text.vue'
 
+const backend_url = () => {
+    return import.meta.env.VITE_BACKEND_URL
+}
+
 const layerB = inject('layer-b')
 
 const tabs = shallowRef({
@@ -107,6 +113,34 @@ const time_XM = computed(() => {
     const d = new Date(props.msg['time_sent'])
     const m = d.getHours() >= 12 ? 'P' : 'A'
     return `${d.getHours()}:${d.getMinutes()} ${m}M`
+})
+
+
+function formatDate(date) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  const options = { hour: 'numeric', minute: 'numeric', hour12: true };
+  const timeString = date.toLocaleTimeString('en-US', options);
+
+  if (date >= today) {
+    return `Today at ${timeString}`;
+  } else if (date >= yesterday) {
+    return `Yesterday at ${timeString}`;
+  } else {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}/${day}/${year} ${timeString}`;
+  }
+}
+
+
+const detailedTime = computed(() => {
+    const d = new Date(props.msg.time_sent)
+    return formatDate(d)
 })
 
 const openMsgMenu = (e) => {
