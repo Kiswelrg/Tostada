@@ -15,6 +15,11 @@ import { computed, ref, nextTick } from 'vue'
 const popup = ref(null)
 
 const showMsgMenu = ref(false)
+
+const menuList = ref([
+    showMsgMenu
+])
+
 const msgMenuTrigger = ref(undefined)
 
 const popupTypes = ref([
@@ -34,6 +39,20 @@ const popupPosition = ref({
 })
 
 const open = async (action, coords, target) => {
+    console.log('opening popup')
+    if (msgMenuTrigger.value !== undefined) {
+        if (target !== msgMenuTrigger.value) {
+            console.log('menu opened, clicking on another button')
+            showMsgMenu.value = false
+            msgMenuTrigger.value = undefined
+        } else {
+            showMsgMenu.value = false
+            msgMenuTrigger.value = undefined
+            console.log('here')
+            return
+        }
+    }
+    msgMenuTrigger.value = target
     showMsgMenu.value = true
     await nextTick()
     const itemW = popup.value.$el.offsetWidth
@@ -62,13 +81,13 @@ const open = async (action, coords, target) => {
                 'max-height': 'fit-content',
             }
         }
-        msgMenuTrigger.value = target
         
     }
 }
 
 const closePopup = () => {
     showMsgMenu.value = false
+    msgMenuTrigger.value = undefined
 }
 
 defineExpose({

@@ -12,9 +12,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, provide } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { provide } from 'vue';
 
 import LayerB from '@/components/Layer/LayerB.vue';
 import FunctionList from './FunctionList/FunctionList.vue';
@@ -22,12 +21,8 @@ import ServerVue from '@/i/FunctionDetail/Server/Server.vue';
 import MeVue from '@/i/FunctionDetail/me/me.vue';
 
 
-const layerB = ref(null)
-const openPopup = (action, coords, target) => {
-  layerB.value.open(action, coords, target)
-}
-
-provide('open-popup', openPopup)
+const layerB = ref(null);
+provide('layer-b', layerB);
 
 const activeServerTab = ref(BigInt(-1));
 const isMeActive = ref(true);

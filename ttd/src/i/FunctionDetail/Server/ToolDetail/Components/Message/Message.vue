@@ -59,7 +59,7 @@
                                                class="block h-5 w-5 object-contain text-red" />
                         </div>
                         <div
-                            @click="openMsgMenu($event)"
+                            @click.stop="openMsgMenu($event)"
                              class="button z-10 text-interactive-normal hover:bg-msgbutton-hover flex items-center justify-center h-6 p-1 min-w-6 flex-zauto cursor-pointer relative box-content pointer-events-auto">
                             <font-awesome-icon :icon="['fas', 'ellipsis-h']"
                                                class="block h-5 w-5 object-contain"
@@ -80,7 +80,7 @@ import Edited from './Content/Edited.vue'
 import Link from './Content/Link.vue'
 import Text from './Content/Text.vue'
 
-const openPopup = inject('open-popup')
+const layerB = inject('layer-b')
 
 const tabs = shallowRef({
     'Text': Text,
@@ -110,7 +110,7 @@ const time_XM = computed(() => {
 })
 
 const openMsgMenu = (e) => {
-    openPopup('MsgMenu', e.currentTarget.getBoundingClientRect(), e.currentTarget)
+    layerB.value.open('MsgMenu', e.currentTarget.getBoundingClientRect(), e.currentTarget);
 }
 
 
