@@ -23,7 +23,7 @@
                                 <ol class="messages-container">
 
                                     <Message v-for="m in messagedIntro" v-bind:key="m.id" :msg="m"></Message>
-                                    <Message v-for="m in sortedMessages" v-bind:key="m.id" :msg="m"></Message>
+                                    <Message v-for="(m, idx) in sortedMessages" :is-group-head="isMsgHead(idx)" v-bind:key="m.id" :msg="m"></Message>
                                 </ol>
                             </div>
                         </div>
@@ -43,11 +43,11 @@
 import InputKing from '@/i/Global/InputKing/InputKing.vue'
 import ToolHead from '../../ToolHead/ToolHead.vue'
 import Welcome from '../../Welcome/Welcome.vue'
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, inject } from 'vue'
 import Message from '../../Components/Message/Message.vue'
 import { useWatchOnce } from '@/util/watcher'
 import { getCookie } from '@/util/session'
-const chatSocket = ref(undefined)
+const chatSocket = inject('chat-socket')
 const reconnectAttempts = ref(0);
 const props = defineProps([
     'tool-detail',
@@ -221,6 +221,10 @@ const isMsgsClose = (oldM, newM) => {
     return oldM['sender']['username'] === newM['sender']['username'] && isTimeClose(oldM['time_sent'], newM['time_sent'])
 }
 
+const isMsgHead = (idx) => {
+    return idx == 0 || !isMsgsClose(sortedMessages.value[idx-1], sortedMessages.value[idx])
+}
+
 
 const connect = (url, tool) => {
     chatSocket.value = new WebSocket(
@@ -234,19 +238,20 @@ const connect = (url, tool) => {
         const data = JSON.parse(e.data)
         console.log('Got messages: ')
         if (data['type'] == 'chat_message') {
-            messages.value.push.apply(messages.value, data['messages'])
+            const cur = data['messages'];
+            messages.value.push.apply(messages.value, cur);
+            
         } else if (data['type'] == 'history_message') {
-            // messages.value = mergeLists(data['messages'])
             messages.value = data['messages']
 
-            sortedMessages.value[0]['is_group_head'] = true
-            for (let idx=1; idx < sortedMessages.value.length; idx++) {
-                const pre = sortedMessages.value[idx-1]
-                let cur = sortedMessages.value[idx]
-                if (!isMsgsClose(pre, cur)) {
-                    cur['is_group_head'] = true
-                }
-            }
+            // sortedMessages.value[0]['is_group_head'] = true
+            // for (let idx=1; idx < sortedMessages.value.length; idx++) {
+            //     const pre = sortedMessages.value[idx-1]
+            //     let cur = sortedMessages.value[idx]
+            //     if (!isMsgsClose(pre, cur)) {
+            //         cur['is_group_head'] = true
+            //     }
+            // }
 
         } else if (data['type'] == 'chat_message_delete') {
         } 

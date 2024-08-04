@@ -19,7 +19,8 @@ import LayerB from '@/components/Layer/LayerB.vue';
 import FunctionList from './FunctionList/FunctionList.vue';
 import ServerVue from '@/i/FunctionDetail/Server/Server.vue';
 import MeVue from '@/i/FunctionDetail/me/me.vue';
-
+const chatSocket = ref(undefined);
+provide('chat-socket', chatSocket)
 
 const layerB = ref(null);
 provide('layer-b', layerB);

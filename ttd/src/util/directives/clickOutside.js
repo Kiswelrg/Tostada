@@ -15,13 +15,8 @@ const clickOutside = {
         ))
       ) {
         if (callback != null){
-          console.log('called the callback function');
-          // console.log(event.target);
-          // console.log(el);
           callback(); // Call the callback function
         }
-      } else {
-        console.log('inside')
       }
     };
     document.body.addEventListener('click', el.clickOutsideEvent);

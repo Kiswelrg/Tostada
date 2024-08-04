@@ -13,6 +13,7 @@
                 <div
                     v-for="(item, index) in options"
                     :key="index"
+                    @click="item.slug ? opt_functions[item.slug]() : null"
                     class="item flex min-h-8 items-center px-2 py-1.5 justify-between mx-0 my-0.5 rounded-[2px] text-[13px] font-medium leading-[18px] cursor-pointer outline-0 text-[var(--interactive-normal)] border-[var(--interactive-normal)] text-left hover:text-[var(--white)]"
                     :class="{'hover:bg-[var(--menu-item-default-active-bg)]': item.type === 'normal', 'text-[var(--status-danger)]': item.type === 'danger', 'hover:bg-[var(--menu-item-danger-active-bg)]': item.type === 'danger'}"
                     >
@@ -28,8 +29,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, inject } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+const ws = inject('chat-socket')
+
+const props = defineProps({
+    cid: Number
+})
 
 const recent_reactions = ref([
     {
@@ -68,10 +74,23 @@ const options = ref([
     },
     {
         'name': 'Delete Message',
+        'slug': 'delete_message',
         'type': 'danger',
         'icon': ['fas', 'trash']
     }
 ])
+
+const deleteMsg = (cid) => {
+    if (cid == -1) return
+    const d = { 'command': 'delete_message', 'cid': props.cid }
+    ws.value.send(JSON.stringify(d))
+}
+
+
+
+const opt_functions = ref({
+    'delete_message': deleteMsg
+})
 
 </script>
 

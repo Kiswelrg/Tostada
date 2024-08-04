@@ -148,7 +148,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.get_active_users(None)
             return
         if text_data_json.get('command') == 'delete_message':
-            await self.delete_message(text_data_json['message_cid'])
+            await self.delete_message(text_data_json['cid'])
             return
         message = text_data_json['message']
 
@@ -163,6 +163,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'messages': [{
                         'sender': {
                             'username': self.user.username,
+                            'avatar': await database_sync_to_async(lambda: get_object_or_404(AUser, id=self.user.id).avatar.url)()
                         },
                         'mentioned_user': {},
                         'tool_used': {},
@@ -191,16 +192,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def delete_message(self, message_cid):
         @database_sync_to_async
         def delete_message_from_db():
-            try:
-                message = GroupMessage.objects.get(urlCode=message_cid, sender=self.user)
-                message.delete()
-                return True
-            except GroupMessage.DoesNotExist:
-                return False
+            message = GroupMessage.objects.get(urlCode=message_cid, sender=self.user)
+            print(message)
+            message.delete()
+            return True
+            
+        u = self.scope.get('user')
+        try:
+            print(message_cid)
+            sender = await database_sync_to_async(lambda: GroupMessage.objects.get(urlCode=message_cid).sender.id)()
+        
+            # Check if the user is authorized to delete the message
+            if sender != u.id:
+                await self.send(text_data=json.dumps({
+                    'type': 'error',
+                    'error': 'Unauthorized: You cannot delete this message.'
+                }))
+                return
+            hasAuth = True
 
-        success = await delete_message_from_db()
-        if success:
-            # Notify all clients about the deletion
+            success = await delete_message_from_db()
             await self.channel_layer.group_send(
                 self.room_channel_name,
                 {
@@ -208,10 +219,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'message_id': message_cid,
                 }
             )
-        else:
+        except GroupMessage.DoesNotExist:
             await self.send(text_data=json.dumps({
-                'error': 'Failed to delete message'
+                'type': 'error',
+                'error': 'Message not found.'
             }))
+        except Exception as e:
+            raise e
+            await self.send(text_data=json.dumps({
+                'type': 'error',
+                'error': 'Failed to delete message.'
+            }))
+            print(f'Error deleting message: {e}')
 
 
     @require_login

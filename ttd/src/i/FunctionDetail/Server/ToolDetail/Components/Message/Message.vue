@@ -2,16 +2,16 @@
     <li class="messageListItem group my-0 border-1 border-solid border-white min-h-1 hover:bg-[#2e3035] w-full outline-none relative">
         <div
             class="message select-text break-words relative pr-12 py-[0.125rem] pl-[72px] mt-0"
-            :class="{'mt-[1.0625rem]': msg['is_group_head'], 'min-h-[1.375rem]': !msg['is_group_head'], 'min-h-[2.75rem]': msg['is_group_head']}"
+            :class="{'mt-[1.0625rem]': props.isGroupHead, 'min-h-[1.375rem]': !props.isGroupHead, 'min-h-[2.75rem]': props.isGroupHead}"
             >
             <div class="message-contents static ml-0 pl-0 indent-0">
                 <img 
-                    v-if="msg['is_group_head']"
+                    v-if="props.isGroupHead"
                     :src="backend_url() + msg.sender.avatar"
                     alt=""
                     class="avatar pointer-events-auto [alt]:indent-[-9999px] absolute left-4 mt-[calc(4px-0.125rem)] w-10 h-10 rounded-[50%] overflow-hidden cursor-pointer select-none z-[1]">
                 <h3
-                    v-if="msg['is_group_head']"
+                    v-if="props.isGroupHead"
                     class="header overflow-hidden relative leading-[1.375rem] text-[hsl( 214 calc( 1 * 8.1%) 61.2% / 1)] whitespace-break-spaces">
                     <span class="messageUsername mr-1">
                         <span
@@ -26,7 +26,7 @@
                     </div>
                 </h3>
 
-                <span v-if="!msg['is_group_head']" class="compact-timestamp text-[11px] inline-block opacity-0 indent-0 font-text-muted mr-1 text-right select-none w-14 h-[1.375rem] left-0 absolute">
+                <span v-if="!props.isGroupHead" class="compact-timestamp text-[11px] inline-block opacity-0 indent-0 font-text-muted mr-1 text-right select-none w-14 h-[1.375rem] left-0 absolute">
                     <time title="Today at 12:39 PM" datetime="2024-03-15T04:39:20.353Z" class="pointer-events-none indent-0 text-text-muted text-right select-none leading-[22px]">{{ time_XM }}</time>
                 </span>
 
@@ -46,7 +46,7 @@
                 <!-- if isGroupTop -top-16px -->
                 <div
                      class="buttons z-[1] absolute right-0 py-0 pl-8 pr-[14px] opacity-0 group-hover:opacity-1"
-                     :class="{'-top-[16px]': msg['is_group_head'], '-top-[25px]': !msg['is_group_head']}"
+                     :class="{'-top-[16px]': props.isGroupHead, '-top-[25px]': !props.isGroupHead}"
                      >
                     <div
                          class="buttons-wrapper bg-msgbutton-primary buttonlist-shadow grid grid-flow-col box-border h-8 rounded items-center justify-start select-none transition-shadow duration-100 ease-out relative overflow-hidden z-10">
@@ -61,7 +61,7 @@
                                                class="block h-5 w-5 object-contain text-red" />
                         </div>
                         <div
-                            @click.stop="openMsgMenu($event)"
+                            @click.stop="openMsgMenu($event, msg.cid)"
                              class="button z-10 text-interactive-normal hover:bg-msgbutton-hover flex items-center justify-center h-6 p-1 min-w-6 flex-zauto cursor-pointer relative box-content pointer-events-auto">
                             <font-awesome-icon :icon="['fas', 'ellipsis-h']"
                                                class="block h-5 w-5 object-contain"
@@ -82,6 +82,11 @@ import Edited from './Content/Edited.vue'
 import Link from './Content/Link.vue'
 import Text from './Content/Text.vue'
 
+const props = defineProps({
+  msg: Object,
+  isGroupHead: Boolean
+})
+
 const backend_url = () => {
     return import.meta.env.VITE_BACKEND_URL
 }
@@ -94,13 +99,10 @@ const tabs = shallowRef({
     'Edited': Edited
 })
 
-const props = defineProps({
-  msg: Object,
-})
 
-const is_group_head = computed(() => {
-    return props.msg?.value?.is_group_head ?? false
-})
+// const is_group_head = computed(() => {
+//     return props.msg?.value?.is_group_head ?? false
+// })
 
 const time = computed(() => {
     if (!props.msg || !props.msg['time_sent']) return ''
@@ -143,8 +145,8 @@ const detailedTime = computed(() => {
     return formatDate(d)
 })
 
-const openMsgMenu = (e) => {
-    layerB.value.open('MsgMenu', e.currentTarget.getBoundingClientRect(), e.currentTarget);
+const openMsgMenu = (e, cid) => {
+    layerB.value.open('MsgMenu', e.currentTarget, cid);
 }
 
 

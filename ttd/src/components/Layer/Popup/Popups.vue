@@ -1,6 +1,6 @@
 <template>
     <div class="popups absolute overflow-y-auto pointer-events-auto">
-        <MsgOption v-if="popupType == 'MsgMenu'" class=""></MsgOption>
+        <MsgOption v-if="popupType == 'MsgMenu'" class="" :cid="cid"></MsgOption>
     </div>
 </template>
 
@@ -8,7 +8,8 @@
 import MsgOption from './Menu/MsgOption.vue'
 
 const props = defineProps({
-    popupType: String
+    popupType: String,
+    cid: Number,
 })
 
 </script>

@@ -3,6 +3,7 @@
         <Popups v-if="showMsgMenu"
                 ref="popup"
                 v-click-outside="[closePopup, msgMenuTrigger]"
+                :cid="curMsgCid"
                 :popup-type="popupType"
                 :style="popupPosition"></Popups>
     </div>
@@ -21,6 +22,7 @@ const menuList = ref([
 ])
 
 const msgMenuTrigger = ref(undefined)
+const curMsgCid = ref(-1)
 
 const popupTypes = ref([
     'MsgMenu'
@@ -38,7 +40,8 @@ const popupPosition = ref({
     'max-height': 'fit-content'
 })
 
-const open = async (action, coords, target) => {
+const open = async (action, target, cid) => {
+    const coords = target.getBoundingClientRect()
     if (msgMenuTrigger.value !== undefined) {
         if (target !== msgMenuTrigger.value) {
             showMsgMenu.value = false
@@ -51,6 +54,7 @@ const open = async (action, coords, target) => {
     }
     msgMenuTrigger.value = target
     showMsgMenu.value = true
+    curMsgCid.value = cid
     await nextTick()
     const itemW = popup.value.$el.offsetWidth
     const itemH = popup.value.$el.offsetHeight
