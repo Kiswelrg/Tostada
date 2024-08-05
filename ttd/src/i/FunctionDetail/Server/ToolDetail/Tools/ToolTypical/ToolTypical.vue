@@ -46,8 +46,10 @@ import Welcome from '../../Welcome/Welcome.vue'
 import { ref, computed, watch, inject } from 'vue'
 import Message from '../../Components/Message/Message.vue'
 import { useWatchOnce } from '@/util/watcher'
+import { jsonWithBigInt } from '@/util/parse'
 import { getCookie } from '@/util/session'
 const chatSocket = inject('chat-socket')
+const layerB = inject('layer-b')
 const reconnectAttempts = ref(0);
 const props = defineProps([
     'tool-detail',
@@ -146,12 +148,27 @@ const messages = ref([
 
 const sortedMessages = computed(() => {
     if (!messages || !messages.value || !messages.value.length) return []
-    return messages.value.toSorted((a,b) => {
+    return messages.value.slice().sort((a,b) => {
         // const d1 = new Date(a['time_sent'])
         // const d2 = new Date(b['time_sent'])
-        return a['cid'] - b['cid']
+        return a['cid'] > b['cid'] ? 1 : a['cid'] < b['cid'] ? -1 : 0
     })
 })
+
+const deleteMsg = (cid) => {
+    let l = 0;
+    let r = messages.value.length-1;
+    while(l<=r) {
+        const m = (l+r)>>1;
+        const id = sortedMessages.value[m].cid
+        if(cid>id) l = m+1;
+        else if(cid<id) r = m-1;
+        else {
+            messages.value.splice(m, 1);
+            return;
+        }
+    }
+}
 
 
 watch(filtered_intro, (newV) => {
@@ -235,12 +252,14 @@ const connect = (url, tool) => {
         reconnectAttempts.value = 0
     }
     chatSocket.value.onmessage = function(e) {
-        const data = JSON.parse(e.data)
+        const data = jsonWithBigInt(e.data)
         console.log('Got messages: ')
         if (data['type'] == 'chat_message') {
             const cur = data['messages'];
             messages.value.push.apply(messages.value, cur);
-            
+        }
+        else if (data['type'] == 'message_deleted') {
+            deleteMsg(data.cid);
         } else if (data['type'] == 'history_message') {
             messages.value = data['messages']
 

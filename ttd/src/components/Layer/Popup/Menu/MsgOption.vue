@@ -13,7 +13,7 @@
                 <div
                     v-for="(item, index) in options"
                     :key="index"
-                    @click="item.slug ? opt_functions[item.slug]() : null"
+                    @click="clickOption(index)"
                     class="item flex min-h-8 items-center px-2 py-1.5 justify-between mx-0 my-0.5 rounded-[2px] text-[13px] font-medium leading-[18px] cursor-pointer outline-0 text-[var(--interactive-normal)] border-[var(--interactive-normal)] text-left hover:text-[var(--white)]"
                     :class="{'hover:bg-[var(--menu-item-default-active-bg)]': item.type === 'normal', 'text-[var(--status-danger)]': item.type === 'danger', 'hover:bg-[var(--menu-item-danger-active-bg)]': item.type === 'danger'}"
                     >
@@ -33,8 +33,12 @@ import { ref, inject } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 const ws = inject('chat-socket')
 
+const emit = defineEmits([
+    'closeMsgMenu'
+])
+
 const props = defineProps({
-    cid: Number
+    cid: BigInt
 })
 
 const recent_reactions = ref([
@@ -82,7 +86,7 @@ const options = ref([
 
 const deleteMsg = (cid) => {
     if (cid == -1) return
-    const d = { 'command': 'delete_message', 'cid': props.cid }
+    const d = { 'command': 'delete_message', 'cid': (props.cid).toString() }
     ws.value.send(JSON.stringify(d))
 }
 
@@ -91,6 +95,16 @@ const deleteMsg = (cid) => {
 const opt_functions = ref({
     'delete_message': deleteMsg
 })
+
+const clickReaction = () => {
+
+}
+
+const clickOption = (idx) => {
+    emit('closeMsgMenu')
+    const item = options.value[idx]
+    item.slug ? opt_functions.value[item.slug]() : null
+}
 
 </script>
 

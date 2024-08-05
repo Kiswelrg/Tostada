@@ -127,7 +127,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'tool_used': {},
                     'time_sent': msg.time_sent.isoformat(),
                     'type': msg._type,
-                    'cid': msg.urlCode,
+                    'cid': str(msg.urlCode),
                     'is_edited': {
                         'state': msg.is_edited,
                         'text': 'edited',
@@ -193,14 +193,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         @database_sync_to_async
         def delete_message_from_db():
             message = GroupMessage.objects.get(urlCode=message_cid, sender=self.user)
-            print(message)
             message.delete()
             return True
             
-        u = self.scope.get('user')
+        u = self.user
         try:
-            print(message_cid)
-            sender = await database_sync_to_async(lambda: GroupMessage.objects.get(urlCode=message_cid).sender.id)()
+            # sender = await database_sync_to_async(lambda: GroupMessage.objects.get(urlCode=message_cid).sender.id)()
+            sender = await database_sync_to_async(lambda: get_object_or_404(GroupMessage, urlCode = message_cid).sender.id)()
         
             # Check if the user is authorized to delete the message
             if sender != u.id:
@@ -209,14 +208,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'error': 'Unauthorized: You cannot delete this message.'
                 }))
                 return
+            
             hasAuth = True
-
             success = await delete_message_from_db()
             await self.channel_layer.group_send(
                 self.room_channel_name,
                 {
                     'type': 'message_deleted',
-                    'message_id': message_cid,
+                    'cid': message_cid,
                 }
             )
         except GroupMessage.DoesNotExist:
@@ -225,7 +224,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'error': 'Message not found.'
             }))
         except Exception as e:
-            raise e
             await self.send(text_data=json.dumps({
                 'type': 'error',
                 'error': 'Failed to delete message.'
@@ -248,8 +246,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @require_login
     async def history_message(self, event):
         msgs = event['messages']
-        print(f'Msg: {[msg["contents"] for msg in msgs]}')
-
+        print(f'Msg: {[msg["contents"][0]["content"] for msg in msgs]}')
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'history_message',
@@ -260,7 +257,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def message_deleted(self, event):
         await self.send(text_data=json.dumps({
             'type': 'message_deleted',
-            'message_cid': event['message_cid'],
+            'cid': event['cid'],
         }))
 
 

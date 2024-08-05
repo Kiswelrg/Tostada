@@ -3,6 +3,7 @@
         <Popups v-if="showMsgMenu"
                 ref="popup"
                 v-click-outside="[closePopup, msgMenuTrigger]"
+                @on-close-msg-menu="closePopup"
                 :cid="curMsgCid"
                 :popup-type="popupType"
                 :style="popupPosition"></Popups>
