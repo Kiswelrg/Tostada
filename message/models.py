@@ -2,7 +2,7 @@
 from django.db import models
 import json
 # from .util import getDirectMessageCode, getGroupMessageCode
-from project.snowflake import getMessageDirectMessageSnowflakeID, getMessageGroupMessageSnowflakeID
+from project.snowflake import getMessageMessageSnowflakeID
 
 
 class Message(models.Model):
@@ -12,10 +12,11 @@ class Message(models.Model):
     is_edited = models.BooleanField(default=False)
     last_edit = models.DateTimeField(auto_now_add=True)
     _type = models.CharField(max_length=20, blank=True, null=True)
+    urlCode = models.PositiveBigIntegerField(default=getMessageMessageSnowflakeID, unique=True, db_index=True, primary_key=True)
 
     class Meta:
         ordering = ['time_sent']
-        abstract = True
+        # abstract = True
 
 
 # Create your models here.
@@ -23,7 +24,6 @@ class DirectMessage(Message):
     sender = models.ForeignKey('account.AUser', on_delete=models.SET_NULL, related_name='sent_direct_messages2', null=True)
     receiver = models.ForeignKey('account.AUser', on_delete=models.SET_NULL, related_name='received_direct_messages2', null=True)
 
-    urlCode = models.PositiveBigIntegerField(default=getMessageDirectMessageSnowflakeID, unique=True, db_index=True, primary_key=True)
 
     class Meta:
         ordering = ['time_sent']
@@ -40,7 +40,7 @@ class GroupMessage(Message):
     is_private = models.BooleanField(default=False)
     channel = models.ForeignKey("tool.ChannelOfChat", on_delete=models.SET_NULL, related_name='all_msgs', to_field='urlCode', null=True)
     tool_used = models.CharField(max_length=20, blank=True, null=True)
-    urlCode = models.PositiveBigIntegerField(default=getMessageGroupMessageSnowflakeID, unique=True, db_index=True, primary_key=True)
+    # urlCode = models.PositiveBigIntegerField(default=getMessageMessageSnowflakeID, unique=True, db_index=True, primary_key=True)
 
     class Meta:
         ordering = ['time_sent']

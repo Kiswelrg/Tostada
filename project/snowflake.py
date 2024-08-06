@@ -67,6 +67,10 @@ tool_categoryinserver_snowflake_generator = SnowflakeIDGenerator()
 def getToolCategoryInServerSnowflakeID():
     return tool_categoryinserver_snowflake_generator.generate()
 
+message_message_snowflake_generator = SnowflakeIDGenerator()
+def getMessageMessageSnowflakeID():
+    return message_message_snowflake_generator.generate()
+
 message_directmessage_snowflake_generator = SnowflakeIDGenerator()
 def getMessageDirectMessageSnowflakeID():
     return message_directmessage_snowflake_generator.generate()
