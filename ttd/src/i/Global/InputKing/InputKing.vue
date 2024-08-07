@@ -23,7 +23,10 @@
                                :placeholder="curPlaceHolder"
                                class="w-full text-md my-2 bg-transparent outline-none font-light"
                                v-model="mainInputText"
-                               @keyup.enter="runToolMethod">
+                               @keyup.enter="runToolMethod"
+                               @paste="pasteContent($event)"
+                               >
+                        <input class="hidden" ref="chatFiles" type="file" id="chatfiles" name="chatfiles" accept="image/png, image/gif, image/jpeg image/jpg image/webp" multiple>
                     </div>
                 </div>
 
@@ -83,14 +86,98 @@ onMounted(() => {
 })
 
 const mainInputText = ref('')
+const chatFiles = ref([])
+
+// Dropup tools
 const isRunningTool = ref(false)
 const curMethodCode = ref(0)
 const curMethod = ref({})
 const curArgs = ref({})
 
+
+const pasteContent = (e) => {
+    const items = (e.clipboardData || window.clipboardData).items;
+    const files = [];
+    for (let item of items) {
+        if (item.kind === 'file') {
+            files.push(item.getAsFile());
+        }
+    }
+
+    if (files.length > 0) {
+        handleFiles(files);
+        e.preventDefault();
+    }
+}
+
+
+function getFileType(file) {
+    // Get file extension
+    const extension = file.name.split('.').pop().toLowerCase();
+    
+    // Check MIME type
+    const mimeType = file.type;
+
+    if (mimeType.startsWith('image/')) {
+        return mimeType.split('/')[1]; // Returns 'png', 'jpeg', etc.
+    } else if (extension) {
+        return extension;
+    } else {
+        return 'unknown';
+    }
+}
+
+const handleFiles = (files) => {
+    const fileInput = chatFiles.value;
+    const dataTransfer = new DataTransfer();
+
+    if (fileInput.files.length >= 10) {
+        alert(`You can only upload a maximum of 10 files. now ${fileInput.files.length}`);
+        return;
+    }
+    // Add existing files
+    Array.from(fileInput.files).forEach((file) => {
+        dataTransfer.items.add(file)
+    });
+
+    let cur = dataTransfer.items.length;
+    // Add new pasted files
+    for (const file of files) {
+        if (cur >= 10) {
+            break;
+        }
+        if (!file) return;
+        // Check if it's a directory or non-recognizable or empty
+        if (file.type === '' || file.size === 0) {
+            console.log(`${file.name} is skipped`);
+        } else {
+            console.log(`${file.name} type : ${getFileType(file)}`);
+            dataTransfer.items.add(file);
+            cur++;
+        }
+    }
+
+    if (dataTransfer.files.length > 10) {
+        alert(`Error: ${dataTransfer.files.length}`);
+        return;
+    }
+    fileInput.files = dataTransfer.files;
+    updateFileCountMessage(fileInput.files.length);
+}
+
+const updateFileCountMessage = (fileCount) => {
+    // You can update a message in the UI if needed
+    console.log(`${fileCount} file(s) selected.`);
+}
+
+
 const onUpdateArgs = (v, k) => {
     curArgs.value[k] = v;
 }
+
+// const curMethod = computed(() => {
+//     return methodDetail(curMethodCode.value)
+// })
 
 const chooseMethod = (m) => {
     if (curMethodCode.value !== m.code) {
@@ -154,20 +241,55 @@ const text2MsgContents = () => {
     return res
 }
 
-const sendMessageInChannel = () => {
-    if (mainInputText.value == '') return
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+    });
+}
+
+
+const sendMessageInChannel = async () => {
+    if (mainInputText.value === '' && chatFiles.value.files.length === 0) return;
+
     const d = {
-        'type': 'normal',
-        'channel_cid': (props.toolDetail.cid).toString(),
-        'contents': text2MsgContents(),
-        'is_private': false,
-        'mentioned_user': undefined,
-        'tool_used': undefined,
+        type: 'normal',
+        channel_cid: props.toolDetail.cid.toString(),
+        contents: text2MsgContents(),
+        is_private: false,
+        mentioned_user: undefined,
+        tool_used: undefined,
+        files: []
+    };
+
+    const files = Array.from(chatFiles.value.files);
+    for (let file of files) {
+        try {
+            const fileData = await fileToBase64(file);
+            d.files.push({
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                data: fileData
+            });
+        } catch (error) {
+            console.error('Error converting file to base64:', error);
+            // Handle error appropriately (e.g., show a user-friendly message)
+        }
     }
-    props.chatSocket.send(JSON.stringify({
-        'message': d
-    }));
-    mainInputText.value = '';
+
+    try {
+        props.chatSocket.send(JSON.stringify({ message: d }));
+        mainInputText.value = '';
+        chatFiles.value = null; // Resetting chatFiles to clear the input
+        updateFileCountMessage(0); // Reset file count message
+    } catch (error) {
+        console.error('Error sending message via WebSocket:', error);
+        // Handle error appropriately
+    }
 }
 
 async function runToolMethod() {
@@ -228,4 +350,7 @@ async function runToolMethod() {
     --m-inputking-l-indent: 24px;
 }
 </style>
-<style lang="scss" scoped></style>
+
+<style lang="scss" scoped>
+
+</style>

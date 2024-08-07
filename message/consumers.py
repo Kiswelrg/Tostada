@@ -10,6 +10,10 @@ from .models import GroupMessage
 from tool.models import ChannelOfChat
 from account.models import AUser
 from .Storage.chat import RedisChatStorage
+import base64
+from io import BytesIO
+from PIL import Image
+
 if settings.PRODUCTION:
     ChatStorage = RedisChatStorage
 else:
@@ -140,10 +144,57 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
+    def decode_base64(self, data):
+        try:
+            file_bytes = base64.b64decode(data)
+            return file_bytes
+        except base64.binascii.Error as e:
+            raise ValueError("Error decoding base64 data: " + str(e))
+
+
+    def process_generic_file(self, file_data, file_name):
+        try:
+            with open(f'/path/to/save/{file_name}', 'wb') as file:
+                file.write(file_data)
+            return f'/path/to/save/{file_name}'
+        except IOError as e:
+            raise ValueError("Error saving file: " + str(e))
+    def process_image(self, file_data):
+        try:
+            image = Image.open(BytesIO(file_data))
+            # You can now work with the image object
+            # For example, save it to a file:
+            # image.save(f'/path/to/save/{file_name}')
+            return image
+        except IOError as e:
+            raise ValueError("Error constructing image from bytes: " + str(e))
+    def process_file(self, file_data, file_type, file_name):
+        if file_type.startswith('image/'):
+            return self.process_image(file_data)
+        else:
+            return self.process_generic_file(file_data, file_name)
+
 
     @require_login
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
+        print(text_data_json['message']['files'][0]['data'])
+        for file in text_data_json['message']['files']:
+            file_info = text_data_json['message']['files'][0]
+            file_data_base64 = file_info['data']
+            file_type = file_info['type']
+            file_name = file_info['name']
+
+            # Decode Base64 data
+            file_data = self.decode_base64(file_data_base64)
+
+            # Process the file based on its type
+            try:
+                processed_file = self.process_file(file_data, file_type, file_name)
+                print(f'Processed file saved as: {processed_file}')
+            except ValueError as e:
+                print("Error processing file:", e)
+
         if text_data_json.get('command') == 'get_active_users':
             await self.get_active_users(None)
             return

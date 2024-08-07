@@ -3,35 +3,37 @@
         
         <div class="toolbody flex flex-col flex-1 overflow-y-auto w-full">
             <ToolHead :title="toolDetail?.name" :intro="toolDetail?.description + ' id: ' + selectedToolId" class="flex-none"/>
-            <div class="belly flex-1 flex flex-col justify-end w-full overflow-y-auto">
-                <Welcome :tool-detail="props.toolDetail"></Welcome>
-                <div class="introduction hidden">
-                    <div class="introwrapper flex flex-col items-left text-left">
-                        <div v-if="!intro?.length" class="paragraph px-2 py-1 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
-                            Another option you have is choosing the number of syllables in the words you speak. You probably have never considered this option before, but you have it every time you open your mouth and speak. You make so many choices like this that you never even think about, but you have the choice with each one. What are you going to do with this knowledge?
-                        </div>
-                        <div v-for="ito in filtered_intro" :key="ito" class="paragraph px-4 py-4 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
-                            <div v-for="content in ito.content" :key="content">{{ content }}</div>
+            <div class="belly flex-1 flex flex-col justify-end w-full overflow-auto">
+                <div class="belly-detail w-full h-fit overflow-y-scroll">
+                    <Welcome :tool-detail="props.toolDetail"></Welcome>
+                    <div class="introduction hidden">
+                        <div class="introwrapper flex flex-col items-left text-left">
+                            <div v-if="!intro?.length" class="paragraph px-2 py-1 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
+                                Another option you have is choosing the number of syllables in the words you speak. You probably have never considered this option before, but you have it every time you open your mouth and speak. You make so many choices like this that you never even think about, but you have the choice with each one. What are you going to do with this knowledge?
+                            </div>
+                            <div v-for="ito in filtered_intro" :key="ito" class="paragraph px-4 py-4 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
+                                <div v-for="content in ito.content" :key="content">{{ content }}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="toolmenu"></div>
-                <div class="chat">
-                    <div class="chat-wrapper text-left">
-                        <div class="scroller">
-                            <div class="scroller-content">
-                                <ol class="messages-container">
+                    <div class="toolmenu"></div>
+                    <div class="chat">
+                        <div class="chat-wrapper text-left">
+                            <div class="scroller">
+                                <div class="scroller-content">
+                                    <ol class="messages-container">
 
-                                    <Message v-for="m in messagedIntro" v-bind:key="m.id" :msg="m"></Message>
-                                    <Message v-for="(m, idx) in sortedMessages" :is-group-head="isMsgHead(idx)" v-bind:key="m.id" :msg="m"></Message>
-                                </ol>
+                                        <Message v-for="m in messagedIntro" v-bind:key="m.id" :msg="m"></Message>
+                                        <Message v-for="(m, idx) in sortedMessages" :is-group-head="isMsgHead(idx)" v-bind:key="m.id" :msg="m"></Message>
+                                    </ol>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         
-            <div class="w-full h-3 block invisible"></div>
+            <div class="w-full h-1 block"></div>
         </div>
         
         <InputKing class="flex-none" :tool-detail="toolDetail" :chat-socket="chatSocket" @add-message="onAddMessage"/>
@@ -320,7 +322,7 @@ const { stopped, stopWatcher } = useWatchOnce(() => props.toolDetail,
 </script>
 
 <style lang="scss" scoped>
-.belly {
+.belly-detail {
     &::-webkit-scrollbar {
         background-color: transparent;
         width: 12px;

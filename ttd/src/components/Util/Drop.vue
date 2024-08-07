@@ -18,7 +18,7 @@
                           clip-rule="evenodd" />
                 </svg>
             </button>
-            <div class="h-full w-4 absolute right-[-4px] top-0 content-top text-black z-10 text-[8px]">({{ currentMethodIdx }})</div>
+            <div class="h-full w-4 absolute right-[-4px] top-0 content-top text-black z-10 text-[8px]">({{ methodsNum }})</div>
         </div>
 
         <!--
