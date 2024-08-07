@@ -4,21 +4,24 @@
              :cur-args="curArgs"
              v-if="Object.keys(curMethodDetail).length !== 0"
              @update-args="onUpdateArgs"></Arg>
-        <div class="wrapper flex justify-between mb-1 bg-[#383a40] w-full h-[44.32px] rounded-lg z-[2]">
+        <div class="wrapper flex justify-between mb-1 w-full h-[44.32px] z-[2] bg-[var(--bg-overlay-3,var(--channeltextarea-background))] rounded-lg">
             <div class="left-buttons h-full flex items-center ml-2">
                 <div class="flex">
-                    <div class="h-8 w-8 bg-[#2f2f2f] rounded-full">
+                    <div class="h-8 w-8 p-1">
                         <!-- display current Bot -->
+                        <div class="flex bg-interactive-normal rounded-full justify-center items-center h-6 w-6 text-[#383a40]">
+                            <PlusRegular class="h-5 w-5 scale-[0.8] stroke-current"></PlusRegular>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="main-input items-center w-full h-full flex mx-2">
 
                 <div class="flex rounded-md shadow-sm w-full h-full text-3s">
-                    <div class="flex">
+                    <div class="flex grow">
                         <input type="text"
                                :placeholder="curPlaceHolder"
-                               class="w-full text-md my-2 bg-inputking-bg outline-none font-light"
+                               class="w-full text-md my-2 bg-transparent outline-none font-light"
                                v-model="mainInputText"
                                @keyup.enter="runToolMethod">
                     </div>
@@ -59,9 +62,11 @@
 </template>
 
 <script setup>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import PlusRegular from '@/assets/Server/Channel/InputKing/plus-regular.vue'
 import Arg from './Arg/Arg.vue'
 import Drop from '../../../components/Util/Drop.vue'
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue'
 import { jsonWithBigInt } from '@/util/parse'
 import { getCookie } from '@/util/session'
 const props = defineProps([
@@ -217,6 +222,7 @@ async function runToolMethod() {
 
 
 <style lang="scss">
+@import "@/styles/global.scss";
 :root {
     --m-inputking-height: 53px;
     --m-inputking-l-indent: 24px;

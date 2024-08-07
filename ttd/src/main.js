@@ -12,7 +12,8 @@ library.add(
     faPen,
     faEllipsisH,
     faArrowLeft,
-    faTrash, faClipboard, faPaperclip
+    faTrash, faClipboard, faPaperclip,
+    
 )
 
 const app = createApp(App).use(router)

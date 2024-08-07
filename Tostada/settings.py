@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'tool',
     'message',
     'project',
+    'attachment',
 ]
 
 MIDDLEWARE = [
@@ -166,10 +167,12 @@ STATICFILES_DIRS = [
 MEDIA_ROOT = 'dafjdijgpaisdfajsdgijdaspfdsiajgisdjapfijaisgapsdjfiaosdjgioad'
 MEDIA_URL = 'fjiapjdgioajdfpjaiposdjgiasdjfpoajgiajspdoifjgjpaisjdfiojapigo'
 if DEBUG:
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'upload')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'upload/media')
     MEDIA_URL = '/media/'
 
-    
+ATTACHMENT_ROOT = os.path.join(BASE_DIR, 'upload/attachment')
+ATTACHMENT_URL = '/attachment/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
