@@ -51,6 +51,8 @@ class SnowflakeIDGenerator:
 # Global instance
 # snowflake_generator = SnowflakeIDGenerator()
 
+
+# Tool app
 tool_server_snowflake_generator = SnowflakeIDGenerator()
 def getToolServerSnowflakeID():
     return tool_server_snowflake_generator.generate()
@@ -67,6 +69,8 @@ tool_categoryinserver_snowflake_generator = SnowflakeIDGenerator()
 def getToolCategoryInServerSnowflakeID():
     return tool_categoryinserver_snowflake_generator.generate()
 
+
+# Message app
 message_message_snowflake_generator = SnowflakeIDGenerator()
 def getMessageMessageSnowflakeID():
     return message_message_snowflake_generator.generate()
@@ -79,7 +83,14 @@ message_groupmessage_snowflake_generator = SnowflakeIDGenerator()
 def getMessageGroupMessageSnowflakeID():
     return message_groupmessage_snowflake_generator.generate()
 
+
+# Account app
 account_auser_snowflake_generator = SnowflakeIDGenerator()
 def getAccountAUserSnowflakeID():
     return account_auser_snowflake_generator.generate()
 
+
+# Attachment app
+attachment_gmfile_snowflake_generator = SnowflakeIDGenerator()
+def AttachmentGMFileSnowflakeID():
+    return attachment_gmfile_snowflake_generator.generate()

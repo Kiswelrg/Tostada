@@ -3,10 +3,12 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
+from django.core.files.base import ContentFile
 from django.utils import timezone
 # from asgiref.sync import sync_to_async
 from django.shortcuts import get_object_or_404
 from .models import GroupMessage
+from attachment.models import GMFile
 from tool.models import ChannelOfChat
 from account.models import AUser
 from .Storage.chat import RedisChatStorage
@@ -37,7 +39,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return user.is_authenticated
     
     @database_sync_to_async
-    def save_groupmessage(self, message, GM_type = 'normal'):
+    def save_groupmessage(self, message, files, GM_type = 'normal'):
         msg = GroupMessage.objects.create(
             sender=AUser.objects.get(id=self.user.id),
             is_private=message['is_private'],
@@ -45,6 +47,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             _type=GM_type,
             contents=json.dumps(message['contents'])
         )
+        for f in files:
+            GMFile.objects.create(
+                file=f,
+                message=msg
+            )
         return msg
 
     @require_login
@@ -153,6 +160,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
     def process_generic_file(self, file_data, file_name):
+
         try:
             with open(f'/path/to/save/{file_name}', 'wb') as file:
                 file.write(file_data)
@@ -169,31 +177,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except IOError as e:
             raise ValueError("Error constructing image from bytes: " + str(e))
     def process_file(self, file_data, file_type, file_name):
-        if file_type.startswith('image/'):
-            return self.process_image(file_data)
-        else:
-            return self.process_generic_file(file_data, file_name)
+        # if file_type.startswith('image/'):
+        #     return self.process_image(file_data)
+        # else:
+        return self.process_generic_file(file_data, file_name)
 
 
     @require_login
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-        print(text_data_json['message']['files'][0]['data'])
-        for file in text_data_json['message']['files']:
-            file_info = text_data_json['message']['files'][0]
-            file_data_base64 = file_info['data']
-            file_type = file_info['type']
-            file_name = file_info['name']
-
-            # Decode Base64 data
-            file_data = self.decode_base64(file_data_base64)
-
-            # Process the file based on its type
-            try:
-                processed_file = self.process_file(file_data, file_type, file_name)
-                print(f'Processed file saved as: {processed_file}')
-            except ValueError as e:
-                print("Error processing file:", e)
 
         if text_data_json.get('command') == 'get_active_users':
             await self.get_active_users(None)
@@ -203,40 +195,63 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
         message = text_data_json['message']
 
-        try:
-            msg = await self.save_groupmessage(message)
+        msg_files = text_data_json['message']['files']
+        files = []
+        for file in msg_files:
+            file_data_base64 = file['data']
+            file_type = file['type']
+            file_name = file['name']
 
-            # Send message to room group
-            await self.channel_layer.group_send(
-                self.room_channel_name,
-                {
-                    'type': 'chat_message',
-                    'messages': [{
-                        'sender': {
-                            'username': self.user.username,
-                            'avatar': await database_sync_to_async(lambda: get_object_or_404(AUser, id=self.user.id).avatar.url)()
-                        },
-                        'mentioned_user': {},
-                        'tool_used': {},
-                        'time_sent': msg.time_sent.isoformat(),
-                        'type': msg._type,
-                        'cid': msg.urlCode,
-                        'is_edited': {
-                            'state': msg.is_edited,
-                            'text': 'edited',
-                            'last_edit':msg.last_edit.isoformat(),
-                        },
-                        'is_private': msg.is_private,
-                        'contents': json.loads(msg.contents), # load in frontend, save some performance for Django
-                    }]
-                    
-                }
-            )
-        except Exception as e:
-            await self.send(text_data=json.dumps({
-                'error': 'Failed to save message'
-            }))
-            print(f'Error saving msg: {e}')
+
+            # Process the file based on its type
+            # processed_file = self.process_file(file_data, file_type, file_name)
+            try:
+                # Decode Base64 data
+                file_data = self.decode_base64(file_data_base64)
+                files.append(
+                    ContentFile(file_data, name = file_name)
+                )
+                print(f'File {file_name} ready to save.')
+            except ValueError as e:
+                print("Error processing file:", e)
+        # try:
+        msg = await self.save_groupmessage(message, files)
+
+        # Send message to room group
+        await self.channel_layer.group_send(
+            self.room_channel_name,
+            {
+                'type': 'chat_message',
+                'messages': [{
+                    'sender': {
+                        'username': self.user.username,
+                        'avatar': await database_sync_to_async(lambda: get_object_or_404(AUser, id=self.user.id).avatar.url)()
+                    },
+                    'mentioned_user': {},
+                    'tool_used': {},
+                    'time_sent': msg.time_sent.isoformat(),
+                    'type': msg._type,
+                    'cid': msg.urlCode,
+                    'is_edited': {
+                        'state': msg.is_edited,
+                        'text': 'edited',
+                        'last_edit':msg.last_edit.isoformat(),
+                    },
+                    'is_private': msg.is_private,
+                    'contents': json.loads(msg.contents), # load in frontend, save some performance for Django
+                    'attachments': [
+                        await database_sync_to_async(GMFile.get_file(a.urlCode) for a in msg.attachments.all())()
+                    ]
+                }]
+                
+            }
+        )
+        # except Exception as e:
+        #     raise e
+        #     await self.send(text_data=json.dumps({
+        #         'error': 'Failed to save message'
+        #     }))
+        #     print(f'Error saving msg: {e}')
 
     
     @require_login

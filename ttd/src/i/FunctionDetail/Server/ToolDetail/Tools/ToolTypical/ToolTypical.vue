@@ -258,6 +258,7 @@ const connect = (url, tool) => {
         console.log('Got messages: ')
         if (data['type'] == 'chat_message') {
             const cur = data['messages'];
+            console.log(cur);
             messages.value.push.apply(messages.value, cur);
         }
         else if (data['type'] == 'message_deleted') {

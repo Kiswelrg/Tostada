@@ -60,6 +60,9 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
     if instance.avatar:
         if os.path.isfile(instance.avatar.path):
             os.remove(instance.avatar.path)
+    if instance.logo:
+        if os.path.isfile(instance.logo.path):
+            os.remove(instance.logo.path)
 
 @receiver(models.signals.pre_save, sender=AUser)
 def auto_delete_file_on_change(sender, instance, **kwargs):
@@ -72,14 +75,18 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
         return False
 
     try:
-        old_file = AUser.objects.get(pk=instance.pk).avatar
+        u = AUser.objects.get(pk=instance.pk)
+        old_files = [u.avatar, u.logo]
     except AUser.DoesNotExist:
         return False
 
-    if old_file == '':
+    if all([f == '' for f in old_files]):
         return
-    new_file = instance.avatar
+    new_files = [instance.avatar, instance.logo]
     
-    if not old_file == new_file:
-        if os.path.isfile(old_file.path):
-            os.remove(old_file.path)
+    for i in range(len(old_files)):
+        old_file = old_files[i]
+        new_file = new_files[i]
+        if not old_file == new_file:
+            if os.path.isfile(old_file.path):
+                os.remove(old_file.path)

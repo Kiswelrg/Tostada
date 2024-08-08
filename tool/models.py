@@ -4,6 +4,7 @@ from django.utils.translation import gettext as _
 from django.dispatch import receiver
 from project.snowflake import getToolServerSnowflakeID, getToolChannelOfChatSnowflakeID, getToolChannelOfVoiceSnowflakeID, getToolCategoryInServerSnowflakeID
 import os
+from django.conf import settings
 
 from .util import model
 # Create your models here.
@@ -201,40 +202,6 @@ class Server(models.Model):
 
 
 
-@receiver(models.signals.post_delete, sender=Server)
-def auto_delete_file_on_delete(sender, instance, **kwargs):
-    """
-    Deletes file from filesystem
-    when corresponding `MyModel` object is deleted.
-    """
-    if instance.logo:
-        if os.path.isfile(instance.logo.path):
-            os.remove(instance.logo.path)
-
-@receiver(models.signals.pre_save, sender=Server)
-def auto_delete_file_on_change(sender, instance, **kwargs):
-    """
-    Deletes old file from filesystem
-    when corresponding `Server` object is updated
-    with new file.
-    """
-    if not instance.pk:
-        return False
-
-    try:
-        old_file = Server.objects.get(pk=instance.pk).logo
-    except Server.DoesNotExist:
-        return False
-
-    if old_file == '':
-        return
-    new_file = instance.logo
-    
-    if not old_file == new_file:
-        if os.path.isfile(old_file.path):
-            os.remove(old_file.path)
-
-
 class CategoryInServer(models.Model):
     name = models.CharField(max_length=100)
     server = models.ForeignKey(Server, on_delete=models.CASCADE, related_name='categories', to_field='urlCode', null=True)
@@ -295,6 +262,52 @@ class Channel(models.Model):
 
     class Meta:
         abstract = True
+
+
+@receiver(models.signals.post_delete, sender=Server)
+@receiver(models.signals.post_delete, sender=Channel)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `MyModel` object is deleted.
+    """
+    if instance.logo:
+        if os.path.isfile(instance.logo.path):
+            os.remove(instance.logo.path)
+    if instance.cover:
+        if os.path.isfile(instance.cover.path):
+            os.remove(instance.logo.path)
+
+@receiver(models.signals.pre_save, sender=Server)
+@receiver(models.signals.pre_save, sender=Channel)
+def auto_delete_file_on_change(sender, instance, **kwargs):
+    """
+    Deletes old file from filesystem
+    when corresponding `Server` object is updated
+    with new file.
+    """
+    if not instance.pk:
+        return False
+
+    try:
+        old_files = [Server.objects.get(pk=instance.pk).logo,
+                    Server.objects.get(pk=instance.pk).cover]
+    except Server.DoesNotExist:
+        return False
+
+    if all([f == '' for f in old_files]) == '':
+        return
+    new_files = [
+        instance.logo,
+        instance.cover
+    ]
+    
+    for i in range(len(old_files)):
+        old_file = old_files[i]
+        new_file = new_files[i]
+        if not old_file == new_file:
+            if os.path.isfile(old_file.path):
+                os.remove(old_file.path)
 
 
 class ChannelOfChat(Channel):
