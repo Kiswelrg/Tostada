@@ -7,7 +7,7 @@
             
             <div class="username-text whitespace-nowrap text-ellipsis overflow-hidden">
                 <div>
-                    kiswelrg
+                    User
                 </div>
             </div>
             <div class="status-text whitespace-nowrap text-ellipsis overflow-hidden">

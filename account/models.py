@@ -43,7 +43,7 @@ class AUser(User):
     # email = models.EmailField(max_length = 25, null = True, blank = True)
     additional = models.JSONField(default=None, blank=True, null=True)
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
-    avatar = models.ImageField(upload_to=avatar_dir_path, blank=True, default='')
+    avatar = models.ImageField(upload_to=avatar_dir_path, blank=True, default='default/user/user.svg')
 
     def __str__(self) -> str:
         return f"{self.username}({self.urlCode})"

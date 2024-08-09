@@ -417,7 +417,7 @@ class UserServerRole(models.Model):
     order = models.PositiveIntegerField(default=0)
 
     def __str__(self) -> str:
-        return f"{self.user} in [{self.server} : {self.role.name}]"
+        return f"{self.user} in [{self.role.server} : {self.role.name}]"
 
 
 # Default to be role-based table

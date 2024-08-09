@@ -147,8 +147,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'type': 'history_message',
                 'messages': [{
                     'sender': {
-                        'username': self.user.username,
-                        'avatar': await database_sync_to_async(lambda: get_object_or_404(AUser, id=self.user.id).avatar.url)()
+                        'username': await database_sync_to_async(lambda: msg.sender.username)(),
+                        'avatar': await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar.url)()
                     },
                     'mentioned_user': {},
                     'tool_used': {},
@@ -244,8 +244,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'type': 'chat_message',
                 'messages': [{
                     'sender': {
-                        'username': self.user.username,
-                        'avatar': await database_sync_to_async(lambda: get_object_or_404(AUser, id=self.user.id).avatar.url)()
+                        'username': await database_sync_to_async(lambda: msg.sender.username)(),
+                        'avatar': await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar.url)()
                     },
                     'mentioned_user': {},
                     'tool_used': {},
