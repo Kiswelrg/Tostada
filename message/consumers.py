@@ -5,10 +5,11 @@ from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils import timezone
-# from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async
 from django.shortcuts import get_object_or_404
-from .models import GroupMessage
-from attachment.models import GMFile
+from django.http.response import Http404
+from .models import ChatMessage
+from attachment.models import MFile
 from tool.models import ChannelOfChat
 from account.models import AUser
 from .Storage.chat import RedisChatStorage
@@ -33,14 +34,25 @@ def require_login(consumer_func):
 class ChatConsumer(AsyncWebsocketConsumer):
     storage = RedisChatStorage()
 
+
+    @database_sync_to_async
+    def getAttachments(self, m, attrs=None):
+        if attrs is None:
+            attrs = ['name', 'url']
+        return [
+            MFile.get_file(a.urlCode, attrs=attrs) for a in m.attachments.all()
+        ]
+    
+
     @database_sync_to_async
     def check_authentication(self):
         user = self.scope.get('user', AnonymousUser())
         return user.is_authenticated
     
+
     @database_sync_to_async
     def save_groupmessage(self, message, files, GM_type = 'normal'):
-        msg = GroupMessage.objects.create(
+        msg = ChatMessage.objects.create(
             sender=AUser.objects.get(id=self.user.id),
             is_private=message['is_private'],
             channel=ChannelOfChat.objects.get(urlCode=self.channel_cid),
@@ -48,7 +60,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             contents=json.dumps(message['contents'])
         )
         for f in files:
-            GMFile.objects.create(
+            MFile.objects.create(
                 file=f,
                 message=msg
             )
@@ -59,6 +71,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if self.storage.redis is None:
             await self.storage.initialize()
         self.channel_cid = self.scope['url_route']['kwargs']['channel_cid']
+        
         self.room_channel_name = f'chat_{self.channel_cid}'
         self.user = self.scope['user']
         
@@ -120,7 +133,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         @database_sync_to_async
         def get_messages():
+            # try:
             channel = get_object_or_404(ChannelOfChat, urlCode=self.channel_cid)
+            # except Http404:
+            #     return []
             return list(channel.all_msgs.all()[:50])  # Use .all() before slicing
 
         msgs = await get_messages()
@@ -146,6 +162,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     },
                     'is_private': msg.is_private,
                     'contents': json.loads(msg.contents), # load in frontend, save some performance for Django
+                    'attachments': await self.getAttachments(msg)
                 } for msg in msgs]
                 
             }
@@ -218,6 +235,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         msg = await self.save_groupmessage(message, files)
 
         # Send message to room group
+        get_file_async = sync_to_async(MFile.get_file)
+
+
         await self.channel_layer.group_send(
             self.room_channel_name,
             {
@@ -239,9 +259,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     },
                     'is_private': msg.is_private,
                     'contents': json.loads(msg.contents), # load in frontend, save some performance for Django
-                    'attachments': [
-                        await database_sync_to_async(GMFile.get_file(a.urlCode) for a in msg.attachments.all())()
-                    ]
+                    'attachments': await self.getAttachments(msg)
                 }]
                 
             }
@@ -258,14 +276,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def delete_message(self, message_cid):
         @database_sync_to_async
         def delete_message_from_db():
-            message = GroupMessage.objects.get(urlCode=message_cid, sender=self.user)
+            message = ChatMessage.objects.get(urlCode=message_cid, sender=self.user)
             message.delete()
             return True
             
         u = self.user
         try:
-            # sender = await database_sync_to_async(lambda: GroupMessage.objects.get(urlCode=message_cid).sender.id)()
-            sender = await database_sync_to_async(lambda: get_object_or_404(GroupMessage, urlCode = message_cid).sender.id)()
+            # sender = await database_sync_to_async(lambda: ChatMessage.objects.get(urlCode=message_cid).sender.id)()
+            sender = await database_sync_to_async(lambda: get_object_or_404(ChatMessage, urlCode = message_cid).sender.id)()
         
             # Check if the user is authorized to delete the message
             if sender != u.id:
@@ -284,7 +302,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'cid': message_cid,
                 }
             )
-        except GroupMessage.DoesNotExist:
+        except ChatMessage.DoesNotExist:
             await self.send(text_data=json.dumps({
                 'type': 'error',
                 'error': 'Message not found.'

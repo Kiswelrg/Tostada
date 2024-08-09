@@ -75,13 +75,13 @@ message_message_snowflake_generator = SnowflakeIDGenerator()
 def getMessageMessageSnowflakeID():
     return message_message_snowflake_generator.generate()
 
-message_directmessage_snowflake_generator = SnowflakeIDGenerator()
-def getMessageDirectMessageSnowflakeID():
-    return message_directmessage_snowflake_generator.generate()
+# message_directmessage_snowflake_generator = SnowflakeIDGenerator()
+# def getMessageDirectMessageSnowflakeID():
+#     return message_directmessage_snowflake_generator.generate()
 
-message_groupmessage_snowflake_generator = SnowflakeIDGenerator()
-def getMessageGroupMessageSnowflakeID():
-    return message_groupmessage_snowflake_generator.generate()
+# message_chatmessage_snowflake_generator = SnowflakeIDGenerator()
+# def getMessageChatMessageSnowflakeID():
+#     return message_chatmessage_snowflake_generator.generate()
 
 
 # Account app
@@ -91,6 +91,6 @@ def getAccountAUserSnowflakeID():
 
 
 # Attachment app
-attachment_gmfile_snowflake_generator = SnowflakeIDGenerator()
-def AttachmentGMFileSnowflakeID():
-    return attachment_gmfile_snowflake_generator.generate()
+attachment_MFile_snowflake_generator = SnowflakeIDGenerator()
+def AttachmentMFileSnowflakeID():
+    return attachment_MFile_snowflake_generator.generate()

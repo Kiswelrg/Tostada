@@ -25,7 +25,7 @@ watch(svg, (newValue) => {
     if (newValue) {
         const computedStyle = window.getComputedStyle(newValue)
         stroke.value = computedStyle.color
-        console.log('SVG color (from watcher):', computedStyle.color)
+        // console.log('SVG color (from watcher):', computedStyle.color)
     }
 }, { immediate: true })
 </script>

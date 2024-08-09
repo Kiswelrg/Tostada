@@ -48,6 +48,9 @@ class AUser(User):
     def __str__(self) -> str:
         return f"{self.username}({self.urlCode})"
     
+    class Meta:
+        ordering = ['urlCode']
+    
 
     
 

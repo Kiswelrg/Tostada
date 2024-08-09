@@ -258,25 +258,23 @@ const connect = (url, tool) => {
         console.log('Got messages: ')
         if (data['type'] == 'chat_message') {
             const cur = data['messages'];
-            console.log(cur);
+            console.log(cur.map(a => a['attachments'].length ? a['attachments'] : undefined));
             messages.value.push.apply(messages.value, cur);
         }
         else if (data['type'] == 'message_deleted') {
             deleteMsg(data.cid);
         } else if (data['type'] == 'history_message') {
             messages.value = data['messages']
+            let logs = [];
+            messages.value.map((a) => {
+                if (a['attachments'].length)
+                    logs.push.apply(logs,a['attachments']);
+            })
+            console.log(logs);
 
-            // sortedMessages.value[0]['is_group_head'] = true
-            // for (let idx=1; idx < sortedMessages.value.length; idx++) {
-            //     const pre = sortedMessages.value[idx-1]
-            //     let cur = sortedMessages.value[idx]
-            //     if (!isMsgsClose(pre, cur)) {
-            //         cur['is_group_head'] = true
-            //     }
-            // }
 
         } else if (data['type'] == 'chat_message_delete') {
-        } 
+        }
     }
 
     chatSocket.value.onclose = function(e) {
@@ -300,15 +298,7 @@ const connect = (url, tool) => {
 
 
 const onToolDetailChange = watch(() => props.toolDetail, (newValue, old) => {
-    if (chatSocket.value === undefined) return false
-    const urlString = import.meta.env.VITE_BACKEND_URL
-    const url = new URL(urlString)
-    connect(url, newValue)
-})
-
-
-const { stopped, stopWatcher } = useWatchOnce(() => props.toolDetail,
-  (newValue, old) => {
+    if (newValue.class !== 'ChannelOfChat') return
     if (newValue !== undefined && newValue.cid !== undefined) {
         const urlString = import.meta.env.VITE_BACKEND_URL
         const url = new URL(urlString)
@@ -316,8 +306,7 @@ const { stopped, stopWatcher } = useWatchOnce(() => props.toolDetail,
         return true
     }
     return false
-  }
-)
+})
 
 
 </script>

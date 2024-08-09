@@ -284,7 +284,7 @@ const sendMessageInChannel = async () => {
     try {
         props.chatSocket.send(JSON.stringify({ message: d }));
         mainInputText.value = '';
-        chatFiles.value = null; // Resetting chatFiles to clear the input
+        chatFiles.value.value = null; // Resetting chatFiles to clear the input
         updateFileCountMessage(0); // Reset file count message
     } catch (error) {
         console.error('Error sending message via WebSocket:', error);

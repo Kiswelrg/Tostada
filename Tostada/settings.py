@@ -171,7 +171,7 @@ ATTACHMENT_ROOT = os.path.join(BASE_DIR, 'upload/attachment')
 ATTACHMENT_URL = '/attachment/'
 ATTACHMENT_KEY1 = '2t2Ybw20Q$zXTR2c01lD0KSz9hnQfsOytLB8egeBCgoOl5KO$lGQwcYHbgDy1P'
 ATTACHMENT_KEY2 = 'JsSX7BVm5yhadMcObU5LqJv94HaRseTt0fM5NTKYDEsC0uZk$VN4B6YMYbo$vM'
-
+ATTACHMENT_KEY = ATTACHMENT_KEY1
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

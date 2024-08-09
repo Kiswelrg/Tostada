@@ -123,9 +123,9 @@ class Server(models.Model):
         
     def initDefaultCategories(self, with_tool = False):
         names = [
-            ('welcome', 'Hi'),
-            ('chat', 'Main'),
-            ('voice', 'General')
+            ('welcome', 'Hi', ChannelOfChat),
+            ('chat', 'Main', ChannelOfChat),
+            ('voice', 'General', ChannelOfVoice)
         ]
         data = {
             'categories': [
@@ -137,7 +137,7 @@ class Server(models.Model):
             
         }
         tools = [
-                    ChannelOfVoice.objects.create(
+                    names[i][2].objects.create(
                         name = names[i][1],
                         server = self,
                         category = data['categories'][i]
@@ -199,6 +199,9 @@ class Server(models.Model):
                 save_list.append(t)
             for item in save_list:
                 item.save()
+
+    class Meta:
+        ordering = ['urlCode']
 
 
 
@@ -322,9 +325,13 @@ class ChannelOfChat(Channel):
     )
     server = models.ForeignKey(
         Server, on_delete=models.CASCADE, related_name='channelofchats', to_field='urlCode', null=True)
+    is_dm = models.BooleanField(default=False)
     method_names = models.JSONField(default=EmptyJson, blank = True)
     inputs = models.JSONField(default=EmptyJson, null=True, blank = True)
     outputs = models.JSONField(default=EmptyJson, null=True, blank = True)
+
+    class Meta:
+        ordering = ['urlCode']
 
 
 class ChannelOfVoice(Channel):

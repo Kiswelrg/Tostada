@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='GMFile',
             fields=[
-                ('urlCode', models.PositiveBigIntegerField(db_index=True, default=project.snowflake.AttachmentGMFileSnowflakeID, primary_key=True, serialize=False, unique=True)),
+                ('urlCode', models.PositiveBigIntegerField(db_index=True, default=project.snowflake.AttachmentMFileSnowflakeID, primary_key=True, serialize=False, unique=True)),
                 ('file', models.FileField(upload_to='upload/attachment')),
                 ('last_url', models.URLField(blank=True, max_length=400, null=True)),
                 ('sent_at', models.DateTimeField(default=django.utils.timezone.now)),
