@@ -217,6 +217,22 @@
                     <label
                       for="exampleFormControlInput4"
                       class="form-label inline-block mb-2 text-gray-700 text-sm"
+                      >邀请码</label
+                    >
+                    <input
+                      class="form-control block w-full px-2 py-1 text-sm font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                      type="text"
+                      id="invitecode"
+                      name="invitecode"
+                      placeholder="邀请码"
+                      v-model="invitecode"
+                      
+                    />
+                  </div>
+                  <div class="mb-3 xl:w-80">
+                    <label
+                      for="exampleFormControlInput4"
+                      class="form-label inline-block mb-2 text-gray-700 text-sm"
                       >验证码</label
                     >
                     <div class="relative">
@@ -296,6 +312,7 @@ const signup_pwd_match = ref(true);
 const username = ref("");
 const pwd = ref("");
 const pwd2 = ref("");
+const invitecode = ref("");
 const signup_varification_correct = ref(true);
 const username_taken = ref(false);
 const csrftoken = getCookie("csrftoken");
@@ -355,6 +372,7 @@ async function signUp() {
     csrfmiddlewaretoken: cmt.value,
     username: username.value,
     code: vcode.value,
+    invitecode: invitecode.value,
     pwd: await (pwd.value),
   };
   var form_data = new FormData();
@@ -390,6 +408,10 @@ async function signUp() {
             username_taken.value = true;
             console.log("username already signed up");
             break;
+          case 4:
+            console.log("邀请码不正确");
+            break;
+          
           // Add more cases as needed
         }
       }

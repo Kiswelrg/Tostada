@@ -34,6 +34,7 @@
                     class="message-content pl-[72px] -ml-[72px] select-text overflow-hidden relative indent-0 text-base leading-[1.375rem] whitespace-break-spaces break-words text-[color:hsl( 210 calc( 1 * 9.1%) 87.1% / 1)]  font-light">
                     
                     <component v-for="(item, index) in msg['contents']" :key="index" :is="tabs[item['type']]" :msg-item="item" class="text-[color:var(--text-normal)] text-3s"></component>
+                    <div class="temp_attach text-[12px] leading-3 pb-1" v-if="msg.attachments?.length">{{ temp_attach(msg) }}</div>
                     <Edited v-if="msg['is_edited']['state']" :is-edited="msg['is_edited']"></Edited>
                 </div>
             </div>
@@ -149,6 +150,10 @@ const openMsgMenu = (e, cid) => {
     layerB.value.open('MsgMenu', e.currentTarget, cid);
 }
 
+
+const temp_attach = (msg) => {
+    return msg.attachments.map(a => `name: ${a.name}, url: ${import.meta.env.VITE_BACKEND_URL}${a.url}`)
+}
 
 </script>
 

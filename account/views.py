@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth import authenticate, login, logout
-
+from django.conf import settings
 
 from UtilGlobal.print import printc
 import hashlib
@@ -132,7 +132,7 @@ def DoSignIn(request):
 
 
 def DoSignUp(request):
-    form_l = ['username', 'pwd', 'code']
+    form_l = ['username', 'pwd', 'code', 'invitecode']
     try:
         for fl in form_l:
             request.POST[fl]
@@ -147,6 +147,8 @@ def DoSignUp(request):
     else:
         if AUser.objects.filter(username = request.POST.get('username')).exists():
             msg = 3
+        elif request.POST.get('invitecode') != settings.SIGNUP_KEY:
+            msg = 4
         else:
             #验证id pwd的规范性（用接口
             pwd = request.POST.get('pwd')
@@ -176,6 +178,7 @@ def DoSignUp(request):
     1 验证码错误
     2 帐号/密码不合法
     3 该账号已经注册了
+    4 需要可用的邀请码
     11 成功
     '''
     return HttpResponse(json.dumps({'state': state, 'msg': msg}))
