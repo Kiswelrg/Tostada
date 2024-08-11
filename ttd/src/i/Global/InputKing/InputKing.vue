@@ -4,37 +4,60 @@
              :cur-args="curArgs"
              v-if="Object.keys(curMethodDetail).length !== 0"
              @update-args="onUpdateArgs"></Arg>
-        <div class="wrapper flex justify-between mb-1 w-full h-[44.32px] z-[2] bg-[var(--bg-overlay-3,var(--channeltextarea-background))] rounded-lg">
-            <div class="left-buttons h-full flex items-center ml-2">
-                <div class="flex">
-                    <div class="h-8 w-8 p-1">
+        <div
+             class="wrapper flex justify-between mb-1 w-full h-fit z-[2] bg-[var(--bg-overlay-3,var(--channeltextarea-background))] rounded-lg pl-4">
+            <div class="left-buttons w-fit h-full flex items-center m-0">
+                <div class="flex self-start">
+                    <div class="h-8 w-10 px-2 pt-3">
                         <!-- display current Bot -->
-                        <div class="flex bg-interactive-normal rounded-full justify-center items-center h-6 w-6 text-[#383a40]">
+                        <div
+                             class="flex bg-interactive-normal rounded-full justify-center items-center h-6 w-6 text-[#383a40]">
                             <PlusRegular class="h-5 w-5 scale-[0.8] stroke-current"></PlusRegular>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="main-input items-center w-full h-full flex mx-2">
-
                 <div class="flex rounded-md shadow-sm w-full h-full text-3s">
-                    <div class="flex grow">
-                        <input type="text"
-                               :placeholder="curPlaceHolder"
-                               class="w-full text-md my-2 bg-transparent outline-none font-light"
-                               v-model="mainInputText"
-                               @keyup.enter="runToolMethod"
-                               @paste="pasteContent($event)"
-                               >
-                        <input class="hidden" ref="chatFiles" type="file" id="chatfiles" name="chatfiles" accept="image/png, image/gif, image/jpeg image/jpg image/webp" multiple>
+                    <div class="w-full">
+                        <div v-if="inputItems.length === 1 && inputItems[0]['content'] === ''" class="placeholder absolute pt-[11px] whitespace-nowrap text-ellipsis overflow-hidden text-[var(--channel-text-area-placeholder)] select-none pointer-events-none">{{ curPlaceHolder }}</div>
+                        <div class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left select-text text-[var(--text-normal))] break py-[11px] pr-[11px]">
+                            <div
+                                v-for="(item, index) in inputItems"
+                                :key="index"
+                                @click="focusInput($event)"
+                                class="element w-full text-md bg-transparent outline-none font-light">
+                                <span
+                                    class="text-[var(--text-normal)] font-medium outline-none"
+                                    contenteditable=""
+                                    @input="inputChange(index, $event)"
+                                    @keydown="handleKeydown(index, $event)"
+                                    @paste="pasteContent($event)"
+                                    >
+                                    {{ parseMsgContent(item) }}
+                                    <br v-if="item.content===''" >
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
             </div>
+
+
+            <div class="upload-files hidden">
+                <input class=""
+                       ref="chatFiles"
+                       type="file"
+                       id="chatfiles"
+                       name="chatfiles"
+                       accept="image/png, image/gif, image/jpeg image/jpg image/webp"
+                       multiple>
+            </div>
+
             <div class="main-input items-center w-16 flex mx-2">
 
-                <div class="flex shadow-sm w-16 h-8">
-                    <div class="h-full">
+                <div class="flex shadow-sm w-16 h-8 self-start">
+                    <div class="h-full pt-3">
                         <Drop class="h-8 w-16"
                               :down="false"
                               @on-choose-method="chooseMethod"
@@ -86,6 +109,14 @@ onMounted(() => {
 })
 
 const mainInputText = ref('')
+const inputItems = ref([
+    {
+        'content': ''
+    },
+    // {
+    //     'content': 'WorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorld'
+    // }
+])
 const chatFiles = ref([])
 
 // Dropup tools
@@ -93,6 +124,52 @@ const isRunningTool = ref(false)
 const curMethodCode = ref(0)
 const curMethod = ref({})
 const curArgs = ref({})
+
+
+const parseMsgContent = (item) => {
+    return item.content
+}
+
+
+const focusInput = (e) => {
+    console.log(e.target.firstChild)
+    e.target.firstChild.focus()
+}
+
+
+const inputChange = (idx, e) => {
+    // console.log(e, e.target.innerText)
+    inputItems.value[idx].content = e.target.innerText
+}
+
+const handleKeydown = (index, event) => {
+    if (event.key === 'Enter') {
+        if (event.shiftKey) {
+            // Shift+Enter: Create a new input item
+            // createNewInputItem(index);
+            event.target.innerText = event.target.innerText + '11'
+            event.preventDefault(); // Prevents the default behavior of adding a line break
+        } else {
+
+            if (curMethodCode !== undefined && curMethodCode > 0) {
+                runToolMethod();
+            }
+            // Enter: Send text
+            sendMessageInChannel();
+            event.preventDefault(); // Prevents the default behavior of submitting the form or adding a line break
+        }
+        return;
+    }
+}
+
+const createNewInputItem = (index) => {
+    inputItems.splice(index + 1, 0, { content: '' });
+    // this.$nextTick(() => {
+    // // Move focus to the newly created item
+    // const newElement = this.$el.querySelectorAll('[contenteditable]')[index + 1];
+    // newElement.focus();
+    // });
+}
 
 
 const pasteContent = (e) => {
@@ -114,7 +191,7 @@ const pasteContent = (e) => {
 function getFileType(file) {
     // Get file extension
     const extension = file.name.split('.').pop().toLowerCase();
-    
+
     // Check MIME type
     const mimeType = file.type;
 
@@ -175,9 +252,6 @@ const onUpdateArgs = (v, k) => {
     curArgs.value[k] = v;
 }
 
-// const curMethod = computed(() => {
-//     return methodDetail(curMethodCode.value)
-// })
 
 const chooseMethod = (m) => {
     if (curMethodCode.value !== m.code) {
@@ -233,6 +307,7 @@ const curMethodDetail = computed(() => {
 
 // for now, 
 const text2MsgContents = () => {
+    return inputItems.value.map(item => item.content).join('\n')
     let res = []
     res.push({
         'type': 'Text',
@@ -253,7 +328,20 @@ function fileToBase64(file) {
 
 
 const sendMessageInChannel = async () => {
-    if (mainInputText.value === '' && chatFiles.value.files.length === 0) return;
+    if (inputItems.value.map(item => item.content).join('') === '') {
+        console.log('All empty')
+    } else {
+        // remove all trailing inputitem which has '' content
+        while (inputItems.value[inputItems.value.length - 1].content === '') {
+            inputItems.value.pop();
+        }
+    }
+
+    return
+    if (mainInputText.value === '' && chatFiles.value.files.length === 0) {
+        console.log('Nothing to send!')
+        return
+    }
 
     const d = {
         type: 'normal',
@@ -283,7 +371,8 @@ const sendMessageInChannel = async () => {
 
     try {
         props.chatSocket.send(JSON.stringify({ message: d }));
-        mainInputText.value = '';
+        // mainInputText.value = '';
+        inputItems.value = [];
         chatFiles.value.value = null; // Resetting chatFiles to clear the input
         updateFileCountMessage(0); // Reset file count message
     } catch (error) {
@@ -345,12 +434,11 @@ async function runToolMethod() {
 
 <style lang="scss">
 @import "@/styles/global.scss";
+
 :root {
     --m-inputking-height: 53px;
     --m-inputking-l-indent: 24px;
 }
 </style>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

@@ -40,7 +40,7 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     # r"^http://\w+\.example\.com$",
-    r"http://10.20.\d{1,3}.\d{1,3}",
+    # r"http://10.20.\d{1,3}.\d{1,3}",
     r"http://127.0.0.1:\d{4,5}",
 ]
 
@@ -80,7 +80,7 @@ ROOT_URLCONF = 'Tostada.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['ttd/dist'],
+        'DIRS': [os.path.join(BASE_DIR, 'ttd/dist')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

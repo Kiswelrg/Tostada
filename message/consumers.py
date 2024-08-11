@@ -211,8 +211,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.delete_message(text_data_json['cid'])
             return
         message = text_data_json['message']
-
         msg_files = text_data_json['message']['files']
+        
+
         files = []
         for file in msg_files:
             file_data_base64 = file['data']
@@ -276,7 +277,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def delete_message(self, message_cid):
         @database_sync_to_async
         def delete_message_from_db():
-            message = ChatMessage.objects.get(urlCode=message_cid, sender=self.user)
+            message = ChatMessage.objects.get(urlCode=message_cid, sender__id=self.user.id)
             message.delete()
             return True
             

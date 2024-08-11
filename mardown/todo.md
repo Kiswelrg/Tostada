@@ -10,20 +10,30 @@
 |django|database PK|change some models to use snowflake ID||✅|
 |msg|group_head|auto change msg to group_head||✅|
 |msg|msg menu|open and close robustly||✅|
-|msg|socket|change socket to handle multiple channels||🤺|
+|msg|delete msg|be able to delete||✅|
+|msg|image|upload files||✅|
+|media|serve|serve media using view||✅|
+|media|serve|add media service signature to url||✅|
+
+### InProgress
+
+|Type|Detail|1|2|Finished|
+|---|---|---|---|---|
+|msg|parser|inputking use multiple `items` for each line of msg|||
+|msg|parser|1msg sent and received in 1 content not a list|||
+|inputking|files|show selected files above inputking|||
+|msg|files|show attachments as files|||
+|Auth|User|change site auth user to my custom AUser|||
 
 ### ToDo
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
-|msg|delete msg|be able to delete||
-|msg|image|upload image in txt||
-|media|serve|serve media using view||
+|msg|socket|change socket to handle multiple channels||🤺|
 |django|database PK|change some models to use compound PK||
 |msg|database msg|before ws connection, check channel/server permission||
 |channel|create invite|invite user to `Channel`||
 |msg|mention|create `mention` in msg||
-|urls|serve media with permission|||
 |msg|reaction part|   |   ||
 |FunctionList|Default Button|Find Servers functionality|||
 |user|`timeout` user|||
