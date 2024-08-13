@@ -277,7 +277,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def delete_message(self, message_cid):
         @database_sync_to_async
         def delete_message_from_db():
-            message = ChatMessage.objects.get(urlCode=message_cid, sender__id=self.user.id)
+            message = ChatMessage.objects.get(urlCode=message_cid)
             message.delete()
             return True
             
@@ -287,7 +287,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender = await database_sync_to_async(lambda: get_object_or_404(ChatMessage, urlCode = message_cid).sender.id)()
         
             # Check if the user is authorized to delete the message
-            if sender != u.id:
+            if sender != u.id and not u.is_superuser:
                 await self.send(text_data=json.dumps({
                     'type': 'error',
                     'error': 'Unauthorized: You cannot delete this message.'

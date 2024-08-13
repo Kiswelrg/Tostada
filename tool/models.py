@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.dispatch import receiver
-from project.snowflake import getToolServerSnowflakeID, getToolChannelOfChatSnowflakeID, getToolChannelOfVoiceSnowflakeID, getToolCategoryInServerSnowflakeID
+from project.snowflake import getToolServerSnowflakeID, getToolChannelSnowflakeID, getToolCategoryInServerSnowflakeID
 import os
 from django.conf import settings
 
@@ -315,7 +315,7 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
 
 class ChannelOfChat(Channel):
     urlCode = models.PositiveBigIntegerField(
-        default=getToolChannelOfChatSnowflakeID, unique=True, db_index=True, primary_key=True)
+        default=getToolChannelSnowflakeID, unique=True, db_index=True, primary_key=True)
     category = models.ForeignKey(
         CategoryInServer,
         on_delete = models.CASCADE,
@@ -336,7 +336,7 @@ class ChannelOfChat(Channel):
 
 class ChannelOfVoice(Channel):
     urlCode = models.PositiveBigIntegerField(
-        default=getToolChannelOfVoiceSnowflakeID, unique=True, db_index=True, primary_key=True)
+        default=getToolChannelSnowflakeID, unique=True, db_index=True, primary_key=True)
     category = models.ForeignKey(
         CategoryInServer,
         on_delete = models.CASCADE,

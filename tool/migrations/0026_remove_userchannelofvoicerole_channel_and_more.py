@@ -26,12 +26,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='channelofchat',
             name='urlCode',
-            field=models.PositiveBigIntegerField(db_index=True, default=project.snowflake.getToolChannelOfChatSnowflakeID, unique=True),
+            field=models.PositiveBigIntegerField(db_index=True, default=project.snowflake.getToolChannelSnowflakeID, unique=True),
         ),
         migrations.AlterField(
             model_name='channelofvoice',
             name='urlCode',
-            field=models.PositiveBigIntegerField(db_index=True, default=project.snowflake.getToolChannelOfChatSnowflakeID, unique=True),
+            field=models.PositiveBigIntegerField(db_index=True, default=project.snowflake.getToolChannelSnowflakeID, unique=True),
         ),
         migrations.DeleteModel(
             name='UserChannelOfChatRole',

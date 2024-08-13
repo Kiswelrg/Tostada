@@ -68,12 +68,12 @@ def reorderServers(request):
     # use custom decorator to check if logged in
 
     # Search targetted servers
-    r = UserServerRole.objects.filter(user__username = request.session['username'], server__urlCode__in = change_list.keys())
+    r = UserServerRole.objects.filter(user__username = request.session['username'], role__server__urlCode__in = change_list.keys())
     print(change_list)
     for u_s_r in r:
-        if u_s_r.order != change_list[u_s_r.server.urlCode]['old_order']:
+        if u_s_r.order != change_list[u_s_r.role.server.urlCode]['old_order']:
             raise Http404('Damn')
-        u_s_r.order = change_list[u_s_r.server.urlCode]['order']
+        u_s_r.order = change_list[u_s_r.role.server.urlCode]['order']
         u_s_r.save()
     return JsonResponse({'msg': 'reorder success','r': True})
 

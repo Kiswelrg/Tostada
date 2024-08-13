@@ -57,7 +57,7 @@ class MFile(models.Model):
     def refreshURL(self):
         url = self.last_url
         if url is not None and url != '' and MFile.validateURL(url):
-            return url
+            return settings.ATTACHMENT_URL + url
         d = {}
         now = timezone.now()
         ex = now + datetime.timedelta(days=1)
@@ -67,9 +67,9 @@ class MFile(models.Model):
         d['hm'] = hashlib.sha256(
             f"{channel_cid}{self.urlCode}{os.path.basename(self.file.name)}{d['ex']}{d['is']}{settings.ATTACHMENT_KEY}".encode('utf-8')
         ).hexdigest()
-        self.last_url = f"{settings.ATTACHMENT_URL}{channel_cid}/{self.urlCode}/{os.path.basename(self.file.name)}?ex={d['ex']}&is={d['is']}&hm={d['hm']}"
+        self.last_url = f"{channel_cid}/{self.urlCode}/{os.path.basename(self.file.name)}?ex={d['ex']}&is={d['is']}&hm={d['hm']}"
         self.save()
-        return self.last_url
+        return settings.ATTACHMENT_URL + self.last_url
 
     @staticmethod
     def get_file(cid, attrs = None):

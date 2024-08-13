@@ -5,7 +5,7 @@
              v-if="Object.keys(curMethodDetail).length !== 0"
              @update-args="onUpdateArgs"></Arg>
         <div
-             class="wrapper flex justify-between mb-1 w-full h-fit z-[2] bg-[var(--bg-overlay-3,var(--channeltextarea-background))] rounded-lg pl-4">
+             class="wrapper flex justify-between mb-1 w-full h-fit z-[2] bg-[var(--bg-overlay-3,var(--channeltextarea-background))] rounded-lg pl-3">
             <div class="left-buttons w-fit h-full flex items-center m-0">
                 <div class="flex self-start">
                     <div class="h-8 w-10 px-2 pt-3">
@@ -20,22 +20,23 @@
             <div class="main-input items-center w-full h-full flex mx-2">
                 <div class="flex rounded-md shadow-sm w-full h-full text-3s">
                     <div class="w-full">
-                        <div v-if="inputItems.length === 1 && inputItems[0]['content'] === ''" class="placeholder absolute pt-[11px] whitespace-nowrap text-ellipsis overflow-hidden text-[var(--channel-text-area-placeholder)] select-none pointer-events-none">{{ curPlaceHolder }}</div>
+                        <div v-if="inputItems.length === 1 && inputItems[0].length === 1 && inputItems[0][0]['content'] === ''" class="placeholder absolute pt-[11px] whitespace-nowrap text-ellipsis overflow-hidden text-[var(--channel-text-area-placeholder)] select-none pointer-events-none">{{ curPlaceHolder }}</div>
                         <div class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left select-text text-[var(--text-normal))] break py-[11px] pr-[11px]">
                             <div
-                                v-for="(item, index) in inputItems"
-                                :key="index"
+                                v-for="(item, idx1) in inputItems"
+                                :key="idx1"
                                 @click="focusInput($event)"
                                 class="element w-full text-md bg-transparent outline-none font-light">
                                 <span
+                                    v-for="(it, idx2) in item"
+                                    :key="idx2"
                                     class="text-[var(--text-normal)] font-medium outline-none"
                                     contenteditable=""
-                                    @input="inputChange(index, $event)"
-                                    @keydown="handleKeydown(index, $event)"
+                                    @input="inputChange(idx1, idx2, $event)"
+                                    @keydown="handleKeydown(idx1, idx2, $event)"
                                     @paste="pasteContent($event)"
                                     >
-                                    {{ parseMsgContent(item) }}
-                                    <br v-if="item.content===''" >
+                                    {{ parseMsgContent(it) }}
                                 </span>
                             </div>
                         </div>
@@ -57,7 +58,7 @@
             <div class="main-input items-center w-16 flex mx-2">
 
                 <div class="flex shadow-sm w-16 h-8 self-start">
-                    <div class="h-full pt-3">
+                    <div class="h-full pt-2">
                         <Drop class="h-8 w-16"
                               :down="false"
                               @on-choose-method="chooseMethod"
@@ -110,12 +111,12 @@ onMounted(() => {
 
 const mainInputText = ref('')
 const inputItems = ref([
-    {
-        'content': ''
-    },
-    // {
-    //     'content': 'WorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorldWorld'
-    // }
+    [
+        {
+            'type': 'text',
+            'content': ''
+        }
+    ],
 ])
 const chatFiles = ref([])
 
@@ -127,22 +128,26 @@ const curArgs = ref({})
 
 
 const parseMsgContent = (item) => {
+    if (item.content === '') return '\uFEFF'
     return item.content
 }
 
 
 const focusInput = (e) => {
+    // this could be either: the text span or the innerText itself
     console.log(e.target.firstChild)
-    e.target.firstChild.focus()
+    // e.target.firstChild.focus
 }
 
 
-const inputChange = (idx, e) => {
-    // console.log(e, e.target.innerText)
-    inputItems.value[idx].content = e.target.innerText
+const inputChange = (idx1, idx2, e) => {
+    console.log('input change', e.target)
+    inputItems.value[idx1][idx2].content = e.target.innerText
+    e.target.focus
 }
 
-const handleKeydown = (index, event) => {
+const handleKeydown = (idx1, idx2, event) => {
+    console.log('keydown')
     if (event.key === 'Enter') {
         if (event.shiftKey) {
             // Shift+Enter: Create a new input item
@@ -154,6 +159,10 @@ const handleKeydown = (index, event) => {
             if (curMethodCode !== undefined && curMethodCode > 0) {
                 runToolMethod();
             }
+            console.log('Enter on:', event.target);
+            const cursorPosition = event.getCaretCharacterOffsetWithin(event.target);
+            console.log('Cursor Position:', cursorPosition);
+
             // Enter: Send text
             sendMessageInChannel();
             event.preventDefault(); // Prevents the default behavior of submitting the form or adding a line break

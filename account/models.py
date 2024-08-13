@@ -14,10 +14,10 @@ import os
 
 class AUser(User):
     def cover_dir_path(instance, filename):
-        return f'cover/user-{instance.urlCode}/' + instance.date_add.strftime('%Y-%m-%d/' + filename)
+        return f'cover/user-{instance.urlCode}/' + instance.date_joined.strftime('%Y-%m-%d/' + filename)
 
     def avatar_dir_path(instance, filename):
-        return f'avatar/user-{instance.urlCode}/' + instance.date_add.strftime('%Y-%m-%d/' + filename)
+        return f'avatar/user-{instance.urlCode}/' + instance.date_joined.strftime('%Y-%m-%d/' + filename)
     
     name = models.CharField(max_length=20,default='some_user')
     # username = models.CharField(  #只能包含_和数字 开头不能有数字或_ _不能2连 结尾不能_

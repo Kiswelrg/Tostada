@@ -57,13 +57,17 @@ tool_server_snowflake_generator = SnowflakeIDGenerator()
 def getToolServerSnowflakeID():
     return tool_server_snowflake_generator.generate()
 
-tool_channelofchat_snowflake_generator = SnowflakeIDGenerator()
-def getToolChannelOfChatSnowflakeID():
-    return tool_channelofchat_snowflake_generator.generate()
+tool_channel_snowflake_generator = SnowflakeIDGenerator()
+def getToolChannelSnowflakeID():
+    return tool_channel_snowflake_generator.generate()
 
-tool_channelofvoice_snowflake_generator = SnowflakeIDGenerator()
-def getToolChannelOfVoiceSnowflakeID():
-    return tool_channelofvoice_snowflake_generator.generate()
+# tool_channelofchat_snowflake_generator = SnowflakeIDGenerator()
+# def getToolChannelOfChatSnowflakeID():
+#     return tool_channelofchat_snowflake_generator.generate()
+
+# tool_channelofvoice_snowflake_generator = SnowflakeIDGenerator()
+# def getToolChannelOfVoiceSnowflakeID():
+#     return tool_channelofvoice_snowflake_generator.generate()
 
 tool_categoryinserver_snowflake_generator = SnowflakeIDGenerator()
 def getToolCategoryInServerSnowflakeID():

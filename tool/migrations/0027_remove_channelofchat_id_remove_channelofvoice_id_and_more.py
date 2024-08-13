@@ -22,11 +22,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='channelofchat',
             name='urlCode',
-            field=models.PositiveBigIntegerField(db_index=True, default=project.snowflake.getToolChannelOfChatSnowflakeID, primary_key=True, serialize=False, unique=True),
+            field=models.PositiveBigIntegerField(db_index=True, default=project.snowflake.getToolChannelSnowflakeID, primary_key=True, serialize=False, unique=True),
         ),
         migrations.AlterField(
             model_name='channelofvoice',
             name='urlCode',
-            field=models.PositiveBigIntegerField(db_index=True, default=project.snowflake.getToolChannelOfChatSnowflakeID, primary_key=True, serialize=False, unique=True),
+            field=models.PositiveBigIntegerField(db_index=True, default=project.snowflake.getToolChannelSnowflakeID, primary_key=True, serialize=False, unique=True),
         ),
     ]
