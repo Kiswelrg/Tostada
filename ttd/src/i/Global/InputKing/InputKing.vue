@@ -21,20 +21,26 @@
                 <div class="flex rounded-md shadow-sm w-full h-full text-3s">
                     <div class="w-full">
                         <div v-if="inputItems.length === 1 && inputItems[0].length === 1 && inputItems[0][0]['content'] === ''" class="placeholder absolute pt-[11px] whitespace-nowrap text-ellipsis overflow-hidden text-[var(--channel-text-area-placeholder)] select-none pointer-events-none">{{ curPlaceHolder }}</div>
-                        <div class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left select-text text-[var(--text-normal))] break py-[11px] pr-[11px]">
+                        <div contenteditable class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left select-text text-[var(--text-normal))] break py-[11px] pr-[11px]"
+                        @input="inputChange"
+                        >
+                            <!-- contenteditable="false" -->
+                            
                             <div
                                 v-for="(item, idx1) in inputItems"
                                 :key="idx1"
                                 @click="focusInput($event)"
                                 class="element w-full text-md bg-transparent outline-none font-light">
                                 <span
+                                    contenteditable="true"
                                     v-for="(it, idx2) in item"
                                     :key="idx2"
+                                    :idx1="idx1"
+                                    :idx2="idx2"
                                     class="text-[var(--text-normal)] font-medium outline-none"
-                                    contenteditable=""
-                                    @input="inputChange(idx1, idx2, $event)"
                                     @keydown="handleKeydown(idx1, idx2, $event)"
                                     @paste="pasteContent($event)"
+                                    ref="spans"
                                     >
                                     {{ parseMsgContent(it) }}
                                 </span>
@@ -56,7 +62,6 @@
             </div>
 
             <div class="main-input items-center w-16 flex mx-2">
-
                 <div class="flex shadow-sm w-16 h-8 self-start">
                     <div class="h-full pt-2">
                         <Drop class="h-8 w-16"
@@ -71,6 +76,7 @@
                 </div>
 
             </div>
+
             <div class="hidden flex right-buttons h-full items-center mr-2">
                 <div>
                     <div class="mx-1 h-8 w-8 bg-[#2f2f2f] rounded-lg"></div>
@@ -93,7 +99,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import PlusRegular from '@/assets/Server/Channel/InputKing/plus-regular.vue'
 import Arg from './Arg/Arg.vue'
 import Drop from '../../../components/Util/Drop.vue'
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch, nextTick } from 'vue'
 import { jsonWithBigInt } from '@/util/parse'
 import { getCookie } from '@/util/session'
 const props = defineProps([
@@ -109,14 +115,29 @@ onMounted(() => {
 
 })
 
+const spans = ref([])
 const mainInputText = ref('')
 const inputItems = ref([
     [
         {
             'type': 'text',
+            'content': 'asdfasf'
+        },
+        {
+            'type': 'text',
+            'content': '213124123'
+        },
+        {
+            'type': 'text',
+            'content': 'asdfsafd'
+        },
+    ],
+    [
+        {
+            'type': 'text',
             'content': ''
         }
-    ],
+    ]
 ])
 const chatFiles = ref([])
 
@@ -134,25 +155,43 @@ const parseMsgContent = (item) => {
 
 
 const focusInput = (e) => {
-    // this could be either: the text span or the innerText itself
-    console.log(e.target.firstChild)
-    // e.target.firstChild.focus
+    // console.log('T, curT, activeE:', e.target.tagName, e.currentTarget.tagName, document.activeElement)
+    const tar = e.target
+    const cur = e.currentTarget
+    
 }
 
 
-const inputChange = (idx1, idx2, e) => {
-    console.log('input change', e.target)
-    inputItems.value[idx1][idx2].content = e.target.innerText
-    e.target.focus
+const inputChange = (e) => {
+    const selection = document.getSelection();
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const anchorNode = range.startContainer;
+        const targetElement = anchorNode.nodeType === Node.TEXT_NODE ? anchorNode.parentElement : anchorNode;
+
+        console.log('Input occurred in:', targetElement.getAttribute('idx1'), targetElement.getAttribute('idx2'));
+    }
 }
+
+
+
+const selectAllSpans = () => {
+window.getSelection().removeAllRanges();
+  const range = document.createRange();
+  range.setStartBefore(spans.value[0]);
+  range.setEndAfter(spans.value[spans.value.length - 1]);
+  window.getSelection().addRange(range);
+
+  
+};
+
 
 const handleKeydown = (idx1, idx2, event) => {
-    console.log('keydown')
     if (event.key === 'Enter') {
         if (event.shiftKey) {
             // Shift+Enter: Create a new input item
             // createNewInputItem(index);
-            event.target.innerText = event.target.innerText + '11'
+            console.log('Shift+Enter');
             event.preventDefault(); // Prevents the default behavior of adding a line break
         } else {
 
@@ -167,6 +206,12 @@ const handleKeydown = (idx1, idx2, event) => {
             sendMessageInChannel();
             event.preventDefault(); // Prevents the default behavior of submitting the form or adding a line break
         }
+        return;
+    }
+
+    if (event.ctrlKey && event.key === 'a') {
+        event.preventDefault();
+        selectAllSpans();
         return;
     }
 }
