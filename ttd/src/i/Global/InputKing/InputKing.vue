@@ -20,28 +20,27 @@
             <div class="main-input items-center w-full h-full flex mx-2">
                 <div class="flex rounded-md shadow-sm w-full h-full text-3s">
                     <div class="w-full">
-                        <div v-if="inputItems.length === 1 && inputItems[0].length === 1 && inputItems[0][0]['content'] === ''" class="placeholder absolute pt-[11px] whitespace-nowrap text-ellipsis overflow-hidden text-[var(--channel-text-area-placeholder)] select-none pointer-events-none">{{ curPlaceHolder }}</div>
-                        <div contenteditable class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left select-text text-[var(--text-normal))] break py-[11px] pr-[11px]"
-                        @input="inputChange"
-                        >
+                        <div v-if="inputItems.length === 1 && inputItems[0].length === 1 && inputItems[0][0]['content'] === ''"
+                             class="placeholder absolute pt-[11px] whitespace-nowrap text-ellipsis overflow-hidden text-[var(--channel-text-area-placeholder)] select-none pointer-events-none">
+                            {{ curPlaceHolder }}</div>
+                        <div contenteditable
+                             class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left select-text text-[var(--text-normal))] break py-[11px] pr-[11px]"
+                             @input="inputChange"
+                             @keydown="handleKeydown">
                             <!-- contenteditable="false" -->
-                            
-                            <div
-                                v-for="(item, idx1) in inputItems"
-                                :key="idx1"
-                                @click="focusInput($event)"
-                                class="element w-full text-md bg-transparent outline-none font-light">
-                                <span
-                                    contenteditable="true"
-                                    v-for="(it, idx2) in item"
-                                    :key="idx2"
-                                    :idx1="idx1"
-                                    :idx2="idx2"
-                                    class="text-[var(--text-normal)] font-medium outline-none"
-                                    @keydown="handleKeydown(idx1, idx2, $event)"
-                                    @paste="pasteContent($event)"
-                                    ref="spans"
-                                    >
+
+                            <div v-for="(item, idx1) in inputItems"
+                                 :key="idx1"
+                                 @click="focusInput($event)"
+                                 class="element w-full text-md bg-transparent outline-none font-light">
+                                <span contenteditable="true"
+                                      v-for="(it, idx2) in item"
+                                      :key="idx2"
+                                      :idx1="idx1"
+                                      :idx2="idx2"
+                                      class="text-[var(--text-normal)] font-medium outline-none"
+                                      @paste="pasteContent($event)"
+                                      ref="spans">
                                     {{ parseMsgContent(it) }}
                                 </span>
                             </div>
@@ -154,16 +153,64 @@ const parseMsgContent = (item) => {
 }
 
 
+const removeRange = (list, start, end) => {
+    const [startRow, startCol] = start;
+    const [endRow, endCol] = end;
+
+    return list.map((row, rowIndex) => {
+        if (rowIndex < startRow || rowIndex > endRow) {
+            // Rows outside the range remain unchanged
+            return row;
+        } else if (rowIndex === startRow && rowIndex === endRow) {
+            // If start and end are in the same row
+            return [...row.slice(0, startCol + 1), ...row.slice(endCol)];
+        } else if (rowIndex === startRow) {
+            // First row of the range
+            return row.slice(0, startCol + 1);
+        } else if (rowIndex === endRow) {
+            // Last row of the range
+            return row.slice(endCol);
+        } else {
+            // Rows fully within the range are removed
+            return [];
+        }
+    }).filter(row => row.length > 0); // Remove any empty rows
+}
+
+const detectSelectionSE = () => {
+    const s = window.getSelection()
+    if (!s.rangeCount) return [0, undefined, [undefined, undefined]]
+    const r = s.getRangeAt(0)
+    const start = r.startContainer
+    const end = r.endContainer
+    const se = [
+        {
+            'node': start,
+            'offset': r.startOffset
+        },
+        {
+            'node': end,
+            'offset': r.endOffset
+        }
+    ]
+    return [
+        s.rangeCount,
+        r.toString(),
+        se
+    ]
+}
+
+
 const focusInput = (e) => {
     // console.log('T, curT, activeE:', e.target.tagName, e.currentTarget.tagName, document.activeElement)
     const tar = e.target
     const cur = e.currentTarget
-    
+
 }
 
 
 const inputChange = (e) => {
-    const selection = document.getSelection();
+    const selection = window.getSelection();
     if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         const anchorNode = range.startContainer;
@@ -176,53 +223,60 @@ const inputChange = (e) => {
 
 
 const selectAllSpans = () => {
-window.getSelection().removeAllRanges();
-  const range = document.createRange();
-  range.setStartBefore(spans.value[0]);
-  range.setEndAfter(spans.value[spans.value.length - 1]);
-  window.getSelection().addRange(range);
+    window.getSelection().removeAllRanges();
+    const range = document.createRange();
+    range.setStartBefore(spans.value[0]);
+    range.setEndAfter(spans.value[spans.value.length - 1]);
+    window.getSelection().addRange(range);
 
-  
+
 };
 
 
-const handleKeydown = (idx1, idx2, event) => {
-    if (event.key === 'Enter') {
-        if (event.shiftKey) {
-            // Shift+Enter: Create a new input item
-            // createNewInputItem(index);
-            console.log('Shift+Enter');
-            event.preventDefault(); // Prevents the default behavior of adding a line break
+const handleKeydown = (e) => {
+    if (e.key == 'Backspace') {
+        console.log('Backspace')
+        console.log('if should delete:', )
+        e.preventDefault()
+        return
+    }
+    else if (e.key === 'Enter') {
+        if (e.shiftKey) {
+            const se = detectSelectionSE()
+            // rangeCount, r.toString()
+            if (!se[0] || se[1]!=='') return
+            const end = se[-1][-1]['node']
+            const el = end.nodeType === Node.TEXT_NODE ? end.parentElement : end;
+            const row = el.getAttribute('idx1')
+            const col = el.getAttribute('idx2')
+            const newLine = inputItems.value[row].slice(col)
+            newLine[0].content = end.textContent.slice(se[-1][-1]['offset'])
+            inputItems.value[row].splice(col+1)
+            inputItems.value[row][-1] = {
+                'type': 'text',
+                'content': end.textContent.slice(0, se[-1][-1]['offset'])
+            }
+            inputItems.value.splice(row+1, 0, newLine)
+            e.preventDefault()
+            return
         } else {
 
             if (curMethodCode !== undefined && curMethodCode > 0) {
-                runToolMethod();
+                runToolMethod()
             }
-            console.log('Enter on:', event.target);
-            const cursorPosition = event.getCaretCharacterOffsetWithin(event.target);
-            console.log('Cursor Position:', cursorPosition);
 
             // Enter: Send text
-            sendMessageInChannel();
-            event.preventDefault(); // Prevents the default behavior of submitting the form or adding a line break
+            sendMessageInChannel()
+            e.preventDefault()
         }
-        return;
+        return
+    } else {
+
     }
 
-    if (event.ctrlKey && event.key === 'a') {
-        event.preventDefault();
-        selectAllSpans();
-        return;
-    }
 }
 
 const createNewInputItem = (index) => {
-    inputItems.splice(index + 1, 0, { content: '' });
-    // this.$nextTick(() => {
-    // // Move focus to the newly created item
-    // const newElement = this.$el.querySelectorAll('[contenteditable]')[index + 1];
-    // newElement.focus();
-    // });
 }
 
 
@@ -495,4 +549,5 @@ async function runToolMethod() {
 }
 </style>
 
-<style lang="scss" scoped></style>
+<style lang="scss"
+       scoped></style>
