@@ -26,7 +26,9 @@
                         <div contenteditable
                              class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left select-text text-[var(--text-normal))] break py-[11px] pr-[11px]"
                              @input="inputChange"
-                             @keydown="handleKeydown">
+                             @keydown="handleKeydown"
+                             ref="inputmarkup"
+                             >
                             <!-- contenteditable="false" -->
 
                             <div v-for="(item, idx1) in inputItems"
@@ -40,7 +42,7 @@
                                       :idx2="idx2"
                                       class="text-[var(--text-normal)] font-medium outline-none"
                                       @paste="pasteContent($event)"
-                                      ref="spans">
+                                      >
                                     {{ parseMsgContent(it) }}
                                 </span>
                             </div>
@@ -114,21 +116,21 @@ onMounted(() => {
 
 })
 
-const spans = ref([])
+const inputmarkup = ref(undefined)
 const mainInputText = ref('')
 const inputItems = ref([
     [
         {
             'type': 'text',
-            'content': 'asdfasf'
+            'content': 'asdfg'
         },
         {
             'type': 'text',
-            'content': '213124123'
+            'content': '12345678'
         },
         {
             'type': 'text',
-            'content': 'asdfsafd'
+            'content': 'hjkl'
         },
     ],
     [
@@ -177,6 +179,7 @@ const removeRange = (list, start, end) => {
     }).filter(row => row.length > 0); // Remove any empty rows
 }
 
+
 const detectSelectionSE = () => {
     const s = window.getSelection()
     if (!s.rangeCount) return [0, undefined, [undefined, undefined]]
@@ -198,6 +201,31 @@ const detectSelectionSE = () => {
         r.toString(),
         se
     ]
+}
+
+
+function getCaretCharacterOffsetWithin(element) {
+    var caretOffset = 0;
+    var doc = element.ownerDocument || element.document;
+    var win = doc.defaultView || doc.parentWindow;
+    var sel;
+    if (typeof win.getSelection != "undefined") {
+        sel = win.getSelection();
+        if (sel.rangeCount > 0) {
+            var range = win.getSelection().getRangeAt(0);
+            var preCaretRange = range.cloneRange();
+            preCaretRange.selectNodeContents(element);
+            preCaretRange.setEnd(range.endContainer, range.endOffset);
+            caretOffset = preCaretRange.toString().length;
+        }
+    } else if ((sel = doc.selection) && sel.type != "Control") {
+        var textRange = sel.createRange();
+        var preCaretTextRange = doc.body.createTextRange();
+        preCaretTextRange.moveToElementText(element);
+        preCaretTextRange.setEndPoint("EndToEnd", textRange);
+        caretOffset = preCaretTextRange.text.length;
+    }
+    return caretOffset;
 }
 
 
@@ -233,10 +261,65 @@ const selectAllSpans = () => {
 };
 
 
+const moveCursorToPosition = (element, position) => {
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.setStart(element.firstChild, position);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+}
+
+
 const handleKeydown = (e) => {
     if (e.key == 'Backspace') {
         console.log('Backspace')
-        console.log('if should delete:', )
+        const se = detectSelectionSE()
+        if (!se[0]) return
+        const start = se[2][0]['node']
+        const end = se[2][1]['node']
+        const sl = start.nodeType === Node.TEXT_NODE ? start.parentElement : start;
+        const el = end.nodeType === Node.TEXT_NODE ? end.parentElement : end
+        const [r1, c1] = [sl.getAttribute('idx1'), sl.getAttribute('idx2')]
+        const [r2, c2] = [el.getAttribute('idx1'), el.getAttribute('idx2')]
+        const xoff = se[2][0]['offset']
+        const yoff = se[2][1]['offset']
+        console.log(se[2][0]['offset'], se[2][1]['offset'])
+        console.log('s == e ?', start === end)
+        if (se[1] === '') {
+            if (xoff > 0) {
+                console.log('r1 c1 xoff:', r1, c1, xoff)
+                console.log('trying to delete:', inputItems.value[r1][c1]['content'][xoff - 1])
+            } else {
+                let cc=c1-1
+                while (cc >= 0 && inputItems.value[r1][cc]['content'] === '') {
+                    cc--
+                    // 最好把这种content==''的去掉在这里
+                }
+                if (cc === -1) {
+                    if (r1 === 0) 
+                        console.log('at the very beginning, do nothing')
+                    else
+                        console.log('trying to merge div, backspace on start of a div')
+
+                } else {
+                    console.log(`trying to delete on the ${c1}th span`)
+                }
+                
+            }
+        } else {
+            console.log('trying to remove range in:', [r1, c1], [r2, c2])
+            // removeRange(inputItems.value, [r1, c1], [r2, c2])
+            if (start == end) {
+                console.log('trying to delete in 1 span, range:', xoff, yoff)
+            } else {
+                console.log('trying to delete in 2 span, range:', xoff, yoff)
+                if (r1 !== r2 && (inputItems.value[r1].length > c1 + 1 || c2 > 0)) {
+                    console.log('trying to merge div(v2)')
+                }
+            }
+
+        }
         e.preventDefault()
         return
     }
@@ -244,20 +327,25 @@ const handleKeydown = (e) => {
         if (e.shiftKey) {
             const se = detectSelectionSE()
             // rangeCount, r.toString()
-            if (!se[0] || se[1]!=='') return
-            const end = se[-1][-1]['node']
+            if (!se[0] || se[1] !== '') return
+            console.log(se)
+            const end = se[2][1]['node']
             const el = end.nodeType === Node.TEXT_NODE ? end.parentElement : end;
-            const row = el.getAttribute('idx1')
-            const col = el.getAttribute('idx2')
-            const newLine = inputItems.value[row].slice(col)
-            newLine[0].content = end.textContent.slice(se[-1][-1]['offset'])
-            inputItems.value[row].splice(col+1)
-            inputItems.value[row][-1] = {
+            const row = parseInt(el.getAttribute('idx1'), 10)
+            const col = parseInt(el.getAttribute('idx2'), 10)
+            const newLine = [...inputItems.value[row].slice(col)]
+            newLine[0].content = end.textContent.slice(se[2][1]['offset'])
+            inputItems.value[row].splice(col + 1)
+            inputItems.value[row][inputItems.value[row].length - 1] = {
                 'type': 'text',
-                'content': end.textContent.slice(0, se[-1][-1]['offset'])
+                'content': end.textContent.slice(0, se[2][1]['offset'])
             }
-            inputItems.value.splice(row+1, 0, newLine)
+            inputItems.value.splice(row + 1, 0, newLine)
             e.preventDefault()
+            nextTick(() => {
+                moveCursorToPosition(inputmarkup.value.querySelector(`[idx1="${row+1}"][idx2="0"]`), 0)
+
+            })
             return
         } else {
 
