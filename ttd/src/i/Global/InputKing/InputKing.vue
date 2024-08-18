@@ -24,26 +24,27 @@
                              class="placeholder absolute pt-[11px] whitespace-nowrap text-ellipsis overflow-hidden text-[var(--channel-text-area-placeholder)] select-none pointer-events-none">
                             {{ curPlaceHolder }}</div>
                         <div contenteditable
-                             class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left select-text text-[var(--text-normal))] break py-[11px] pr-[11px]"
+                             
+                             class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left text-[var(--text-normal))] break py-[11px] pr-[11px] cursor-default"
+                             @mousedown.self.prevent
                              @input="inputChange"
                              @keydown="handleKeydown"
                              ref="inputmarkup"
                              >
-                            <!-- contenteditable="false" -->
-
-                            <div v-for="(item, idx1) in inputItems"
-                                 :key="idx1"
-                                 @click="focusInput($event)"
-                                 class="element w-full text-md bg-transparent outline-none font-light">
-                                <span contenteditable="true"
+                             <div v-for="(item, idx1) in inputItems"
+                             :key="idx1"
+                             @click="clickElement(idx1, $event)"
+                             @keydown="console.log(detectSelectionSE())"
+                             class="element w-full text-md bg-transparent outline-none font-light select-none cursor-text">
+                                <span 
                                       v-for="(it, idx2) in item"
                                       :key="idx2"
                                       :idx1="idx1"
                                       :idx2="idx2"
-                                      class="text-[var(--text-normal)] font-medium outline-none"
+                                      class="text-[var(--text-normal)] font-medium outline-none select-text"
                                       @paste="pasteContent($event)"
+                                      v-html="parseMsgContent(it)"
                                       >
-                                    {{ parseMsgContent(it) }}
                                 </span>
                             </div>
                         </div>
@@ -138,6 +139,12 @@ const inputItems = ref([
             'type': 'text',
             'content': ''
         }
+    ],
+    [
+        {
+            'type': 'text',
+            'content': ''
+        }
     ]
 ])
 const chatFiles = ref([])
@@ -149,8 +156,9 @@ const curMethod = ref({})
 const curArgs = ref({})
 
 
+
 const parseMsgContent = (item) => {
-    if (item.content === '') return '\uFEFF'
+    if (item.content == '') return '&#xFEFF;'
     return item.content
 }
 
@@ -181,51 +189,55 @@ const removeRange = (list, start, end) => {
 
 
 const detectSelectionSE = () => {
+    const getNodeDetail = (node, offset) => {
+        const span = node.nodeType === Node.TEXT_NODE  // this is a must
+        ? node.parentElement 
+        : node;
+        const row = parseInt(span.getAttribute('idx1'), 10)
+        const col = parseInt(span.getAttribute('idx2'), 10)
+        // const _1th_div = span.parentElement.previousSibling == null || span.parentElement.previousSibling.data == ''
+        // const _last_div = span.parentElement.nextSibling == null || span.parentElement.nextSibling.data == ''
+        const _1th_div = row == 0
+        const _last_div = row == inputItems.value.length - 1
+        const _1th_span = col == 0
+        console.log(node, span)
+        if (isNaN(row)) {return undefined}
+        const _last_span = col == inputItems.value[row].length - 1
+        const _1th_char = (offset == 0) || (offset == 1 && span.textContent[0] == '\uFEFF')
+        const _last_char = (offset == span.textContent.length) || (offset == span.textContent.length - 1 && span.textContent[span.textContent.length - 1] == '\uFEFF')
+        let position = 0b000000000
+        if (_1th_div) position |= (0b1 << 8)
+        if (!_1th_div && !_last_div) position |= (0b1 << 7)
+        if (_last_div) position |= (0b1 << 6)
+        if (_1th_span) position |= (0b1 << 5)
+        if (!_1th_span && !_last_span) position |= (0b1 << 4)
+        if (_last_span) position |= (0b1 << 3)
+        if (_1th_char) position |= (0b1 << 2)
+        if (!_1th_char && !_last_char) position |= (0b1 << 1)
+        if (_last_char) position |= (0b1 << 0)
+        return {
+            'position': position,
+            'node': node,
+            'offset': offset
+        }
+    }
     const s = window.getSelection()
     if (!s.rangeCount) return [0, undefined, [undefined, undefined]]
     const r = s.getRangeAt(0)
     const start = r.startContainer
     const end = r.endContainer
+    const forward = ((start == end && s.anchorOffset <= s.focusOffset) || (start != end && start == s.anchorNode)) ? true : false
+    const _s = getNodeDetail(start, r.startOffset)
+    const _e = forward ? getNodeDetail(end, r.endOffset) : _s
     const se = [
-        {
-            'node': start,
-            'offset': r.startOffset
-        },
-        {
-            'node': end,
-            'offset': r.endOffset
-        }
+        _s, _e
     ]
     return [
         s.rangeCount,
         r.toString(),
-        se
+        se,
+        forward,
     ]
-}
-
-
-function getCaretCharacterOffsetWithin(element) {
-    var caretOffset = 0;
-    var doc = element.ownerDocument || element.document;
-    var win = doc.defaultView || doc.parentWindow;
-    var sel;
-    if (typeof win.getSelection != "undefined") {
-        sel = win.getSelection();
-        if (sel.rangeCount > 0) {
-            var range = win.getSelection().getRangeAt(0);
-            var preCaretRange = range.cloneRange();
-            preCaretRange.selectNodeContents(element);
-            preCaretRange.setEnd(range.endContainer, range.endOffset);
-            caretOffset = preCaretRange.toString().length;
-        }
-    } else if ((sel = doc.selection) && sel.type != "Control") {
-        var textRange = sel.createRange();
-        var preCaretTextRange = doc.body.createTextRange();
-        preCaretTextRange.moveToElementText(element);
-        preCaretTextRange.setEndPoint("EndToEnd", textRange);
-        caretOffset = preCaretTextRange.text.length;
-    }
-    return caretOffset;
 }
 
 
@@ -249,16 +261,13 @@ const inputChange = (e) => {
 }
 
 
-
 const selectAllSpans = () => {
     window.getSelection().removeAllRanges();
     const range = document.createRange();
     range.setStartBefore(spans.value[0]);
     range.setEndAfter(spans.value[spans.value.length - 1]);
     window.getSelection().addRange(range);
-
-
-};
+}
 
 
 const moveCursorToPosition = (element, position) => {
@@ -270,11 +279,35 @@ const moveCursorToPosition = (element, position) => {
     selection.addRange(range);
 }
 
+function placeCaretAtEnd(el) {
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.selectNodeContents(el);
+    range.collapse(false);  // Move caret to the end
+    selection.removeAllRanges();
+    selection.addRange(range);
+}
+
+const clickElement = (k, e) => {
+    // console.log(e.target, e.currentTarget.lastElementChild)
+    if (e.target.classList.contains('element')) {
+        const range = document.createRange();
+        const selection = window.getSelection();
+        console.log(e.target.lastElementChild, e.currentTarget == e.target)
+        moveCursorToPosition(e.target.lastElementChild, e.target.lastElementChild.textContent.length);
+        // range.selectNodeContents(e.target.lastChild);
+        // range.collapse(false);
+        // selection.removeAllRanges();
+        // selection.addRange(range);
+    }
+}
+
 
 const handleKeydown = (e) => {
+    const se = detectSelectionSE()
+    console.log(se)
     if (e.key == 'Backspace') {
         console.log('Backspace')
-        const se = detectSelectionSE()
         if (!se[0]) return
         const start = se[2][0]['node']
         const end = se[2][1]['node']
@@ -297,10 +330,10 @@ const handleKeydown = (e) => {
                     // 最好把这种content==''的去掉在这里
                 }
                 if (cc === -1) {
-                    if (r1 === 0) 
+                    if (r1 == 0) 
                         console.log('at the very beginning, do nothing')
                     else
-                        console.log('trying to merge div, backspace on start of a div')
+                        console.log('trying to merge div, backspace on start of a div, at row:', r1)
 
                 } else {
                     console.log(`trying to delete on the ${c1}th span`)
@@ -325,12 +358,12 @@ const handleKeydown = (e) => {
     }
     else if (e.key === 'Enter') {
         if (e.shiftKey) {
-            const se = detectSelectionSE()
-            // rangeCount, r.toString()
-            if (!se[0] || se[1] !== '') return
-            console.log(se)
+            if (!se[0] || se[1] != '') return
             const end = se[2][1]['node']
+            console.log(end.nodeType, end)
             const el = end.nodeType === Node.TEXT_NODE ? end.parentElement : end;
+            console.log(el.nodeType, el)
+            console.log(se)
             const row = parseInt(el.getAttribute('idx1'), 10)
             const col = parseInt(el.getAttribute('idx2'), 10)
             const newLine = [...inputItems.value[row].slice(col)]
@@ -358,13 +391,39 @@ const handleKeydown = (e) => {
             e.preventDefault()
         }
         return
-    } else {
+    }
+    else if (e.key.startsWith('Arrow')) {
+        if (se[0] == 0 || se[2][0] == undefined) {
+            e.preventDefault()
+            return
+        }
 
+        // limit moves out of spans
+        const start = se[2][0]
+        const pos_s = start['position']
+        if (Number(pos_s>>8) === Number(0b1)) {
+            if (e.key == 'ArrowUp' || (Number(pos_s&0b000100100)===Number(0b000100100) && e.key == 'ArrowLeft')) {
+                e.preventDefault()
+                return
+            }
+        }
+        const end = se[2][1]
+        const pos_e = end['position']
+        if (Number(pos_e&0b001000000) === Number(0b001000000)) {
+            if (e.key == 'ArrowDown' || (Number(pos_e&0b000001001)===Number(0b000001001) && e.key == 'ArrowRight')) {
+                e.preventDefault()
+                return
+            }
+        }
+
+        // move over invisible \ufeff char
+        if (e.key == 'ArrowLeft') {
+            console.log(pos_s.toString(2), start['offset'], start['node'].data)
+        }
+
+        return
     }
 
-}
-
-const createNewInputItem = (index) => {
 }
 
 
