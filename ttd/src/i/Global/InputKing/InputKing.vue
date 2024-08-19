@@ -20,31 +20,33 @@
             <div class="main-input items-center w-full h-full flex mx-2">
                 <div class="flex rounded-md shadow-sm w-full h-full text-3s">
                     <div class="w-full">
-                        <div v-if="inputItems.length === 1 && inputItems[0].length === 1 && inputItems[0][0]['content'] === ''"
+                        <div v-if="inputItems.length === 1 && inputItems[0].length === 1 && inputItems[0][0].content === ''"
                              class="placeholder absolute pt-[11px] whitespace-nowrap text-ellipsis overflow-hidden text-[var(--channel-text-area-placeholder)] select-none pointer-events-none">
                             {{ curPlaceHolder }}</div>
                         <div contenteditable
-                             
                              class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left text-[var(--text-normal))] break py-[11px] pr-[11px] cursor-default"
-                             @mousedown.self.prevent
+                             @mousedown.self="markupMouseDown"
+                             @mousemove="()=>isDraggingText=true"
+                             @mouseup="markupMouseUp"
                              @input="inputChange"
                              @keydown="handleKeydown"
                              ref="inputmarkup"
                              >
                              <div v-for="(item, idx1) in inputItems"
                              :key="idx1"
+                             :idx1="idx1"
                              @click="clickElement(idx1, $event)"
-                             @keydown="console.log(detectSelectionSE())"
-                             class="element w-full text-md bg-transparent outline-none font-light select-none cursor-text">
+                             @copy="copyContent"
+                             @paste="pasteContent"
+                             class="element w-full text-md bg-transparent outline-none font-light cursor-text select-text">
                                 <span 
-                                      v-for="(it, idx2) in item"
-                                      :key="idx2"
-                                      :idx1="idx1"
-                                      :idx2="idx2"
-                                      class="text-[var(--text-normal)] font-medium outline-none select-text"
-                                      @paste="pasteContent($event)"
-                                      v-html="parseMsgContent(it)"
-                                      >
+                                    v-for="(it, idx2) in item"
+                                    :key="idx2"
+                                    :idx1="idx1"
+                                    :idx2="idx2"
+                                    class="text-[var(--text-normal)] font-medium outline-none"
+                                    v-html="parseMsgContent(it)"
+                                    >
                                 </span>
                             </div>
                         </div>
@@ -148,6 +150,8 @@ const inputItems = ref([
     ]
 ])
 const chatFiles = ref([])
+const isDraggingText = ref(false)
+let x_y = [-1, -1]
 
 // Dropup tools
 const isRunningTool = ref(false)
@@ -200,7 +204,13 @@ const detectSelectionSE = () => {
         const _1th_div = row == 0
         const _last_div = row == inputItems.value.length - 1
         const _1th_span = col == 0
-        console.log(node, span)
+        // console.log('se detail:', span.tagName, row, col, node, span)
+        if (span.tagName != 'SPAN') {
+            return {
+                'div': true,
+                'node': node
+            }
+        }
         if (isNaN(row)) {return undefined}
         const _last_span = col == inputItems.value[row].length - 1
         const _1th_char = (offset == 0) || (offset == 1 && span.textContent[0] == '\uFEFF')
@@ -222,21 +232,28 @@ const detectSelectionSE = () => {
         }
     }
     const s = window.getSelection()
+    console.log('anchor equals focus?', s.anchorNode == s.focusNode)
     if (!s.rangeCount) return [0, undefined, [undefined, undefined]]
     const r = s.getRangeAt(0)
     const start = r.startContainer
     const end = r.endContainer
     const forward = ((start == end && s.anchorOffset <= s.focusOffset) || (start != end && start == s.anchorNode)) ? true : false
     const _s = getNodeDetail(start, r.startOffset)
-    const _e = forward ? getNodeDetail(end, r.endOffset) : _s
-    const se = [
-        _s, _e
-    ]
+    const _e = start != end ? getNodeDetail(end, r.endOffset) : _s
+    let se = [
+                _s, _e
+            ]
+    if ('div' in _s) {
+        se = [
+            undefined, undefined
+        ]
+    }
     return [
         s.rangeCount,
         r.toString(),
         se,
         forward,
+        'div' in _s ? _s : undefined
     ]
 }
 
@@ -249,15 +266,77 @@ const focusInput = (e) => {
 }
 
 
-const inputChange = (e) => {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const anchorNode = range.startContainer;
-        const targetElement = anchorNode.nodeType === Node.TEXT_NODE ? anchorNode.parentElement : anchorNode;
-
-        console.log('Input occurred in:', targetElement.getAttribute('idx1'), targetElement.getAttribute('idx2'));
+const markupMouseDown = (e) => {
+    if (e.target.classList.contains('markup')) {
+        e.preventDefault()
+        return
     }
+    isDraggingText.value=false
+    x_y = [e.clientX, e.clientY]
+}
+
+
+const markupMouseUp = (e) => {
+    // if (e.target.classList.contains('markup') && x_y[0] == e.clientX && x_y[1] == e.clientY) {
+    //     const range = document.createRange();
+    //     const selection = window.getSelection();
+    //     selection.removeAllRanges();
+    // }
+    setTimeout(() => {
+        isDraggingText.value = false;
+        x_y = [-1, -1]
+    }, 0);
+}
+
+
+const inputChange = (e, t = '') => {
+    e.preventDefault()
+    const se = detectSelectionSE()
+    console.log('Input:', se, 'se the same?', se[2][0].node == se[2][1].node)
+    if (se[0] == 0) {
+        return
+    }
+    const text = e.data
+    console.log('inputing:', text)
+    // click on empty div, with an empty span
+    if (se[2][0] == undefined) {
+        const el = se[4]['node'].parentElement.firstElementChild
+        const row = el.getAttribute('idx1')
+        const col = el.getAttribute('idx2')
+        moveCursorToPosition(se[4]['node'].parentElement.firstChild, col)
+        console.log('here col:', col)
+        inputItems.value[row][col].content = text
+        console.log(row, col, text)
+    }
+    else {
+        const el1 = se[2][0]['node'].nodeType === Node.TEXT_NODE  // this is a must
+        ? se[2][0]['node'].parentElement 
+        : se[2][0]['node'];
+        const el2 = se[2][1]['node'].nodeType === Node.TEXT_NODE  // this is a must
+        ? se[2][1]['node'].parentElement 
+        : se[2][1]['node'];
+        const row = parseInt(el1.getAttribute('idx1'), 10)
+        const col = parseInt(el1.getAttribute('idx2'), 10)
+        const row2 = parseInt(el2.getAttribute('idx1'), 10)
+        const col2 = parseInt(el2.getAttribute('idx2'), 10)
+        if (row === row2 && col === col2) {
+            inputItems.value[row][col].content = inputItems.value[row][col].content.slice(0, se[2][0]['offset']-1) + text + inputItems.value[row][col].content.slice(se[2][1]['offset']-1)
+            nextTick(()=>{
+                moveCursorToPosition(el2.firstChild, se[2][1].offset + text.length - 1)
+            })
+        } else {
+            inputItems.value = removeRange(inputItems.value, [row, col], [row2, col2])
+            inputItems.value[row][col].content = inputItems.value[row][col].content.slice(0, se[2][0]['offset']-1) + text
+            const next_col = row == row2 ? col + 1:0
+            console.log(next_col)
+            inputItems.value[row2][next_col].content = inputItems.value[row2][next_col].content.slice(se[2][1]['offset']-1)
+            nextTick(()=>{
+                moveCursorToPosition(el2.firstChild, se[2][1].offset + text.length - 1)
+            })
+        }
+        
+    }
+
 }
 
 
@@ -273,11 +352,12 @@ const selectAllSpans = () => {
 const moveCursorToPosition = (element, position) => {
     const range = document.createRange();
     const selection = window.getSelection();
-    range.setStart(element.firstChild, position);
+    range.setStart(element, position);
     range.collapse(true);
     selection.removeAllRanges();
     selection.addRange(range);
 }
+
 
 function placeCaretAtEnd(el) {
     const range = document.createRange();
@@ -288,27 +368,26 @@ function placeCaretAtEnd(el) {
     selection.addRange(range);
 }
 
+
 const clickElement = (k, e) => {
-    // console.log(e.target, e.currentTarget.lastElementChild)
+    if (isDraggingText.value) {
+        e.preventDefault();
+        return;
+    }
     if (e.target.classList.contains('element')) {
-        const range = document.createRange();
-        const selection = window.getSelection();
-        console.log(e.target.lastElementChild, e.currentTarget == e.target)
-        moveCursorToPosition(e.target.lastElementChild, e.target.lastElementChild.textContent.length);
-        // range.selectNodeContents(e.target.lastChild);
-        // range.collapse(false);
-        // selection.removeAllRanges();
-        // selection.addRange(range);
+        console.log('clicking element:', e.target.lastElementChild, e.currentTarget == e.target)
+        moveCursorToPosition(e.target.lastElementChild.firstChild, e.target.lastElementChild.textContent.length);
+
     }
 }
 
 
 const handleKeydown = (e) => {
     const se = detectSelectionSE()
-    console.log(se)
+    console.log('keydown:', se, 'se the same?', se[2][0].node == se[2][1].node)
     if (e.key == 'Backspace') {
         console.log('Backspace')
-        if (!se[0]) return
+        if (!se[0] || se[2][0] == undefined) return
         const start = se[2][0]['node']
         const end = se[2][1]['node']
         const sl = start.nodeType === Node.TEXT_NODE ? start.parentElement : start;
@@ -322,10 +401,10 @@ const handleKeydown = (e) => {
         if (se[1] === '') {
             if (xoff > 0) {
                 console.log('r1 c1 xoff:', r1, c1, xoff)
-                console.log('trying to delete:', inputItems.value[r1][c1]['content'][xoff - 1])
+                console.log('trying to delete:', inputItems.value[r1][c1].content[xoff - 1])
             } else {
                 let cc=c1-1
-                while (cc >= 0 && inputItems.value[r1][cc]['content'] === '') {
+                while (cc >= 0 && inputItems.value[r1][cc].content === '') {
                     cc--
                     // 最好把这种content==''的去掉在这里
                 }
@@ -358,12 +437,11 @@ const handleKeydown = (e) => {
     }
     else if (e.key === 'Enter') {
         if (e.shiftKey) {
-            if (!se[0] || se[1] != '') return
+            if (!se[0]) return
+            if (se[1] != '') {e.preventDefault(); return}
             const end = se[2][1]['node']
             console.log(end.nodeType, end)
             const el = end.nodeType === Node.TEXT_NODE ? end.parentElement : end;
-            console.log(el.nodeType, el)
-            console.log(se)
             const row = parseInt(el.getAttribute('idx1'), 10)
             const col = parseInt(el.getAttribute('idx2'), 10)
             const newLine = [...inputItems.value[row].slice(col)]
@@ -376,8 +454,8 @@ const handleKeydown = (e) => {
             inputItems.value.splice(row + 1, 0, newLine)
             e.preventDefault()
             nextTick(() => {
-                moveCursorToPosition(inputmarkup.value.querySelector(`[idx1="${row+1}"][idx2="0"]`), 0)
-
+                moveCursorToPosition(inputmarkup.value.querySelector(`[idx1="${row+1}"][idx2="0"]`).firstChild, 0)
+                console.log(inputItems.value)
             })
             return
         } else {
@@ -420,14 +498,28 @@ const handleKeydown = (e) => {
         if (e.key == 'ArrowLeft') {
             console.log(pos_s.toString(2), start['offset'], start['node'].data)
         }
+        
 
         return
     }
+    else if (e.key == 'x') {
+        console.log('X')
+        console.log('keydown:', se, 'se the same?', se[2][0].node == se[2][1].node)
+    }
+}
 
+
+const copyContent = (e) => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
+    const modifiedText = selectedText.replace(/\uFEFF/g, '');
+    e.clipboardData.setData('text/plain', modifiedText);
+    e.preventDefault();
 }
 
 
 const pasteContent = (e) => {
+    // paste files
     const items = (e.clipboardData || window.clipboardData).items;
     const files = [];
     for (let item of items) {
@@ -435,11 +527,59 @@ const pasteContent = (e) => {
             files.push(item.getAsFile());
         }
     }
-
     if (files.length > 0) {
         handleFiles(files);
         e.preventDefault();
+        return;
     }
+
+    // paste text
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+    if (text) {
+        const se = detectSelectionSE();
+        console.log('pasting:', text, se[2], se[2][1]['position']);
+        if(!se[0]) return
+        const el1 = se[2][0]['node'].nodeType === Node.TEXT_NODE  // this is a must
+        ? se[2][0]['node'].parentElement 
+        : se[2][0]['node'];
+        const el2 = se[2][1]['node'].nodeType === Node.TEXT_NODE  // this is a must
+        ? se[2][1]['node'].parentElement 
+        : se[2][1]['node'];
+        const row = parseInt(el1.getAttribute('idx1'), 10)
+        const col = parseInt(el1.getAttribute('idx2'), 10)
+        const row2 = parseInt(el2.getAttribute('idx1'), 10)
+        const col2 = parseInt(el2.getAttribute('idx2'), 10)
+        if (row === row2 && col === col2) {
+            console.log(se[2])
+            inputItems.value[row][col].content = inputItems.value[row][col].content.slice(0, se[2][0]['offset']) + text + inputItems.value[row][col].content.slice(se[2][1]['offset'])
+        } else {
+            console.log(se[2])
+            inputItems.value = removeRange(inputItems.value, [row, col], [row2, col2])
+            inputItems.value[row][col].content = inputItems.value[row][col].content.slice(0, se[2][0]['offset']) + text
+            inputItems.value[row2][0].content = inputItems.value[row2][0].content.slice(se[2][1]['offset'])
+        }
+
+        e.preventDefault();
+    }
+};
+
+// Function to insert text at the cursor position
+const insertTextAtCursor = (text) => {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+
+    // Insert text as a text node
+    const textNode = document.createTextNode(text);
+    range.insertNode(textNode);
+
+    // Move the cursor after the inserted text
+    range.setStartAfter(textNode);
+    range.setEndAfter(textNode);
+    selection.removeAllRanges();
+    selection.addRange(range);
 }
 
 
@@ -516,17 +656,20 @@ const chooseMethod = (m) => {
     }
 }
 
+
 const curPlaceHolder = computed(() => {
     if (curMethod.value.description === undefined || curMethod.value.description === '')
         return 'Message Here...'
     return curMethod.value.description
 })
 
+
 const methodsList = computed(() => {
     if (props.toolDetail)
         return props.toolDetail['methods']
     return undefined
 })
+
 
 watch(methodsList, (newV) => {
     curArgs.value = {}
@@ -543,6 +686,7 @@ watch(methodsList, (newV) => {
         curMethodCode.value = -1
 })
 
+
 const methodDetail = (c) => {
     if (!methodsList.value) return {}
     for (const group of methodsList.value.groups) {
@@ -555,10 +699,12 @@ const methodDetail = (c) => {
     return {}
 }
 
+
 const curMethodDetail = computed(() => {
     if (curMethodCode.value == -1) return {}
     return methodDetail(curMethodCode.value)
 })
+
 
 // for now, 
 const text2MsgContents = () => {
@@ -635,6 +781,7 @@ const sendMessageInChannel = async () => {
         // Handle error appropriately
     }
 }
+
 
 async function runToolMethod() {
     // no tool method
