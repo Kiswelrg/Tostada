@@ -23,30 +23,31 @@
                         <div v-if="inputItems.length === 1 && inputItems[0].length === 1 && inputItems[0][0].content === ''"
                              class="placeholder absolute pt-[11px] whitespace-nowrap text-ellipsis overflow-hidden text-[var(--channel-text-area-placeholder)] select-none pointer-events-none">
                             {{ curPlaceHolder }}</div>
-                        <div contenteditable
-                             class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left text-[var(--text-normal))] break py-[11px] pr-[11px] cursor-default"
-                             @mousedown.self="markupMouseDown"
-                             @mousemove="()=>isDraggingText=true"
-                             @mouseup="markupMouseUp"
-                             @input="inputChange"
-                             @keydown="handleKeydown"
-                             ref="inputmarkup"
-                             >
-                             <div v-for="(item, idx1) in inputItems"
-                             :key="idx1"
-                             :idx1="idx1"
-                             @click="clickElement(idx1, $event)"
-                             @copy="copyContent"
-                             @paste="pasteContent"
-                             class="element w-full text-md bg-transparent outline-none font-light cursor-text select-text">
-                                <span 
-                                    v-for="(it, idx2) in item"
-                                    :key="idx2"
-                                    :idx1="idx1"
-                                    :idx2="idx2"
-                                    class="text-[var(--text-normal)] font-medium outline-none"
-                                    v-html="parseMsgContent(it)"
-                                    >
+                        <div 
+                            contenteditable
+                            class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left text-[var(--text-normal))] break py-[11px] pr-[11px] cursor-default"
+                            @mousedown.self="markupMouseDown"
+                            @mousemove="()=>isDraggingText=true"
+                            @mouseup="markupMouseUp"
+                            @keydown="handleKeydown"
+                            @beforeinput="beforeInputChange"
+                            ref="inputmarkup"
+                            >
+                            <div v-for="(item, idx1) in inputItems"
+                            :key="idx1"
+                            :idx1="idx1"
+                            @click="clickElement(idx1, $event)"
+                            @copy="copyContent"
+                            @paste="pasteContent"
+                            class="element w-full text-md bg-transparent outline-none font-light cursor-text select-text">
+                            <span 
+                                v-for="(it, idx2) in item"
+                                :key="idx2"
+                                :idx1="idx1"
+                                :idx2="idx2"
+                                class="text-[var(--text-normal)] font-medium outline-none"
+                                v-html="parseMsgContent(it)"
+                                >
                                 </span>
                             </div>
                         </div>
@@ -159,7 +160,9 @@ const curMethodCode = ref(0)
 const curMethod = ref({})
 const curArgs = ref({})
 
-
+const watchinputitems = watch(inputItems.value, (newV)=>{
+    console.log(newV, text2MsgContents())
+})
 
 const parseMsgContent = (item) => {
     if (item.content == '') return '&#xFEFF;'
@@ -170,13 +173,36 @@ const parseMsgContent = (item) => {
 const removeRange = (list, start, end) => {
     const [startRow, startCol] = start;
     const [endRow, endCol] = end;
-
+    let res = [];
+    for(const i in list) {
+        const rowIndex = parseInt(i, 10);
+        const row = list[rowIndex];
+        if (rowIndex < startRow || rowIndex > endRow) {
+            // Rows outside the range remain unchanged
+            res.push([...row]);
+        } else if (rowIndex === startRow && rowIndex === endRow) {
+            // If start and end are in the same row
+            if (startCol == endCol) res.push([...row]);
+            else res.push([...row.slice(0, startCol + 1), ...row.slice(endCol)]);
+        } else if (rowIndex === startRow) {
+            // First row of the range
+            res.push(row.slice(0, startCol + 1));
+        } else if (rowIndex === endRow) {
+            // Last row of the range
+            res[res.length-1] = [...res[res.length-1], ...row.slice(endCol)];
+        } else {
+            // Rows fully within the range are removed
+        }
+        
+    }
+    return res;
     return list.map((row, rowIndex) => {
         if (rowIndex < startRow || rowIndex > endRow) {
             // Rows outside the range remain unchanged
             return row;
         } else if (rowIndex === startRow && rowIndex === endRow) {
             // If start and end are in the same row
+            if (startCol == endCol) return row;
             return [...row.slice(0, startCol + 1), ...row.slice(endCol)];
         } else if (rowIndex === startRow) {
             // First row of the range
@@ -228,7 +254,7 @@ const detectSelectionSE = () => {
         return {
             'position': position,
             'node': node,
-            'offset': offset
+            'offset': node.data === '\ufeff' ? 0 : offset
         }
     }
     const s = window.getSelection()
@@ -239,7 +265,8 @@ const detectSelectionSE = () => {
     const end = r.endContainer
     const forward = ((start == end && s.anchorOffset <= s.focusOffset) || (start != end && start == s.anchorNode)) ? true : false
     const _s = getNodeDetail(start, r.startOffset)
-    const _e = start != end ? getNodeDetail(end, r.endOffset) : _s
+    // const _e = start != end ? getNodeDetail(end, r.endOffset) : _s
+    const _e = getNodeDetail(end, r.endOffset)
     let se = [
                 _s, _e
             ]
@@ -289,10 +316,46 @@ const markupMouseUp = (e) => {
 }
 
 
-const inputChange = (e, t = '') => {
+const removeTextBetween = (se) => {
+    console.log('removeTextBetween:', se, 'se the same?', se[2][0].node == se[2][1].node)
+    if (se[0] == 0) {
+        return true
+    }
+    
+    const el1 = se[2][0]['node'].nodeType === Node.TEXT_NODE  // this is a must
+    ? se[2][0]['node'].parentElement 
+    : se[2][0]['node'];
+    const el2 = se[2][1]['node'].nodeType === Node.TEXT_NODE  // this is a must
+    ? se[2][1]['node'].parentElement 
+    : se[2][1]['node'];
+    const row = parseInt(el1.getAttribute('idx1'), 10)
+    const col = parseInt(el1.getAttribute('idx2'), 10)
+    const row2 = parseInt(el2.getAttribute('idx1'), 10)
+    const col2 = parseInt(el2.getAttribute('idx2'), 10)
+    
+    if (row === row2 && col === col2) {
+        const c = inputItems.value[row][col].content
+        inputItems.value[row][col].content = c.slice(0, se[2][0].offset) + c.slice(se[2][1].offset)
+    }
+    else {
+        inputItems.value = removeRange(inputItems.value, [row, col], [row2, col2])
+        inputItems.value[row][col].content = inputItems.value[row][col].content.slice(0, se[2][0].offset)
+        const next_col = col + 1
+        // use row instead of row2 because they're collapsed
+        inputItems.value[row][next_col].content = inputItems.value[row][next_col].content.slice(se[2][1].offset)
+    }
+    // nextTick(()=>{
+    //     moveCursorToPosition(el1.lastChild, se[2][0].offset)
+    // })
+    return [row, col]
+}
+
+
+const beforeInputChange = (e) => {
     e.preventDefault()
     const se = detectSelectionSE()
-    console.log('Input:', se, 'se the same?', se[2][0].node == se[2][1].node)
+    console.log('BeforeInput :', se, 'se the same?', se[2][0].node == se[2][1].node)
+    const [r,c] = removeTextBetween(se)
     if (se[0] == 0) {
         return
     }
@@ -309,31 +372,18 @@ const inputChange = (e, t = '') => {
         console.log(row, col, text)
     }
     else {
+        // se[2][0] and se[2][1] are always the same in input event handler
+
         const el1 = se[2][0]['node'].nodeType === Node.TEXT_NODE  // this is a must
         ? se[2][0]['node'].parentElement 
         : se[2][0]['node'];
-        const el2 = se[2][1]['node'].nodeType === Node.TEXT_NODE  // this is a must
-        ? se[2][1]['node'].parentElement 
-        : se[2][1]['node'];
         const row = parseInt(el1.getAttribute('idx1'), 10)
         const col = parseInt(el1.getAttribute('idx2'), 10)
-        const row2 = parseInt(el2.getAttribute('idx1'), 10)
-        const col2 = parseInt(el2.getAttribute('idx2'), 10)
-        if (row === row2 && col === col2) {
-            inputItems.value[row][col].content = inputItems.value[row][col].content.slice(0, se[2][0]['offset']-1) + text + inputItems.value[row][col].content.slice(se[2][1]['offset']-1)
-            nextTick(()=>{
-                moveCursorToPosition(el2.firstChild, se[2][1].offset + text.length - 1)
-            })
-        } else {
-            inputItems.value = removeRange(inputItems.value, [row, col], [row2, col2])
-            inputItems.value[row][col].content = inputItems.value[row][col].content.slice(0, se[2][0]['offset']-1) + text
-            const next_col = row == row2 ? col + 1:0
-            console.log(next_col)
-            inputItems.value[row2][next_col].content = inputItems.value[row2][next_col].content.slice(se[2][1]['offset']-1)
-            nextTick(()=>{
-                moveCursorToPosition(el2.firstChild, se[2][1].offset + text.length - 1)
-            })
-        }
+        const ct = inputItems.value[row][col].content
+        inputItems.value[row][col].content = ct.slice(0, se[2][0].offset) + text + ct.slice(se[2][0].offset)
+        nextTick(()=>{
+            moveCursorToPosition(el1.firstChild, se[2][0].offset + text.length)
+        })
         
     }
 
@@ -382,6 +432,8 @@ const clickElement = (k, e) => {
 }
 
 
+
+
 const handleKeydown = (e) => {
     const se = detectSelectionSE()
     console.log('keydown:', se, 'se the same?', se[2][0].node == se[2][1].node)
@@ -392,47 +444,116 @@ const handleKeydown = (e) => {
         const end = se[2][1]['node']
         const sl = start.nodeType === Node.TEXT_NODE ? start.parentElement : start;
         const el = end.nodeType === Node.TEXT_NODE ? end.parentElement : end
-        const [r1, c1] = [sl.getAttribute('idx1'), sl.getAttribute('idx2')]
-        const [r2, c2] = [el.getAttribute('idx1'), el.getAttribute('idx2')]
-        const xoff = se[2][0]['offset']
-        const yoff = se[2][1]['offset']
-        console.log(se[2][0]['offset'], se[2][1]['offset'])
-        console.log('s == e ?', start === end)
+        const [r1, c1] = [parseInt(sl.getAttribute('idx1'), 10), parseInt(sl.getAttribute('idx2'), 10)]
+        const [r2, c2] = [parseInt(el.getAttribute('idx1'), 10), parseInt(el.getAttribute('idx2'), 10)]
+        const xoff = se[2][0].offset
+        const yoff = se[2][1].offset
+        // console.log(se[2][0].offset, se[2][1].offset)
+        // console.log('s == e ?', start === end)
+        let target = [{},{}];
         if (se[1] === '') {
             if (xoff > 0) {
-                console.log('r1 c1 xoff:', r1, c1, xoff)
-                console.log('trying to delete:', inputItems.value[r1][c1].content[xoff - 1])
+                // console.log('r1 c1 xoff:', r1, c1, xoff)
+                // console.log('trying to delete:', inputItems.value[r1][c1].content[xoff - 1])
+                target[0]['r'] = r1
+                target[0]['c'] = c1
+                target[0]['range'] = [xoff-1, xoff]
             } else {
                 let cc=c1-1
                 while (cc >= 0 && inputItems.value[r1][cc].content === '') {
                     cc--
-                    // 最好把这种content==''的去掉在这里
                 }
+                // 最好把content==''的span在这个步骤就去除掉
+                if (cc > -1) inputItems.value[r1].splice(cc+1, cc-c1+1)
+
                 if (cc === -1) {
-                    if (r1 == 0) 
-                        console.log('at the very beginning, do nothing')
-                    else
-                        console.log('trying to merge div, backspace on start of a div, at row:', r1)
+                    if (r1 == 0) {
+                        // console.log('at the very beginning, do nothing')
+                    }
+                    else {
+                        // console.log('trying to merge div, backspace on start of a div, at row:', r1)
+                        let nextLineSpans = inputItems.value[r1].map(span=>{return {'type':span.type, 'content':span.content}})
+                        if (nextLineSpans[0].content == '') {
+                            nextLineSpans.splice(0,1)
+                        }
+                        inputItems.value[r1-1] = [...inputItems.value[r1-1].map(span=>{return {'type':span.type, 'content':span.content}}), ...nextLineSpans]
+                        inputItems.value.splice(r1, 1)
+                        let len = inputItems.value[r1-1].length
+                        if (len>1 && inputItems.value[r1-1][len-1].content === '') {
+                            inputItems.value[r1-1].splice(len-1, 1)
+                            len--
+                        }
+                        nextTick(()=>{
+                            const cursorTarget = inputmarkup.value.querySelector(`[idx1="${r1-1}"][idx2="${len-1}"]`).firstChild
+                            moveCursorToPosition(cursorTarget, cursorTarget.textContent.length)
+                        })
+                    }
 
                 } else {
-                    console.log(`trying to delete on the ${c1}th span`)
+                    // seems impossible to get here
+                    // console.log(`trying to delete on the ${cc}th span`)
+                    target[0]['r'] = r1
+                    target[0]['c'] = c1
+                    target[0]['range'] = [-1, inputItems.value[r1][c1].length]
                 }
                 
             }
         } else {
-            console.log('trying to remove range in:', [r1, c1], [r2, c2])
             // removeRange(inputItems.value, [r1, c1], [r2, c2])
             if (start == end) {
-                console.log('trying to delete in 1 span, range:', xoff, yoff)
+                // console.log('trying to delete in 1 span, range:', xoff, yoff)
+                target[0]['r'] = r1
+                target[0]['c'] = c1
+                target[0]['range'] = [xoff, yoff]
             } else {
-                console.log('trying to delete in 2 span, range:', xoff, yoff)
-                if (r1 !== r2 && (inputItems.value[r1].length > c1 + 1 || c2 > 0)) {
-                    console.log('trying to merge div(v2)')
+                if (r1 !== r2 || c1+1 < c2) {
+                    // console.log('trying to remove range in:', [r1, c1], [r2, c2])
+                    inputItems.value = removeRange(inputItems.value, [r1, c1], [r2, c2])
+                }
+                // console.log('trying to delete in >=2 span, range:', xoff, yoff)
+                
+                // if (r1 !== r2 && (inputItems.value[r1].length > c1 + 1 || c2 > 0)) {
+                if (r1 !== r2) {
+                    // console.log('trying to merge div(v2)')
+                    inputItems.value[r1] = [...inputItems.value[r1], ...inputItems.value[r1+1]]
+                    inputItems.value.splice(r1+1, 1)
+                    target[0]['r'] = r1
+                    target[0]['c'] = c1
+                    target[0]['range'] = [xoff, inputItems.value[r1][c1].content.length]
+                    target[1]['r'] = r1
+                    target[1]['c'] = c1+1
+                    target[1]['range'] = [0, yoff]
+                } else {
+                    inputItems.value[r1][c1].content += inputItems.value[r1][c1+1].content
+                    inputItems.value[r1].splice(c1+1,1)
+                    target[0]['r'] = r1
+                    target[0]['c'] = c1
+                    target[0]['range'] = [xoff, xoff + yoff + 1]
                 }
             }
 
         }
+        for(let i=0;i<2;i++){
+            if (Object.keys(target[i]).length > 0) {
+                const cur = inputItems.value[target[i].r][target[i].c]
+                const ct = cur.content
+                const size1 = ct.length
+                const ending = (target[i].range[1] + size1 + 1) % (size1 + 1)
+                const start = target[i].range[0]
+                // console.log('Final delete decision :', ct.slice(start, ending))
+                cur.content = ct.slice(0, start) + ct.slice(ending)
+                if (i === 0)
+                    nextTick(()=>{
+                        moveCursorToPosition(sl.firstChild, start)
+                    })
+            }
+
+        }
+        
         e.preventDefault()
+        return
+    } else if (e.key === 'Delete') {
+        console.log('no code for delete yet')
         return
     }
     else if (e.key === 'Enter') {
@@ -444,12 +565,12 @@ const handleKeydown = (e) => {
             const el = end.nodeType === Node.TEXT_NODE ? end.parentElement : end;
             const row = parseInt(el.getAttribute('idx1'), 10)
             const col = parseInt(el.getAttribute('idx2'), 10)
-            const newLine = [...inputItems.value[row].slice(col)]
-            newLine[0].content = end.textContent.slice(se[2][1]['offset'])
+            const newLine = [...inputItems.value[row].slice(col).map(span=>{return {'type':span.type, 'content':span.content}})]
+            newLine[0].content = end.textContent.slice(se[2][1].offset)
             inputItems.value[row].splice(col + 1)
             inputItems.value[row][inputItems.value[row].length - 1] = {
                 'type': 'text',
-                'content': end.textContent.slice(0, se[2][1]['offset'])
+                'content': end.textContent.slice(0, se[2][1].offset)
             }
             inputItems.value.splice(row + 1, 0, newLine)
             e.preventDefault()
@@ -496,15 +617,19 @@ const handleKeydown = (e) => {
 
         // move over invisible \ufeff char
         if (e.key == 'ArrowLeft') {
-            console.log(pos_s.toString(2), start['offset'], start['node'].data)
+            console.log(pos_s.toString(2), start.offset, start['node'].data)
         }
         
 
         return
+    } else if (e.ctrlKey && e.key === 'v') {
+        console.log('leave paste alone')
+        return
     }
-    else if (e.key == 'x') {
-        console.log('X')
-        console.log('keydown:', se, 'se the same?', se[2][0].node == se[2][1].node)
+    else if (e.key.length === 1 && !e.ctrlKey) {
+        // const [r,c] = removeTextBetween(se)
+        // e.preventDefault()
+        return
     }
 }
 
@@ -551,12 +676,12 @@ const pasteContent = (e) => {
         const col2 = parseInt(el2.getAttribute('idx2'), 10)
         if (row === row2 && col === col2) {
             console.log(se[2])
-            inputItems.value[row][col].content = inputItems.value[row][col].content.slice(0, se[2][0]['offset']) + text + inputItems.value[row][col].content.slice(se[2][1]['offset'])
+            inputItems.value[row][col].content = inputItems.value[row][col].content.slice(0, se[2][0].offset) + text + inputItems.value[row][col].content.slice(se[2][1].offset)
         } else {
             console.log(se[2])
             inputItems.value = removeRange(inputItems.value, [row, col], [row2, col2])
-            inputItems.value[row][col].content = inputItems.value[row][col].content.slice(0, se[2][0]['offset']) + text
-            inputItems.value[row2][0].content = inputItems.value[row2][0].content.slice(se[2][1]['offset'])
+            inputItems.value[row][col].content = inputItems.value[row][col].content.slice(0, se[2][0].offset) + text
+            inputItems.value[row2][0].content = inputItems.value[row2][0].content.slice(se[2][1].offset)
         }
 
         e.preventDefault();
@@ -599,6 +724,7 @@ function getFileType(file) {
     }
 }
 
+
 const handleFiles = (files) => {
     const fileInput = chatFiles.value;
     const dataTransfer = new DataTransfer();
@@ -636,6 +762,7 @@ const handleFiles = (files) => {
     fileInput.files = dataTransfer.files;
     updateFileCountMessage(fileInput.files.length);
 }
+
 
 const updateFileCountMessage = (fileCount) => {
     // You can update a message in the UI if needed
@@ -708,7 +835,7 @@ const curMethodDetail = computed(() => {
 
 // for now, 
 const text2MsgContents = () => {
-    return inputItems.value.map(item => item.content).join('\n')
+    return inputItems.value.map(div => div.map(item => item.content).join('')).join('\n')
     let res = []
     res.push({
         'type': 'Text',
