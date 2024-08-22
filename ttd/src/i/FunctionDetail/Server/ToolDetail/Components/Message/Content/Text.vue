@@ -1,5 +1,5 @@
 <template>
-    <span class="message-text normal" :style="{'display': [msgDisplay], 'font-size': [msgFSize]}">{{ props.msgItem.content}}</span>
+    <span class="message-text normal" :style="{'display': [msgDisplay], 'font-size': [msgFSize]}">{{ props.msgItem.content }}</span>
 </template>
 
 <script setup>

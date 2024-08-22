@@ -14,23 +14,18 @@
 |msg|image|upload files||✅|
 |media|serve|serve media using view||✅|
 |media|serve|add media service signature to url||✅|
+|msg|parser|inputking use multiple `items` for each line of msg||✅|
+|msg|parser|1msg sent and received in 1 content not a list|||
 
 ### InProgress
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
-|msg|parser|inputking use multiple `items` for each line of msg||*|
-|msg|parser|1msg sent and received in 1 content not a list|||
-|inputking|files|show selected files above inputking|||
 |msg|files|show attachments as files|||
+|msg|images|show images preview|||
+|inputking|code|clean it up|||
+|inputking|files|show selected files above inputking|||
 |Auth|User|change site auth user to my custom AUser|||
-
-
-* 没有selection时，input检测具体span
-* 没有selection时，input检测具体span的caret position
-* 有selection时，input检测具体span
-* 有selection时，input检测具体span的caret position
-* click检测具体span及位置
 
 
 

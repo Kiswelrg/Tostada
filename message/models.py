@@ -7,7 +7,7 @@ from project.snowflake import getMessageMessageSnowflakeID
 
 
 class Message(models.Model):
-    contents = models.JSONField(blank=True, null=True)
+    contents = models.TextField(max_length=2000, blank=True, null=True)
     time_sent = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
     is_edited = models.BooleanField(default=False)

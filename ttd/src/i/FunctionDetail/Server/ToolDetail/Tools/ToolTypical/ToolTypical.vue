@@ -89,10 +89,7 @@ const messagedIntro = computed(() => {
                     'state': false,
                     'text': 'edited'
                 },
-                'contents': ito.content.map(obj => ({
-                    'type': 'Text',
-                    'content': obj
-                })),
+                'contents': {'type':'Text','content':ito.content.join('\n')},
                 'isGroupHead':  i == 0 ? true : false,
                 'avatar_src': '/static/@me/1F955.svg'
             })
@@ -264,6 +261,7 @@ const connect = (url, tool) => {
         else if (data['type'] == 'message_deleted') {
             deleteMsg(data.cid);
         } else if (data['type'] == 'history_message') {
+            console.log(data)
             messages.value = data['messages']
             let logs = [];
             messages.value.map((a) => {

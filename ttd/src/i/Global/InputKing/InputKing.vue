@@ -160,9 +160,6 @@ const curMethodCode = ref(0)
 const curMethod = ref({})
 const curArgs = ref({})
 
-const watchinputitems = watch(inputItems.value, (newV)=>{
-    console.log(newV, text2MsgContents())
-})
 
 const parseMsgContent = (item) => {
     if (item.content == '') return '&#xFEFF;'
@@ -258,7 +255,7 @@ const detectSelectionSE = () => {
         }
     }
     const s = window.getSelection()
-    console.log('anchor equals focus?', s.anchorNode == s.focusNode)
+    // console.log('anchor equals focus?', s.anchorNode == s.focusNode)
     if (!s.rangeCount) return [0, undefined, [undefined, undefined]]
     const r = s.getRangeAt(0)
     const start = r.startContainer
@@ -432,18 +429,15 @@ const clickElement = (k, e) => {
 }
 
 
-
-
 const handleKeydown = (e) => {
     const se = detectSelectionSE()
-    console.log('keydown:', se, 'se the same?', se[2][0].node == se[2][1].node)
     if (e.key == 'Backspace') {
         console.log('Backspace')
         if (!se[0] || se[2][0] == undefined) return
         const start = se[2][0]['node']
         const end = se[2][1]['node']
         const sl = start.nodeType === Node.TEXT_NODE ? start.parentElement : start;
-        const el = end.nodeType === Node.TEXT_NODE ? end.parentElement : end
+        let el = end.nodeType === Node.TEXT_NODE ? end.parentElement : end
         const [r1, c1] = [parseInt(sl.getAttribute('idx1'), 10), parseInt(sl.getAttribute('idx2'), 10)]
         const [r2, c2] = [parseInt(el.getAttribute('idx1'), 10), parseInt(el.getAttribute('idx2'), 10)]
         const xoff = se[2][0].offset
@@ -452,6 +446,7 @@ const handleKeydown = (e) => {
         // console.log('s == e ?', start === end)
         let target = [{},{}];
         if (se[1] === '') {
+            let cc = undefined
             if (xoff > 0) {
                 // console.log('r1 c1 xoff:', r1, c1, xoff)
                 // console.log('trying to delete:', inputItems.value[r1][c1].content[xoff - 1])
@@ -459,11 +454,13 @@ const handleKeydown = (e) => {
                 target[0]['c'] = c1
                 target[0]['range'] = [xoff-1, xoff]
             } else {
-                let cc=c1-1
+                cc=c1-1
+                
                 while (cc >= 0 && inputItems.value[r1][cc].content === '') {
+                    el=el.previousSibling
                     cc--
                 }
-                // 最好把content==''的span在这个步骤就去除掉
+                // 把content==''的span在这个步骤就去除掉
                 if (cc > -1) inputItems.value[r1].splice(cc+1, cc-c1+1)
 
                 if (cc === -1) {
@@ -476,15 +473,17 @@ const handleKeydown = (e) => {
                         if (nextLineSpans[0].content == '') {
                             nextLineSpans.splice(0,1)
                         }
+                        const cursor_back_length = nextLineSpans.length;
+                        let len = inputItems.value[r1-1].length
                         inputItems.value[r1-1] = [...inputItems.value[r1-1].map(span=>{return {'type':span.type, 'content':span.content}}), ...nextLineSpans]
                         inputItems.value.splice(r1, 1)
-                        let len = inputItems.value[r1-1].length
                         if (len>1 && inputItems.value[r1-1][len-1].content === '') {
                             inputItems.value[r1-1].splice(len-1, 1)
                             len--
                         }
                         nextTick(()=>{
                             const cursorTarget = inputmarkup.value.querySelector(`[idx1="${r1-1}"][idx2="${len-1}"]`).firstChild
+                            console.log(cursorTarget.length, cursor_back_length)
                             moveCursorToPosition(cursorTarget, cursorTarget.textContent.length)
                         })
                     }
@@ -492,9 +491,13 @@ const handleKeydown = (e) => {
                 } else {
                     // seems impossible to get here
                     // console.log(`trying to delete on the ${cc}th span`)
-                    target[0]['r'] = r1
-                    target[0]['c'] = c1
-                    target[0]['range'] = [-1, inputItems.value[r1][c1].length]
+                    el=el.previousSibling
+                    const cc_span = inputItems.value[r1][cc]
+                    cc_span.content = inputItems.value[r1][cc].content.slice(0, inputItems.value[r1][cc].content.length-1)
+                    nextTick(()=>{
+                        moveCursorToPosition(el.firstChild, cc_span.content.length)
+                    })
+                    
                 }
                 
             }
@@ -533,7 +536,15 @@ const handleKeydown = (e) => {
             }
 
         }
+
+        let firstTargetRemoved = false
+        let previousSpan = undefined
         for(let i=0;i<2;i++){
+            if (firstTargetRemoved) {
+                nextTick(()=> {
+                    moveCursorToPosition(previousSpan.firstChild, previousSpan.textContent.length)
+                })
+            }
             if (Object.keys(target[i]).length > 0) {
                 const cur = inputItems.value[target[i].r][target[i].c]
                 const ct = cur.content
@@ -542,18 +553,31 @@ const handleKeydown = (e) => {
                 const start = target[i].range[0]
                 // console.log('Final delete decision :', ct.slice(start, ending))
                 cur.content = ct.slice(0, start) + ct.slice(ending)
-                if (i === 0)
-                    nextTick(()=>{
+                if (cur.content === '' && target[i].c > 0) {
+                    previousSpan = sl.previousSibling
+                    inputItems.value[target[i].r].splice(target[i].c, 1)
+                    firstTargetRemoved = true
+                    // target[1] = {
+                    //     'placeholder': true
+                    // }
+                }
+                nextTick(()=>{
+                    if (!firstTargetRemoved) {
                         moveCursorToPosition(sl.firstChild, start)
-                    })
+                    }
+                })
+                
+                
             }
 
         }
         
         e.preventDefault()
         return
-    } else if (e.key === 'Delete') {
+    }
+    else if (e.key === 'Delete') {
         console.log('no code for delete yet')
+        e.preventDefault()
         return
     }
     else if (e.key === 'Enter') {
@@ -622,13 +646,13 @@ const handleKeydown = (e) => {
         
 
         return
-    } else if (e.ctrlKey && e.key === 'v') {
+    }
+    else if (e.ctrlKey && e.key === 'v') {
         console.log('leave paste alone')
         return
     }
     else if (e.key.length === 1 && !e.ctrlKey) {
-        // const [r,c] = removeTextBetween(se)
-        // e.preventDefault()
+        // going to beforeInput...
         return
     }
 }
@@ -834,15 +858,10 @@ const curMethodDetail = computed(() => {
 
 
 // for now, 
-const text2MsgContents = () => {
+const text2MsgContents = computed(()=>{
     return inputItems.value.map(div => div.map(item => item.content).join('')).join('\n')
-    let res = []
-    res.push({
-        'type': 'Text',
-        'content': mainInputText.value
-    })
-    return res
-}
+
+})
 
 
 function fileToBase64(file) {
@@ -856,25 +875,19 @@ function fileToBase64(file) {
 
 
 const sendMessageInChannel = async () => {
-    if (inputItems.value.map(item => item.content).join('') === '') {
-        console.log('All empty')
-    } else {
-        // remove all trailing inputitem which has '' content
-        while (inputItems.value[inputItems.value.length - 1].content === '') {
-            inputItems.value.pop();
-        }
-    }
-
-    return
-    if (mainInputText.value === '' && chatFiles.value.files.length === 0) {
+    let msg2send = text2MsgContents.value
+    let last_idx = msg2send.length-1
+    while(last_idx>0 && msg2send[last_idx] === '\n') last_idx--
+    msg2send = msg2send.slice(0, last_idx+1)
+    if (msg2send === '' && chatFiles.value.files.length === 0) {
         console.log('Nothing to send!')
         return
     }
-
+    
     const d = {
         type: 'normal',
         channel_cid: props.toolDetail.cid.toString(),
-        contents: text2MsgContents(),
+        contents: msg2send,
         is_private: false,
         mentioned_user: undefined,
         tool_used: undefined,

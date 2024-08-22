@@ -51,13 +51,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
 
     @database_sync_to_async
-    def save_groupmessage(self, message, files, GM_type = 'normal'):
+    def save_chatmessage(self, message, files, GM_type = 'normal'):
         msg = ChatMessage.objects.create(
             sender=AUser.objects.get(id=self.user.id),
             is_private=message['is_private'],
             channel=ChannelOfChat.objects.get(urlCode=self.channel_cid),
             _type=GM_type,
-            contents=json.dumps(message['contents'])
+            contents=message['contents']
         )
         for f in files:
             MFile.objects.create(
@@ -161,7 +161,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         'last_edit':msg.last_edit.isoformat(),
                     },
                     'is_private': msg.is_private,
-                    'contents': json.loads(msg.contents), # load in frontend, save some performance for Django
+                    'contents': msg.contents, # load in frontend, save some performance for Django
                     'attachments': await self.getAttachments(msg)
                 } for msg in msgs]
                 
@@ -233,7 +233,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             except ValueError as e:
                 print("Error processing file:", e)
         # try:
-        msg = await self.save_groupmessage(message, files)
+        msg = await self.save_chatmessage(message, files)
 
         # Send message to room group
         get_file_async = sync_to_async(MFile.get_file)
@@ -259,7 +259,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         'last_edit':msg.last_edit.isoformat(),
                     },
                     'is_private': msg.is_private,
-                    'contents': json.loads(msg.contents), # load in frontend, save some performance for Django
+                    'contents': msg.contents, # parse in frontend, save some performance for Django
                     'attachments': await self.getAttachments(msg)
                 }]
                 
@@ -331,7 +331,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @require_login
     async def history_message(self, event):
         msgs = event['messages']
-        print(f'Msg: {[msg["contents"][0]["content"] for msg in msgs]}')
+        print(msgs)
+        print(f'Msg: {[msg["contents"] for msg in msgs]}')
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'history_message',
