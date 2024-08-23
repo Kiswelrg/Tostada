@@ -351,7 +351,12 @@ const removeTextBetween = (se) => {
 const beforeInputChange = (e) => {
     e.preventDefault()
     const se = detectSelectionSE()
-    console.log('BeforeInput :', se, 'se the same?', se[2][0].node == se[2][1].node)
+    try {
+        console.log('BeforeInput :', se, 'se the same?', se[2][0].node == se[2][1].node)
+    } catch (error) {
+        console.log('BeforeInput : hit div, not span!')
+    }
+
     const [r,c] = removeTextBetween(se)
     if (se[0] == 0) {
         return
@@ -431,6 +436,7 @@ const clickElement = (k, e) => {
 
 const handleKeydown = (e) => {
     const se = detectSelectionSE()
+    console.log(e.key, se)
     if (e.key == 'Backspace') {
         console.log('Backspace')
         if (!se[0] || se[2][0] == undefined) return
@@ -512,13 +518,16 @@ const handleKeydown = (e) => {
                 if (r1 !== r2 || c1+1 < c2) {
                     // console.log('trying to remove range in:', [r1, c1], [r2, c2])
                     inputItems.value = removeRange(inputItems.value, [r1, c1], [r2, c2])
+                    nextTick(()=>{
+                        moveCursorToPosition(sl.firstChild, xoff)
+                    })
                 }
                 // console.log('trying to delete in >=2 span, range:', xoff, yoff)
                 
                 // if (r1 !== r2 && (inputItems.value[r1].length > c1 + 1 || c2 > 0)) {
                 if (r1 !== r2) {
                     // console.log('trying to merge div(v2)')
-                    inputItems.value[r1] = [...inputItems.value[r1], ...inputItems.value[r1+1]]
+                    if (r1+1<inputItems.value.length) inputItems.value[r1] = [...inputItems.value[r1], ...inputItems.value[r1+1]]
                     inputItems.value.splice(r1+1, 1)
                     target[0]['r'] = r1
                     target[0]['c'] = c1
@@ -527,11 +536,12 @@ const handleKeydown = (e) => {
                     target[1]['c'] = c1+1
                     target[1]['range'] = [0, yoff]
                 } else {
+                    const cur_end = yoff + inputItems.value[r1][c1].content.length
                     inputItems.value[r1][c1].content += inputItems.value[r1][c1+1].content
                     inputItems.value[r1].splice(c1+1,1)
                     target[0]['r'] = r1
                     target[0]['c'] = c1
-                    target[0]['range'] = [xoff, xoff + yoff + 1]
+                    target[0]['range'] = [xoff, cur_end]
                 }
             }
 
@@ -557,21 +567,17 @@ const handleKeydown = (e) => {
                     previousSpan = sl.previousSibling
                     inputItems.value[target[i].r].splice(target[i].c, 1)
                     firstTargetRemoved = true
-                    // target[1] = {
-                    //     'placeholder': true
-                    // }
                 }
-                nextTick(()=>{
-                    if (!firstTargetRemoved) {
+                if (!firstTargetRemoved && i === 0) {
+                    nextTick(()=>{
                         moveCursorToPosition(sl.firstChild, start)
-                    }
-                })
+                    })
+                }
                 
                 
             }
 
         }
-        
         e.preventDefault()
         return
     }
@@ -647,6 +653,10 @@ const handleKeydown = (e) => {
 
         return
     }
+    else if (e.ctrlKey && e.key === 'c') {
+        console.log('leave copy alone')
+        return
+    }
     else if (e.ctrlKey && e.key === 'v') {
         console.log('leave paste alone')
         return
@@ -654,6 +664,12 @@ const handleKeydown = (e) => {
     else if (e.key.length === 1 && !e.ctrlKey) {
         // going to beforeInput...
         return
+    }
+    else if (e.key.length === 1 && e.ctrlKey) {
+        console.log(e.key, '+ ctrl')
+    }
+    else {
+
     }
 }
 

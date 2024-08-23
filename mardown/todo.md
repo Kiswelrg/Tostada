@@ -15,7 +15,7 @@
 |media|serve|serve media using view||✅|
 |media|serve|add media service signature to url||✅|
 |msg|parser|inputking use multiple `items` for each line of msg||✅|
-|msg|parser|1msg sent and received in 1 content not a list|||
+|msg|parser|1msg sent and received in 1 content not a list||✅|
 
 ### InProgress
 

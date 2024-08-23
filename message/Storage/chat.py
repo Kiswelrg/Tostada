@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from django.conf import settings
+import codecs
 # import redis.asyncio as aioredis
 import redis
 
@@ -34,7 +35,9 @@ class RedisChatStorage(ChatStorage):
     def __init__(self):
         self.redis = None
 
-    async def initialize(self):
+    async def initialize(self, server):
+        host = f'{server[0]}:{server[1]}'
+        self.host_code = codecs.encode(host.encode('utf-8'),'hex').decode('utf-8')
         self.redis = redis.Redis(
             host = settings.CHANNEL_LAYERS['default']['CONFIG']['hosts'][0][0],
             port = settings.CHANNEL_LAYERS['default']['CONFIG']['hosts'][0][1],
@@ -44,18 +47,18 @@ class RedisChatStorage(ChatStorage):
     #     pass
 
     async def add_active_user(self, channel_cid, user_id):
-        if self.redis.scard(f'active_users:{channel_cid}' == 0):
-            self.redis.sadd('active_channels', channel_cid)
-        self.redis.sadd(f'active_users:{channel_cid}', user_id)
+        if self.redis.scard(f'{self.host_code}:active_users:{channel_cid}' == 0):
+            self.redis.sadd(f'{self.host_code}:active_channels', channel_cid)
+        self.redis.sadd(f'{self.host_code}:active_users:{channel_cid}', user_id)
 
     async def remove_user(self, channel_cid, user_id):
-        r = self.redis.srem(f'active_users:{channel_cid}', user_id)
-        if self.redis.scard(f'active_users:{channel_cid}') == 0:
-                self.redis.srem('active_channels', channel_cid)
+        r = self.redis.srem(f'{self.host_code}:active_users:{channel_cid}', user_id)
+        if self.redis.scard(f'{self.host_code}:active_users:{channel_cid}') == 0:
+                self.redis.srem(f'{self.host_code}:active_channels', channel_cid)
         return r
 
     async def get_active_users(self, channel_cid):
-        key = f'active_users:{channel_cid}'
+        key = f'{self.host_code}:active_users:{channel_cid}'
         exists = self.redis.exists(key)
         if exists:
             return self.redis.smembers(key)
@@ -63,13 +66,13 @@ class RedisChatStorage(ChatStorage):
             return None  # or an empty list, or however you want to handle this case
         
     async def get_active_user_count(self, channel_cid):
-        return self.redis.scard(f'active_users:{channel_cid}')
+        return self.redis.scard(f'{self.host_code}:active_users:{channel_cid}')
 
     async def is_channel_exist(self, channel_cid):
-        return self.redis.scard(f'active_users:{channel_cid}') > 0
+        return self.redis.scard(f'{self.host_code}:active_users:{channel_cid}') > 0
 
     async def is_user_in_channel(self, channel_cid, user_id):
-        return self.redis.sismember(f'active_users:{channel_cid}', user_id)
+        return self.redis.sismember(f'{self.host_code}:active_users:{channel_cid}', user_id)
     
 
 class CassandraChatStorage(ChatStorage):

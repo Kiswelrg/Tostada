@@ -243,8 +243,9 @@ const isMsgHead = (idx) => {
 
 
 const connect = (url, tool) => {
+    console.log(url.host)
     chatSocket.value = new WebSocket(
-        `ws://${url.host}/ws/chat/${tool.cid}/`
+        `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${url.host}/ws/chat/${tool.cid}/`
     )
     chatSocket.value.onopen = function(e) {
         console.log("WS/CHAT connection established")
@@ -268,7 +269,7 @@ const connect = (url, tool) => {
                 if (a['attachments'].length)
                     logs.push.apply(logs,a['attachments']);
             })
-            console.log(logs);
+            // console.log(logs);
 
 
         } else if (data['type'] == 'chat_message_delete') {

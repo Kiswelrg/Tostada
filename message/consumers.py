@@ -69,7 +69,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @require_login
     async def connect(self):
         if self.storage.redis is None:
-            await self.storage.initialize()
+            await self.storage.initialize(self.scope['server'])
         self.channel_cid = self.scope['url_route']['kwargs']['channel_cid']
         
         self.room_channel_name = f'chat_{self.channel_cid}'
@@ -137,7 +137,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             channel = get_object_or_404(ChannelOfChat, urlCode=self.channel_cid)
             # except Http404:
             #     return []
-            return list(channel.all_msgs.all()[:50])  # Use .all() before slicing
+            return list(channel.all_msgs.all()[:500])  # Use .all() before slicing
 
         msgs = await get_messages()
 
@@ -319,7 +319,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @require_login
     async def chat_message(self, event):
         msgs = event['messages']
-        print(f'Msg: {[msg["contents"] for msg in msgs]}')
+        # print(f'Msg: {[msg["contents"] for msg in msgs]}')
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
@@ -331,9 +331,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @require_login
     async def history_message(self, event):
         msgs = event['messages']
-        print(msgs)
-        print(f'Msg: {[msg["contents"] for msg in msgs]}')
-        # Send message to WebSocket
+        # print(f'Msg: {[msg["contents"] for msg in msgs]}')
+        
         await self.send(text_data=json.dumps({
             'type': 'history_message',
             'messages': msgs,
