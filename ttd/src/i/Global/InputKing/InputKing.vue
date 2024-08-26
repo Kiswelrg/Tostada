@@ -126,29 +126,9 @@ const inputItems = ref([
     [
         {
             'type': 'text',
-            'content': 'asdfg'
-        },
-        {
-            'type': 'text',
-            'content': '12345678'
-        },
-        {
-            'type': 'text',
-            'content': 'hjkl'
+            'content': ''
         },
     ],
-    [
-        {
-            'type': 'text',
-            'content': ''
-        }
-    ],
-    [
-        {
-            'type': 'text',
-            'content': ''
-        }
-    ]
 ])
 const chatFiles = ref([])
 const isDraggingText = ref(false)
@@ -282,14 +262,6 @@ const detectSelectionSE = () => {
 }
 
 
-const focusInput = (e) => {
-    // console.log('T, curT, activeE:', e.target.tagName, e.currentTarget.tagName, document.activeElement)
-    const tar = e.target
-    const cur = e.currentTarget
-
-}
-
-
 const markupMouseDown = (e) => {
     if (e.target.classList.contains('markup')) {
         e.preventDefault()
@@ -314,6 +286,7 @@ const markupMouseUp = (e) => {
 
 
 const removeTextBetween = (se) => {
+    console.log(se, inputItems.value)
     console.log('removeTextBetween:', se, 'se the same?', se[2][0].node == se[2][1].node)
     if (se[0] == 0) {
         return true
@@ -406,16 +379,6 @@ const moveCursorToPosition = (element, position) => {
     const selection = window.getSelection();
     range.setStart(element, position);
     range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
-}
-
-
-function placeCaretAtEnd(el) {
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.selectNodeContents(el);
-    range.collapse(false);  // Move caret to the end
     selection.removeAllRanges();
     selection.addRange(range);
 }
@@ -786,7 +749,8 @@ const handleFiles = (files) => {
         }
         if (!file) return;
         // Check if it's a directory or non-recognizable or empty
-        if (file.type === '' || file.size === 0) {
+        // if (file.type === '' || file.size === 0) {
+        if (file.size === 0) {
             console.log(`${file.name} is skipped`);
         } else {
             console.log(`${file.name} type : ${getFileType(file)}`);
@@ -929,7 +893,14 @@ const sendMessageInChannel = async () => {
     try {
         props.chatSocket.send(JSON.stringify({ message: d }));
         // mainInputText.value = '';
-        inputItems.value = [];
+        inputItems.value = [
+            [
+                {
+                    'type': 'text',
+                    'content': ''
+                },
+            ],
+        ];
         chatFiles.value.value = null; // Resetting chatFiles to clear the input
         updateFileCountMessage(0); // Reset file count message
     } catch (error) {

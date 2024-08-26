@@ -38,7 +38,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def getAttachments(self, m, attrs=None):
         if attrs is None:
-            attrs = ['name', 'url']
+            attrs = ['name', 'url', 'type', 'size']
         return [
             MFile.get_file(a.urlCode, attrs=attrs) for a in m.attachments.all()
         ]
@@ -99,6 +99,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
         await self.fetch_messages()
+
 
     async def disconnect(self, close_code):
         # Remove user from active users
@@ -216,6 +217,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         files = []
         for file in msg_files:
+            if len(files) == 10:
+                await self.send(text_data=json.dumps({
+                    'type': 'error_message',
+                    'messages': 'permission denied',
+                }))
+                return
             file_data_base64 = file['data']
             file_type = file['type']
             file_name = file['name']

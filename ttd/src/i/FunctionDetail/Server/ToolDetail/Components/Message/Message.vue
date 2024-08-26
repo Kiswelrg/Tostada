@@ -36,13 +36,12 @@
                     <!-- <component v-for="(item, index) in msg['contents']" :key="index" :is="tabs[item['type']]" :msg-item="item" class="text-[color:var(--text-normal)] text-3s"></component> -->
                     <component :is="tabs['Text']" :msg-item="{'type':'Text','content':msg.contents}" class="text-[color:var(--text-normal)] text-3s"></component>
 
-                    <div class="temp_attach text-[12px] leading-3 pb-1" v-if="msg.attachments?.length">{{ temp_attach(msg) }}</div>
                     <Edited v-if="msg['is_edited']['state']" :is-edited="msg['is_edited']"></Edited>
                 </div>
             </div>
 
-            <!-- Reactions -->
-            <div class="accessories empty:hidden h-fit indent-0 min-h-0 min-w-0 py-[0.125rem] relative"></div>
+            <!-- Reactions / Attachments -->
+            <Accessories :attachments="msg.attachments"></Accessories>
 
             <!-- Actions -->
             <div class="buttonContainer absolute top-0 right-0">
@@ -84,6 +83,7 @@ import { computed, shallowRef, ref, inject } from 'vue'
 import Edited from './Content/Edited.vue'
 import Link from './Content/Link.vue'
 import Text from './Content/Text.vue'
+import Accessories from './Accessories/Accessories.vue'
 
 const props = defineProps({
   msg: Object,

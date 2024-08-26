@@ -75,9 +75,11 @@ class MFile(models.Model):
     def get_file(cid, attrs = None):
         if attrs is None:
             attrs = [
+                'type',
+                'size',
                 'name',
                 'url',
-                'file'
+                'file',
             ]
         try:
             f = MFile.objects.get(pk=cid)
@@ -85,11 +87,13 @@ class MFile(models.Model):
             return None
         res =  {}
         if 'name' in attrs:
-            res['name'] = f.file.name
+            res['name'] = f.file.name.rsplit('/',1)[1]
         if 'url' in attrs:
             res['url'] = f.refreshURL()
         if 'file' in attrs:
             res['file'] = f.file
+        if 'size' in attrs:
+            res['size'] = f.file.size
         return res
         
     def fileSavePath(instance, fn):
