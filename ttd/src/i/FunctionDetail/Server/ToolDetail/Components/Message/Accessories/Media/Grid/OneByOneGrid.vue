@@ -1,5 +1,5 @@
 <template>
-    <div class="OneByOneGrid flex max-h-[280px] w-full">
+    <div class="OneByOneGrid flex " :class="{'max-h-[280px]': !props.isAlone, 'max-h-[350px]': props.isAlone, 'w-full': !props.isAlone, 'w-fit': props.isAlone, 'max-w-full': props.isAlone, 'inline-block': props.isAlone, 'flex': !props.isAlone}">
         <VisualMosaicItem :item="props.item" :isAlone="props.isAlone">
             
         </VisualMosaicItem>

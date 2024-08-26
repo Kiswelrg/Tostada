@@ -8,7 +8,26 @@ import datetime
 import hashlib
 import os
 from django.core.files.storage import FileSystemStorage
+from PIL import Image
+import imghdr
 
+def is_image1(field_file):
+    if not field_file:
+        return False
+    file_type = imghdr.what(field_file)
+    return file_type in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']
+
+from PIL import Image
+
+def is_image(field_file):
+    if not field_file:
+        return False,0
+    try:
+        img = Image.open(field_file)
+        img.verify()  # Verify the file is an image
+        return True,img.size
+    except (IOError, SyntaxError):
+        return False,0
 
 # Create your models here.
 
@@ -94,6 +113,9 @@ class MFile(models.Model):
             res['file'] = f.file
         if 'size' in attrs:
             res['size'] = f.file.size
+        c = is_image(f.file)
+        if c[0]:
+            res['dimensions'] = c[1]
         return res
         
     def fileSavePath(instance, fn):

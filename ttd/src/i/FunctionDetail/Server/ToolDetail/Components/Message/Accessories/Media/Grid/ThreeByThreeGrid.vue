@@ -1,6 +1,6 @@
 <template>
     <div class="ThreeByThreeGrid mt-1 grid grid-cols-3 gap-1">
-        <VisualMosaicItem v-for="(item, idx) in props.items" :item="item"></VisualMosaicItem>
+        <VisualMosaicItem v-for="(item, idx) in props.items" :item="item" :image-square="true"></VisualMosaicItem>
     </div>
 </template>
 

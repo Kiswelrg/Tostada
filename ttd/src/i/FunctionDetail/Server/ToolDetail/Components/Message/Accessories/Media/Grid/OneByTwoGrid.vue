@@ -1,5 +1,5 @@
 <template>
-    <div class="OneByTwoGrid flex flex-row gap-1 max-h-[280px]">
+    <div class="OneByTwoGrid flex flex-row gap-1 max-h-[280px]" :class="{'max-h-[350px]': props.items.length === 3}">
         <template v-if="props.items.length == 2">
             <OneByTwoItem :item="props.items[0]"></OneByTwoItem>
             <OneByTwoItem :item="props.items[1]"></OneByTwoItem>

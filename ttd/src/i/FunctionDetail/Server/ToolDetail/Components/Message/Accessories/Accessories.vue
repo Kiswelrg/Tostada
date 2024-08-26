@@ -21,7 +21,7 @@ const allowedImgExts = [
     'jpeg',
     'webp',
     'gif',
-    'svg',
+    'bmp',
 ]
 const isFileImage = (obj) => {
     const extension = obj.name.split('.').pop().toLowerCase()
