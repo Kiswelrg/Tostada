@@ -165,10 +165,13 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'ttd/dist/static'),
 ]
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Media
 MEDIA_ROOT = os.path.join(BASE_DIR, 'upload/media')
 MEDIA_URL = '/media/'
 
+# Attachment
 ATTACHMENT_ROOT = os.path.join(BASE_DIR, 'upload/attachment')
 ATTACHMENT_URL = '/attachment/'
 ATTACHMENT_KEY1 = '2t2Ybw20Q$zXTR2c01lD0KSz9hnQfsOytLB8egeBCgoOl5KO$lGQwcYHbgDy1P'
