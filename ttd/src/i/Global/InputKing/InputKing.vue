@@ -287,7 +287,11 @@ const markupMouseUp = (e) => {
 
 const removeTextBetween = (se) => {
     console.log(se, inputItems.value)
-    console.log('removeTextBetween:', se, 'se the same?', se[2][0].node == se[2][1].node)
+    try {
+        console.log('removeTextBetween:', se, 'se the same?', se[2][0].node == se[2][1].node)
+    } catch {
+        return [0, 0]
+    }
     if (se[0] == 0) {
         return true
     }
@@ -323,11 +327,18 @@ const removeTextBetween = (se) => {
 
 const beforeInputChange = (e) => {
     e.preventDefault()
-    const se = detectSelectionSE()
+    let se = detectSelectionSE()
     try {
         console.log('BeforeInput :', se, 'se the same?', se[2][0].node == se[2][1].node)
     } catch (error) {
         console.log('BeforeInput : hit div, not span!')
+        se[2][0] = {
+            'position': 365,
+            'offset': 0,
+            'node': se[4].node.previousSibling.firstChild
+        }
+        se[2][1] = se[2][0]
+        se[4] = undefined
     }
 
     const [r,c] = removeTextBetween(se)

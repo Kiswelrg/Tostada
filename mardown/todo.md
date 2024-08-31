@@ -16,15 +16,17 @@
 |media|serve|add media service signature to url||✅|
 |msg|parser|inputking use multiple `items` for each line of msg||✅|
 |msg|parser|1msg sent and received in 1 content not a list||✅|
+|msg|images|show images preview(organized)||✅|
+|inputking|scroll|show jump to bottom when new msgs arrive||✅|
+
 
 ### InProgress
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
+|inputking|scroll|show jump to bottom button when viewing old msgs|||
 |msg|files|show attachments as files|||
-|msg|images|show images preview|||
 |inputking|code|clean it up|||
-|inputking|files|show selected files above inputking|||
 |Auth|User|change site auth user to my custom AUser|||
 
 

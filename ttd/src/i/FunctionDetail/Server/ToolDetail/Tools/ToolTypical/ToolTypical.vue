@@ -4,7 +4,10 @@
         <div class="toolbody flex flex-col flex-1 overflow-y-auto w-full">
             <ToolHead :title="toolDetail?.name" :intro="toolDetail?.description + ' id: ' + selectedToolId" class="flex-none"/>
             <div class="belly flex-1 flex flex-col justify-end w-full overflow-auto">
-                <div class="belly-detail w-full h-fit overflow-y-scroll">
+                <div class="belly-detail w-full h-fit overflow-y-scroll"
+                    ref="belly"
+                    @scroll="onBellyScroll"
+                >
                     <Welcome :tool-detail="props.toolDetail"></Welcome>
                     <div class="introduction hidden">
                         <div class="introwrapper flex flex-col items-left text-left">
@@ -33,7 +36,7 @@
                 </div>
             </div>
         
-            <div class="w-full h-1 block"></div>
+            <div class="w-full h-1 block hidden"></div>
         </div>
         
         <InputKing class="flex-none" :tool-detail="toolDetail" :chat-socket="chatSocket" @add-message="onAddMessage"/>
@@ -45,18 +48,41 @@
 import InputKing from '@/i/Global/InputKing/InputKing.vue'
 import ToolHead from '../../ToolHead/ToolHead.vue'
 import Welcome from '../../Welcome/Welcome.vue'
-import { ref, computed, watch, inject } from 'vue'
+import { ref, computed, watch, inject, nextTick } from 'vue'
 import Message from '../../Components/Message/Message.vue'
 import { useWatchOnce } from '@/util/watcher'
 import { jsonWithBigInt } from '@/util/parse'
 import { getCookie } from '@/util/session'
 const chatSocket = inject('chat-socket')
 const layerB = inject('layer-b')
-const reconnectAttempts = ref(0);
+const belly = ref()
+const reconnectAttempts = ref(0)
 const props = defineProps([
     'tool-detail',
     'introToMsg'
 ])
+
+const onBellyScroll = () => {
+    if (belly.value) {
+        const scrollTop = belly.value.scrollTop;
+        const scrollHeight = belly.value.scrollHeight;
+        const clientHeight = belly.value.clientHeight;
+        let opt = 1; // 0 top, 1 middle, 2 bottom
+        // console.log('Scroll Top:', scrollTop, scrollHeight, clientHeight);
+
+        if (scrollTop === 0) {
+            // console.log('At the top of the div');
+            opt = 0;
+        }
+
+        if (scrollTop + clientHeight === scrollHeight) {
+            // console.log('At the bottom of the div');
+            opt = 2;
+        }
+        return [opt, scrollTop, clientHeight, scrollHeight]
+    }
+    return undefined
+}
 
 const selectedToolId = computed(() => {
     return props.toolDetail?.cid
@@ -74,6 +100,7 @@ const filtered_intro = computed(() => {
     }
     return undefined
 })
+
 
 const messagedIntro = computed(() => {
     let r = []
@@ -255,13 +282,22 @@ const connect = (url, tool) => {
         const data = jsonWithBigInt(e.data)
         console.log('Got messages: ')
         if (data['type'] == 'chat_message') {
+            const scrollInfo = onBellyScroll();
             const cur = data['messages'];
             console.log(cur.map(a => a['attachments'].length ? a['attachments'] : undefined));
             messages.value.push.apply(messages.value, cur);
+            nextTick(()=>{
+                if (scrollInfo !== undefined) {
+                    if (scrollInfo[0] === 2) {
+                        belly.value.scrollTop = belly.value.scrollHeight - belly.value.clientHeight;
+                    }
+                }
+            })
         }
         else if (data['type'] == 'message_deleted') {
             deleteMsg(data.cid);
         } else if (data['type'] == 'history_message') {
+            const scrollInfo = onBellyScroll();
             console.log(data)
             messages.value = data['messages']
             let logs = [];
@@ -270,8 +306,11 @@ const connect = (url, tool) => {
                     logs.push.apply(logs,a['attachments']);
             })
             // console.log(logs);
-
-
+            if (scrollInfo !== undefined) {
+                nextTick(()=>{
+                    belly.value.scrollTop = belly.value.scrollHeight - belly.value.clientHeight;
+                })
+            }
         } else if (data['type'] == 'chat_message_delete') {
         }
     }
