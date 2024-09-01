@@ -2,7 +2,7 @@
     <div class="tooltypical z-[2] flex flex-col justify-between h-full w-full text-white">
         
         <div class="toolbody flex flex-col flex-1 overflow-y-auto w-full">
-            <ToolHead :title="toolDetail?.name" :intro="toolDetail?.description" class="flex-none"/>
+            <ToolHead :title="toolDetail?.name" :intro="toolDetail?.description + '_test_jenkins'" class="flex-none"/>
             <div class="belly flex-1 flex flex-col justify-end w-full overflow-auto">
                 <div class="belly-detail w-full h-fit overflow-y-scroll"
                     ref="belly"
