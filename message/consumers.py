@@ -103,7 +103,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         # Remove user from active users
-        await self.storage.remove_user(self.channel_cid, self.user.id)
+        try:
+            await self.storage.remove_user(self.channel_cid, self.user.id)
+        except AttributeError:
+            print('User not found in this server\'s active list')
+            return
 
         # Leave room group
         await self.channel_layer.group_discard(

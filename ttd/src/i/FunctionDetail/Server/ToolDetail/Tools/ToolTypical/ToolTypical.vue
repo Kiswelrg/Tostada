@@ -2,7 +2,7 @@
     <div class="tooltypical z-[2] flex flex-col justify-between h-full w-full text-white">
         
         <div class="toolbody flex flex-col flex-1 overflow-y-auto w-full">
-            <ToolHead :title="toolDetail?.name" :intro="toolDetail?.description + ' id: ' + selectedToolId" class="flex-none"/>
+            <ToolHead :title="toolDetail?.name" :intro="toolDetail?.description" class="flex-none"/>
             <div class="belly flex-1 flex flex-col justify-end w-full overflow-auto">
                 <div class="belly-detail w-full h-fit overflow-y-scroll"
                     ref="belly"
@@ -270,9 +270,10 @@ const isMsgHead = (idx) => {
 
 
 const connect = (url, tool) => {
-    console.log(url.host)
+    const ws_url = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${import.meta.env.DEV === 'development' ? url.host : import.meta.env.VITE_WS_HOST}/ws/chat/${tool.cid}/`
+    // console.log('Vue Backend Host:', url.host, 'ws_url:', ws_url, import.meta.env)
     chatSocket.value = new WebSocket(
-        `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${url.host}/ws/chat/${tool.cid}/`
+        ws_url
     )
     chatSocket.value.onopen = function(e) {
         console.log("WS/CHAT connection established")
