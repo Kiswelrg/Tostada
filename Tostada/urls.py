@@ -37,5 +37,11 @@ urlpatterns = [
 # this is for dev only, change before going to production
 ]
 
+
 if settings.DEBUG:
-    urlpatterns.append((static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)) if settings.DEBUG else [])
+    urlpatterns.extend(
+        (
+            static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + 
+            static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+        )
+    )
