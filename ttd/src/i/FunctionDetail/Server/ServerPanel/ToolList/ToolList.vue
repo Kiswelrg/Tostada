@@ -49,11 +49,11 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { inject, onMounted, onUnmounted } from 'vue';
-import { watch } from 'vue';
+import { inject, onMounted, onUnmounted } from 'vue'
+import { watch } from 'vue'
 import { useWatchOnce } from '@/util/watcher'
-import { jsonWithBigInt } from '@/util/parse';
-import { getCookie } from '@/util/session';
+import { jsonWithBigInt } from '@/util/parse'
+import { getCookie } from '@/util/session'
 const server = inject('active-server')
 const hashtag_url = '/static/tool/main/chevron-down-solid.svg'
 const chevron_url = '/static/tool/main/hashtag-solid.svg'

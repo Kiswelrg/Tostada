@@ -3,6 +3,7 @@ import '@/style.css'
 import App from './App.vue'
 import router from './router'
 import { library, icon } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
   faSmile,
   faPen,
@@ -12,6 +13,10 @@ import {
   faClipboard,
   faPaperclip,
   faDownload,
+  faMicrophone,
+  faHeadphones,
+  faHashtag,
+  faGear,
 } from "@fortawesome/free-solid-svg-icons";
 import clickOutside from './util/directives/clickOutside'
 
@@ -22,9 +27,15 @@ library.add(
     faEllipsisH,
     faArrowLeft,
     faTrash, faClipboard, faPaperclip,
-    faDownload
+    faDownload,
+    faMicrophone,
+    faHeadphones,
+    faHashtag,
+    faGear,
 )
 
-const app = createApp(App).use(router)
+const app = createApp(App)
+            .component('font-awesome-icon', FontAwesomeIcon)
+            .use(router)
 app.directive('click-outside', clickOutside)
 app.mount('#app')

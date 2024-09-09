@@ -78,7 +78,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+// import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, shallowRef, ref, inject } from 'vue'
 import Edited from './Content/Edited.vue'
 import Link from './Content/Link.vue'

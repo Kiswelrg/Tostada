@@ -30,7 +30,7 @@
 
 <script setup>
 import { ref, inject } from 'vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+// import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 const ws = inject('chat-socket')
 
 const emit = defineEmits([

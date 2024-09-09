@@ -1,13 +1,15 @@
 <template>
 <div class="flex z-[2] h-[var(--m-userbar-height)] grow-0 shrink-0 mb-px w-full pr-2 pl-[6px] bg-userbar-bg items-center">
 
-    <div class="flex min-w-[120px] h-[42px] mr-2 pl-0.5 bg-userbar-hoverbg rounded-md items-center">
-        <div class="h-8 w-8 shrink-0 rounded-full bg-hui-800 cursor-pointer"></div>
+    <div class="flex min-w-[120px] h-[42px] mr-2 pl-0.5 hover:bg-userbar-hoverbg rounded-md items-center">
+        <div class="h-8 w-8 shrink-0 rounded-full bg-hui-800 cursor-pointer">
+            <img class="rounded-full" :src="UserInfo?.avatar" alt="">
+        </div>
         <div class="h-[42px] grow mr-1 cursor-pointer py-1 pl-2 min-w-0 text-left">
             
             <div class="username-text whitespace-nowrap text-ellipsis overflow-hidden">
                 <div>
-                    User
+                    {{ UserInfo?.username }}
                 </div>
             </div>
             <div class="status-text whitespace-nowrap text-ellipsis overflow-hidden">
@@ -19,15 +21,52 @@
         </div>
     </div>
     <div class="buttonlist flex flex-initial nowrap justify-start items-stretch">
-        <div class="h-8 w-8 flex justify-center items-center rounded-md hover:bg-userbar-hoverbg"></div>
-        <div class="h-8 w-8 flex justify-center items-center rounded-md hover:bg-userbar-hoverbg"></div>
-        <div class="h-8 w-8 flex justify-center items-center rounded-md hover:bg-userbar-hoverbg"></div>
+        <div class="h-8 w-8 flex justify-center items-center rounded-md hover:bg-userbar-hoverbg">
+            <font-awesome-icon :icon="['fas', 'microphone']"
+                class="block h-5 w-5 object-contain text-interactive-normal"
+                />
+        </div>
+        <div class="h-8 w-8 flex justify-center items-center rounded-md hover:bg-userbar-hoverbg">
+            <font-awesome-icon :icon="['fas', 'headphones']"
+                class="block h-5 w-5 object-contain text-interactive-normal"
+                />
+        </div>
+        <div class="h-8 w-8 flex justify-center items-center rounded-md hover:bg-userbar-hoverbg">
+            <font-awesome-icon :icon="['fas', 'gear']"
+                class="block h-5 w-5 object-contain text-interactive-normal"
+                />
+        </div>
     </div>
     <div class="bg-red-400 h-5 w-5 absolute bottom-0"></div>
 </div>
 </template>
 
 <script setup>
+import { onBeforeMount, ref } from 'vue'
+import { jsonWithBigInt } from '@/util/parse'
+
+const UserInfo = ref(undefined);
+onBeforeMount(async () => {
+    const fetchedInfo = await getOwnInfo()
+    UserInfo.value = jsonWithBigInt(fetchedInfo)
+
+})
+
+
+const getOwnInfo = async () => {
+  const r = await fetch("/api/account/info/", {
+    method: "GET",
+    headers: {
+      "Content-type": "application/json",
+    },
+  });
+  if (!r.ok) {
+    return {'username': 'loading', 'avatar': '#'}
+  }
+  const text = await r.text(); // Fetch the response text
+  return text; // Return it from the function
+}
+
 
 </script>
 
@@ -39,7 +78,6 @@
 </style>
 
 <style lang="scss" scoped>
-
 .username-text {
     font-size: 14px;
     line-height: 18px;

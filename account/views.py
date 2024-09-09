@@ -3,6 +3,7 @@ from django.middleware.csrf import get_token
 from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.http.response import Http404
+from django.core.exceptions import PermissionDenied
 from django.forms import ValidationError
 from django.http.response import HttpResponseRedirect
 from django.http import JsonResponse
@@ -23,6 +24,14 @@ import os
 
 from account.models import AUser
 # Create your views here.
+
+
+def require_login(consumer_func):
+    def wrapper(self, *args, **kwargs):
+        if self.user.is_authenticated:
+            return consumer_func(self, *args, **kwargs)
+        raise PermissionDenied
+    return wrapper
 
 
 def Home(request):
@@ -264,3 +273,13 @@ def avatar_view(request, user_code):
     else:
         # Handle the case where the user does not have an avatar
         pass
+
+
+@require_login
+def getOwnInfo(request):
+    u = request.user
+    res = {
+        'username': u.username,
+        'avatar': u.auser.avatar.url
+    }
+    return JsonResponse(res)

@@ -3,7 +3,7 @@
     <div
       class="emptychannel-icon flex justify-center items-center mt-4 h-[68px] w-[68px] rounded-full bg-[var(--background-accent)]"
     >
-      <FontAwesomeIcon :icon="faHashtag" class="text-[#cbcbcb] h-4 w-4" />
+      <font-awesome-icon :icon="['fas', 'hashtag']" class="text-[#cbcbcb] h-4 w-4" />
     </div>
     <h3 class="my-2 text-4sdouble text-[color:var(--header-primary)] font-bold">
       Welcome to #{{ props.toolDetail?.name }}!
@@ -24,7 +24,7 @@
             class="flex justify-start align-center flex-nowrap "
             style="flex: 1 1 auto">
             <div class="buttonIcon mr-[6px] outline-0">
-              <FontAwesomeIcon :icon="faPen" class="text-[var(--text-link)]" />
+              <font-awesome-icon :icon="['fas', 'pen']" class="text-[var(--text-link)]" />
             </div>
             <div
               class="text-md text-4s font-normal outline-0 text-[var(--text-link)]"
@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+// import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faHashtag, faPen } from '@fortawesome/free-solid-svg-icons'
 const props = defineProps([
   'tool-detail'

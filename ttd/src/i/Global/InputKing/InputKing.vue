@@ -100,7 +100,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+// import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import PlusRegular from '@/assets/Server/Channel/InputKing/plus-regular.vue'
 import Arg from './Arg/Arg.vue'
 import Drop from '../../../components/Util/Drop.vue'

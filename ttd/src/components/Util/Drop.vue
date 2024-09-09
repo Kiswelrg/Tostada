@@ -69,7 +69,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+// import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import colors from 'tailwindcss/colors'
 
 const emit = defineEmits([

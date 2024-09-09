@@ -270,7 +270,7 @@ const isMsgHead = (idx) => {
 
 
 const connect = (url, tool) => {
-    const ws_url = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${import.meta.env.DEV === 'development' ? url.host : import.meta.env.VITE_WS_HOST}/ws/chat/${tool.cid}/`
+    const ws_url = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${import.meta.env.DEV ? url.host : import.meta.env.VITE_WS_HOST}/ws/chat/${tool.cid}/`
     // console.log('Vue Backend Host:', url.host, 'ws_url:', ws_url, import.meta.env)
     chatSocket.value = new WebSocket(
         ws_url

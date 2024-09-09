@@ -20,6 +20,7 @@ urlpatterns = [
 	path('Token/',views.getToken),
 	path('isLoggedIn/',views.isLoggedIn, name = 'is-logged-in'),
 	path('Vcode/',views.Vcode, name = 'Vcode'),
+	path('info/',views.getOwnInfo, name = 'own-info'),
 	# re_path(r'^search/(?:(?P<page>[0-9]{1,3})(?:[&=\w]+)/)?$',views.Search, name = 'search'),
 	path('',views.Home, name = 'home'),
 	
