@@ -585,12 +585,14 @@ const handleKeydown = (e) => {
             return
         } else {
 
-            if (curMethodCode !== undefined && curMethodCode > 0) {
+            if (curMethodCode.value !== undefined && curMethodCode.value > 0) {
                 runToolMethod()
+            } else {
+                // Enter: Send text
+                sendMessageInChannel()
+
             }
 
-            // Enter: Send text
-            sendMessageInChannel()
             e.preventDefault()
         }
         return
@@ -937,12 +939,12 @@ async function runToolMethod() {
     }, 5000)
 
     // set method
-    var form_data = new FormData()
+    let form_data = new FormData()
     curArgs.value['method-name'] = curMethodDetail.value.display_name
     curArgs.value['method-code'] = curMethodCode.value
     curArgs.value['sub_class'] = props.toolDetail['additional']['sub_class']
 
-    for (var v in curArgs.value) {
+    for (let v in curArgs.value) {
         form_data.append(v, curArgs.value[v])
     }
     const response = await fetch(

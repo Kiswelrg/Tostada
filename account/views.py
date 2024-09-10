@@ -3,7 +3,6 @@ from django.middleware.csrf import get_token
 from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.http.response import Http404
-from django.core.exceptions import PermissionDenied
 from django.forms import ValidationError
 from django.http.response import HttpResponseRedirect
 from django.http import JsonResponse
@@ -16,6 +15,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
 
 from UtilGlobal.print import printc
+from UtilGlobal.decorator.view_perm import require_login
 import hashlib
 import json
 import random
@@ -25,13 +25,6 @@ import os
 from account.models import AUser
 # Create your views here.
 
-
-def require_login(consumer_func):
-    def wrapper(self, *args, **kwargs):
-        if self.user.is_authenticated:
-            return consumer_func(self, *args, **kwargs)
-        raise PermissionDenied
-    return wrapper
 
 
 def Home(request):
@@ -68,7 +61,6 @@ def ResetPwd(request):
     if request.POST['pwd'] == request.POST['pwd2']:
         return HttpResponse(json.dumps({'state': False, 'msg': 4}))
 
-    printc(request.POST)
     msg = 0
     state = False
     if request.POST['code'] != request.session['code']:
@@ -122,7 +114,7 @@ def DoSignIn(request):
             state = True
             msg = 11
             request.session['isLoggedIn'] = True
-            request.session['username'] = username
+            # request.session['username'] = username
             login(request, user)
         else:
             msg = 2
@@ -180,7 +172,7 @@ def DoSignUp(request):
             state = True
             msg = 11
             request.session['isLoggedIn'] = True
-            request.session['username'] = request.POST['username']
+            # request.session['username'] = request.POST['username']
             return HttpResponse(json.dumps({'state': state, 'msg': msg}))
     '''
     msg choices
@@ -198,7 +190,7 @@ def getToken(request):
 
 
 def isLoggedIn(request):
-    if not request.session.has_key('isLoggedIn') or not request.session.has_key('username') or not request.session['isLoggedIn']:
+    if not request.session.has_key('isLoggedIn') or not request.session['isLoggedIn'] or not request.user.is_authenticated:
         return JsonResponse({'r': 0})
     return JsonResponse({'r': 1})
 

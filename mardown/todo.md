@@ -24,6 +24,7 @@
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
+|view|error|build a 403 page|||
 |inputking|scroll|show jump to bottom button when viewing old msgs|||
 |msg|files|show attachments as files|||
 |inputking|code|clean it up|||

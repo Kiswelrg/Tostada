@@ -2,12 +2,14 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.http import Http404
+from django.core.exceptions import PermissionDenied
 from django.utils.datastructures import MultiValueDictKeyError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from .models import Server, UserServerRole, ChannelOfChat, ChannelOfVoice, CategoryInServer
-from .models import UserChannelOfChatRole, UserChannelOfVoiceRole
+from .models import Server, ServerRole, UserServerRole, ChannelOfChat, ChannelOfVoice, CategoryInServer
+from .models import UserChannelOfChatRole, UserChannelOfVoiceRole, AuthBits
 from UtilGlobal.print import printc
+from UtilGlobal.decorator.view_perm import require_login
 from .util.ImportTool import import_function_from_file, importFunction
 import json
 
@@ -34,15 +36,17 @@ tool_class_short = {
 
 
 # Create your views here.
+@require_login
 def Home(request):
     return render(request, 'index.html')
 
 
 # Fetch all tool servers that a user has joined
+@require_login
 def fetch_user_tool_servers(request):
-    print(request.user)
-    # tool_servers = Server.objects.filter(user_server_auths__user__username=request.session['username'])
-    u_s_role = UserServerRole.objects.filter(user__username=request.session['username'])
+    # tool_servers = Server.objects.filter(user_server_auths__user__urlCode=request.user.auser.urlCode)
+    u = request.user.auser
+    u_s_role = UserServerRole.objects.filter(user__urlCode=u.urlCode)
     data = [
         {
             "cid": str(us.role.server.urlCode),
@@ -56,6 +60,7 @@ def fetch_user_tool_servers(request):
     return JsonResponse({"tool_servers": data, 'r': True})
 
 
+@require_login
 @require_POST
 def reorderServers(request):
     try:
@@ -63,13 +68,16 @@ def reorderServers(request):
     except MultiValueDictKeyError:
         raise Http404('Damn')
     change_list = {int(s['cid']):s for s in change_list}
-    # Verify user auth
 
-    # use custom decorator to check if logged in
+    # Verify user auth on every server in change_list
+    u = request.user.auser
+    if any(
+        [not UserServerRole.objects.filter(user=u, role__server__urlCode=k).exists() for k in change_list]
+    ):
+        raise PermissionDenied
 
     # Search targetted servers
-    r = UserServerRole.objects.filter(user__username = request.session['username'], role__server__urlCode__in = change_list.keys())
-    print(change_list)
+    r = UserServerRole.objects.filter(user__urlCode = u.urlCode, role__server__urlCode__in = change_list.keys())
     for u_s_r in r:
         if u_s_r.order != change_list[u_s_r.role.server.urlCode]['old_order']:
             raise Http404('Damn')
@@ -78,18 +86,40 @@ def reorderServers(request):
     return JsonResponse({'msg': 'reorder success','r': True})
 
 
+@require_login
 def reorderServerCategorys(request):
     try:
         change_list = json.loads(request.POST['change_list'])
     except MultiValueDictKeyError:
         raise Http404('Damn')
     change_list = {int(c['cid']):c for c in change_list}
-    # Verify user auth
 
-    # use custom decorator to check if logged in
+    # Verify change_list
+    if len(change_list) != 2:
+        raise PermissionDenied
+    else:
+        ks = list(change_list.keys())
+        # category not exist
+        if any(
+            [not CategoryInServer.objects.filter(urlCode=cid).exists() for cid in ks]
+        ):
+            raise PermissionDenied
+        # does not belong to the same server
+        server0 = CategoryInServer.objects.get(urlCode=ks[0]).server
+        if server0 != CategoryInServer.objects.get(urlCode=ks[1]).server:
+            raise PermissionDenied
+        # user has auth
+        hasAuth = False
+        for auth in ServerRole.objects.filter(server=server0, user_server_auths__user=request.user.auser):
+            v = auth.auth_value
+            if (v & AuthBits['Manage Channels'] > 0) or (v & AuthBits['Administrator'] > 0):
+                hasAuth = True
+                break
+        if not hasAuth: raise PermissionDenied
 
-    # Search targetted servers
-    r = CategoryInServer.objects.filter(server__owner__username = request.session['username'], urlCode__in = change_list.keys())
+    # Search target categories
+    u = request.user.auser
+    r = CategoryInServer.objects.filter(server__owner__urlCode = u.urlCode, urlCode__in = change_list.keys())
     print(change_list)
     for c_in_s in r:
         if c_in_s.order != change_list[c_in_s.urlCode]['old_order']:
@@ -100,7 +130,9 @@ def reorderServerCategorys(request):
 
 
 # Fetch a specific tool server by its urlCode
+@require_login
 def fetch_tool_server(request, tool_server_code):
+    u = request.user.auser
     tool_server = get_object_or_404(Server, urlCode=tool_server_code)
     tools = {}
     data = {
@@ -115,7 +147,7 @@ def fetch_tool_server(request, tool_server_code):
     if 'tools' not in request.GET or not request.GET['tools'] == '1':
         return JsonResponse({"tool_server": data, "r": True, "type": "no-tool"})
     
-    if UserServerRole.objects.filter(user__username=request.session['username'], role__server = tool_server).exists():
+    if UserServerRole.objects.filter(user__urlCode=u.urlCode, role__server = tool_server).exists():
         # If already a member of the server, (return all types of tools)
         for k, v in tool_class_short.items():
             tools[k] = v.objects.filter(server=tool_server)
@@ -123,7 +155,7 @@ def fetch_tool_server(request, tool_server_code):
     else:
         for k, v in tool_role_short.items():
             tool_querys = v.objects.filter(
-            user__username=request.session['username'],
+            user__urlCode=u.urlCode,
             tool__server=tool_server
             ).values_list('tool', flat=True)
 
@@ -165,13 +197,15 @@ def fetch_tool_server(request, tool_server_code):
 
 
 # Fetch a specific tool by its urlCode
+@require_login
 def fetch_tool(request, tool_class, tool_code):
     Sub_Tool = tool_class_short[tool_class]
     tool = get_object_or_404(Sub_Tool, urlCode=tool_code)
-    # user_tool = None
-
-    if not UserServerRole.objects.filter(role__server=tool.server, user__username=request.session['username']).exists():
-        if not tool_role_short[tool_class].objects.filter(user__username=request.session['username'], tool=tool).exists():
+    
+    # check auth
+    u = request.user.auser
+    if not UserServerRole.objects.filter(role__server=tool.server, user__urlCode=u.urlCode).exists():
+        if not tool_role_short[tool_class].objects.filter(user__urlCode=u.urlCode, tool=tool).exists():
             return JsonResponse({"r": False})
         
     
@@ -196,13 +230,12 @@ def fetch_tool(request, tool_class, tool_code):
     return JsonResponse({"tool": data, "r": True})
 
 
-@require_POST
+# @require_POST
+# @require_login
 def run_tool(request, tool_code):
     printc([request.POST, tool_code], isList=True, color=[255,255,0])
     tool_class = request.POST['sub_class']
-    # add = Channel.objects.get(urlCode = tool_code).additional
     methods = (tool_class_full[tool_class].objects.get(urlCode = tool_code).method_names)
-    # server_code = methods['tool'].strip().split('/')[0]
     method_detail = None
     for g in methods['groups']:
         for m in g['methods']:
@@ -213,10 +246,10 @@ def run_tool(request, tool_code):
             break
     if method_detail is None:
         raise Http404()
-    f_name = method_detail.get('function_name')
-    if f_name is None or len(f_name) == 0:
-        f_name = request.POST['method-code']
-    f_name = 'f_' + f_name
+    name = method_detail.get('function_name')
+    if name is None or len(name) == 0:
+        name = request.POST['method-code']
+    f_name = 'f_' + name
     f = importFunction(f'tool.servers.{methods["tool"]}.main', f_name)
 
     # 不具备复用
