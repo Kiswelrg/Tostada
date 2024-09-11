@@ -3,7 +3,7 @@ import json
 from UtilGlobal.internet.test_proxy import check_port, get_url_via_proxy
 from UtilGlobal.message.dump2msg import dump2msg
 
-def f_availableIpPort(method_detail):
+def f_availableIpPort(method_detail, auser, channel_cid):
     def geturl(pp):
         return f"http://{pp['ip']}:{pp['port']}"
     r = [{
@@ -23,7 +23,16 @@ def f_availableIpPort(method_detail):
             'content': ipport,
             'display': 'block'
         })
-    return json.dumps(dump2msg(r, 'Kiswerlg', '/static/@me/1F955.svg', isEdited=True, isGroupHead=True), ensure_ascii=False)
+    return json.dumps(
+        dump2msg(
+            r,
+            auser,
+            '/static/@me/1F955.svg',
+            channel_cid,
+            is_edited=True,
+        ), 
+        ensure_ascii=False
+    )
 
 
 def f_301928492109():

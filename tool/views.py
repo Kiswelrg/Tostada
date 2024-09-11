@@ -235,7 +235,26 @@ def fetch_tool(request, tool_class, tool_code):
 def run_tool(request, tool_code):
     printc([request.POST, tool_code], isList=True, color=[255,255,0])
     tool_class = request.POST['sub_class']
-    methods = (tool_class_full[tool_class].objects.get(urlCode = tool_code).method_names)
+    tool_model = tool_class_full[tool_class]
+    tool = tool_model.objects.filter(urlCode=tool_code)
+    u = request.user.auser
+    if not tool.exists():
+        raise PermissionDenied
+    else:
+        tool = tool[0]
+        roles = ServerRole.objects.filter(user_server_auths__user=u, server=tool.server)
+        if not roles.exists():
+            raise PermissionDenied
+        hasAuth = False
+        for r in roles:
+            v = r.auth_value
+            if (v & AuthBits['Manage Channels'] > 0) or (v & AuthBits['Administrator'] > 0):
+                hasAuth = True
+                break
+        if not hasAuth: raise PermissionDenied
+
+
+    methods = (tool_model.objects.get(urlCode = tool_code).method_names)
     method_detail = None
     for g in methods['groups']:
         for m in g['methods']:
@@ -253,7 +272,7 @@ def run_tool(request, tool_code):
     f = importFunction(f'tool.servers.{methods["tool"]}.main', f_name)
 
     # 不具备复用
-    r = f(method_detail)
+    r = f(method_detail, u, tool_code)
     return JsonResponse({
         'status': 200,
         'r': True,
