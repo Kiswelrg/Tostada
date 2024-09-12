@@ -45,7 +45,7 @@
           </div>
           <!-- Your joined servers icons here -->
           <span class="icon inline-block w-12 h-12">
-            <img :src="server.logoSrc"
+            <img :src="server.logoSrc + '?size=256'"
                  alt="Server"
                  class="icon relative m-full h-full mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out"
                  draggable="true"

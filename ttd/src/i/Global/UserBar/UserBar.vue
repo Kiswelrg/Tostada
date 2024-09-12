@@ -3,7 +3,7 @@
 
     <div class="flex min-w-[120px] h-[42px] mr-2 pl-0.5 hover:bg-userbar-hoverbg rounded-md items-center">
         <div class="h-8 w-8 shrink-0 rounded-full bg-hui-800 cursor-pointer">
-            <img class="rounded-full" :src="UserInfo?.avatar" alt="">
+            <img class="rounded-full h-full w-full" :src="UserInfo?.avatar + '?size=128'" alt="">
         </div>
         <div class="h-[42px] grow mr-1 cursor-pointer py-1 pl-2 min-w-0 text-left">
             
@@ -37,7 +37,7 @@
                 />
         </div>
     </div>
-    <div class="bg-red-400 h-5 w-5 absolute bottom-0"></div>
+    <div class="bg-red-400 h-5 w-5 absolute bottom-0 hidden"></div>
 </div>
 </template>
 

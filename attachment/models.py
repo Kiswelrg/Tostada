@@ -17,7 +17,6 @@ def is_image1(field_file):
     file_type = imghdr.what(field_file)
     return file_type in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']
 
-from PIL import Image
 
 def is_image(field_file):
     if not field_file:
