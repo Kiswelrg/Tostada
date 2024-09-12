@@ -17,7 +17,7 @@ const props = defineProps([
 ])
 
 const currentTab = ref('ToolTypical')
-const tool_detail = ref()
+const tool_detail = ref(undefined)
 
 
 const tabs = shallowRef({

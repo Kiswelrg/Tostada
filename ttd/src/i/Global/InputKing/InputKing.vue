@@ -286,9 +286,9 @@ const markupMouseUp = (e) => {
 
 
 const removeTextBetween = (se) => {
-    console.log(se, inputItems.value)
+    // console.log(se, inputItems.value)
     try {
-        console.log('removeTextBetween:', se, 'se the same?', se[2][0].node == se[2][1].node)
+        // console.log('removeTextBetween:', se, 'se the same?', se[2][0].node == se[2][1].node)
     } catch {
         return [0, 0]
     }
@@ -329,7 +329,7 @@ const beforeInputChange = (e) => {
     e.preventDefault()
     let se = detectSelectionSE()
     try {
-        console.log('BeforeInput :', se, 'se the same?', se[2][0].node == se[2][1].node)
+        // console.log('BeforeInput :', se, 'se the same?', se[2][0].node == se[2][1].node)
     } catch (error) {
         console.log('BeforeInput : hit div, not span!')
         se[2][0] = {
@@ -346,7 +346,7 @@ const beforeInputChange = (e) => {
         return
     }
     const text = e.data
-    console.log('inputing:', text)
+    // console.log('inputing:', text)
     // click on empty div, with an empty span
     if (se[2][0] == undefined) {
         const el = se[4]['node'].parentElement.firstElementChild
@@ -410,9 +410,9 @@ const clickElement = (k, e) => {
 
 const handleKeydown = (e) => {
     const se = detectSelectionSE()
-    console.log(e.key, se)
+    // console.log(e.key, se)
     if (e.key == 'Backspace') {
-        console.log('Backspace')
+        // console.log('Backspace')
         if (!se[0] || se[2][0] == undefined) return
         const start = se[2][0]['node']
         const end = se[2][1]['node']
@@ -565,7 +565,7 @@ const handleKeydown = (e) => {
             if (!se[0]) return
             if (se[1] != '') {e.preventDefault(); return}
             const end = se[2][1]['node']
-            console.log(end.nodeType, end)
+            // console.log(end.nodeType, end)
             const el = end.nodeType === Node.TEXT_NODE ? end.parentElement : end;
             const row = parseInt(el.getAttribute('idx1'), 10)
             const col = parseInt(el.getAttribute('idx2'), 10)
@@ -623,18 +623,18 @@ const handleKeydown = (e) => {
 
         // move over invisible \ufeff char
         if (e.key == 'ArrowLeft') {
-            console.log(pos_s.toString(2), start.offset, start['node'].data)
+            // console.log(pos_s.toString(2), start.offset, start['node'].data)
         }
         
 
         return
     }
     else if (e.ctrlKey && e.key === 'c') {
-        console.log('leave copy alone')
+        // console.log('leave copy alone')
         return
     }
     else if (e.ctrlKey && e.key === 'v') {
-        console.log('leave paste alone')
+        // console.log('leave paste alone')
         return
     }
     else if (e.key.length === 1 && !e.ctrlKey) {
@@ -642,7 +642,7 @@ const handleKeydown = (e) => {
         return
     }
     else if (e.key.length === 1 && e.ctrlKey) {
-        console.log(e.key, '+ ctrl')
+        // console.log(e.key, '+ ctrl')
     }
     else {
 

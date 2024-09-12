@@ -127,49 +127,7 @@ const messagedIntro = computed(() => {
 })
 
 
-const messages = ref([
-    {
-        'sender': {
-            'nickname': 'Kis',
-            'username': 'Kiswelrg',
-        },
-        'mentioned_user': {
-            'nickname': 'Kis',
-            'username': 'Kiswelrg',
-        },
-        'tool_used': {
-            'name': 'Welcome',
-            'description': 'some_tool desc',
-            'app_name': 'some_app'
-        },
-        'time_sent': '2024-02-21T02:26:27Z',
-        'type': 'normal',
-        'cid': 0,
-        'is_edited': {
-            'state': true,
-            'text': 'edited',
-            'last_edit': '2024-02-21T02:26:27Z'
-        },
-        'is_group_head': true,
-        'is_private': false,
-        'avatar_src': '/static/@me/1F955.svg',
-        'contents': [
-            {
-                'type': 'Text',
-                'content': 'Welcome to ',
-            },
-            {
-                'type': 'Link',
-                'display_name': 'Tostada.com',
-                'url': '#'
-            }, 
-            {
-                'type': 'Text',
-                'content': ', start using tools by selecting a Bot at the bottom right corner and send messages!',
-            }
-        ],
-    }
-])
+const messages = ref([])
 
 
 const sortedMessages = computed(() => {

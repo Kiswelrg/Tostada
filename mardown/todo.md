@@ -18,15 +18,16 @@
 |msg|parser|1msg sent and received in 1 content not a list||✅|
 |msg|images|show images preview(organized)||✅|
 |inputking|scroll|show jump to bottom when new msgs arrive||✅|
+|msg|files|show attachments as files||✅|
 
 
 ### InProgress
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
+|msg|input|input bug when typing Chinese|||
 |view|error|build a 403 page|||
 |inputking|scroll|show jump to bottom button when viewing old msgs|||
-|msg|files|show attachments as files|||
 |inputking|code|clean it up|||
 |Auth|User|change site auth user to my custom AUser|||
 
