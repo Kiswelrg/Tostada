@@ -23,7 +23,7 @@ def resize_gif(file, requested_size):
 
         # Save the resized frames to an in-memory file
         img_io = io.BytesIO()
-        frames[0].save(img_io, format='GIF', save_all=True, append_images=frames[1:], loop=0, duration=img.info['duration'], transparency=img.info.get('transparency'))
+        frames[0].save(img_io, format='GIF', save_all=True, append_images=frames[1:], loop=0, duration=img.info['duration'], transparency=img.info.get('transparency', 255))
         img_io.seek(0)
 
         # Return the resized GIF wrapped in a FileResponse
