@@ -30,7 +30,10 @@
                             @mousemove="()=>isDraggingText=true"
                             @mouseup="markupMouseUp"
                             @keydown="handleKeydown"
+                            @compositionstart="handleCompositionStart"
+                            @compositionend="handleCompositionEnd"
                             @beforeinput="beforeInputChange"
+                            @input="inputChange"
                             ref="inputmarkup"
                             >
                             <div v-for="(item, idx1) in inputItems"
@@ -40,14 +43,14 @@
                             @copy="copyContent"
                             @paste="pasteContent"
                             class="element w-full text-md bg-transparent outline-none font-light cursor-text select-text">
-                            <span 
-                                v-for="(it, idx2) in item"
-                                :key="idx2"
-                                :idx1="idx1"
-                                :idx2="idx2"
-                                class="text-[var(--text-normal)] font-medium outline-none"
-                                v-html="parseMsgContent(it)"
-                                >
+                                <span 
+                                    v-for="(it, idx2) in item"
+                                    :key="idx2"
+                                    :idx1="idx1"
+                                    :idx2="idx2"
+                                    class="text-[var(--text-normal)] font-medium outline-none"
+                                    v-html="parseMsgContent(it)"
+                                    >
                                 </span>
                             </div>
                         </div>
@@ -122,6 +125,7 @@ onMounted(() => {
 
 const inputmarkup = ref(undefined)
 const mainInputText = ref('')
+const isComposing = ref(false)
 const inputItems = ref([
     [
         {
@@ -289,6 +293,7 @@ const removeTextBetween = (se) => {
     // console.log(se, inputItems.value)
     try {
         // console.log('removeTextBetween:', se, 'se the same?', se[2][0].node == se[2][1].node)
+        const test = se[2][0].node == se[2][1].node
     } catch {
         return [0, 0]
     }
@@ -325,53 +330,94 @@ const removeTextBetween = (se) => {
 }
 
 
+const handleCompositionStart = () => {
+    isComposing.value = true
+}
+
+const handleCompositionEnd = (e) => {
+    isComposing.value = false
+    console.log('Composition ended, resetting isComposing');
+}
+
+
+// const inputChange = (e) => {
+//     e.preventDefault()
+//     // nextTick(()=>{
+//     setTimeout(() => {
+//         if (isComposing.value) {
+//             // Don't process the input while composing
+//             console.log('input cut, because of composing')
+//             return
+//         }
+//         console.log('input!!')
+//     })
+// }
+
+
 const beforeInputChange = (e) => {
     e.preventDefault()
     let se = detectSelectionSE()
-    try {
-        // console.log('BeforeInput :', se, 'se the same?', se[2][0].node == se[2][1].node)
-    } catch (error) {
-        console.log('BeforeInput : hit div, not span!')
-        se[2][0] = {
-            'position': 365,
-            'offset': 0,
-            'node': se[4].node.previousSibling.firstChild
+    const pre_compose_value = isComposing.value
+    setTimeout(() => {
+        if (isComposing.value) {
+            // Don't process the input while composing
+            console.log('before input cut, because of composing')
+            return
         }
-        se[2][1] = se[2][0]
-        se[4] = undefined
-    }
 
-    const [r,c] = removeTextBetween(se)
-    if (se[0] == 0) {
-        return
-    }
-    const text = e.data
-    // console.log('inputing:', text)
-    // click on empty div, with an empty span
-    if (se[2][0] == undefined) {
-        const el = se[4]['node'].parentElement.firstElementChild
-        const row = el.getAttribute('idx1')
-        const col = el.getAttribute('idx2')
-        moveCursorToPosition(se[4]['node'].parentElement.firstChild, col)
-        console.log('here col:', col)
-        inputItems.value[row][col].content = text
-        console.log(row, col, text)
-    }
-    else {
-        // se[2][0] and se[2][1] are always the same in input event handler
-
-        const el1 = se[2][0]['node'].nodeType === Node.TEXT_NODE  // this is a must
-        ? se[2][0]['node'].parentElement 
-        : se[2][0]['node'];
-        const row = parseInt(el1.getAttribute('idx1'), 10)
-        const col = parseInt(el1.getAttribute('idx2'), 10)
-        const ct = inputItems.value[row][col].content
-        inputItems.value[row][col].content = ct.slice(0, se[2][0].offset) + text + ct.slice(se[2][0].offset)
-        nextTick(()=>{
-            moveCursorToPosition(el1.firstChild, se[2][0].offset + text.length)
-        })
+        console.log('before input:', se, se[2][0]['node'].data, se[2][1]['node'].data)
         
-    }
+        try {
+            // console.log('BeforeInput :', se, 'se the same?', se[2][0].node == se[2][1].node)
+            const test = se[2][0].node == se[2][1].node;
+        } catch (error) {
+            console.log('BeforeInput : hit div, not span!')
+            se[2][0] = {
+                'position': 365,
+                'offset': 0,
+                'node': se[4].node.previousSibling.firstChild
+            }
+            se[2][1] = se[2][0]
+            se[4] = undefined
+        }
+
+        if (!pre_compose_value) 
+        {
+            const [r,c] = removeTextBetween(se)
+
+        }
+        if (se[0] == 0) {
+            return
+        }
+        const text = e.data
+        // console.log('inputing:', text)
+        // click on empty div, with an empty span
+        if (se[2][0] == undefined) {
+            const el = se[4]['node'].parentElement.firstElementChild
+            const row = el.getAttribute('idx1')
+            const col = el.getAttribute('idx2')
+            moveCursorToPosition(se[4]['node'].parentElement.firstChild, col)
+            console.log('here col:', col)
+            inputItems.value[row][col].content = text
+            console.log(row, col, text)
+        }
+        else {
+            // se[2][0] and se[2][1] are always the same in input event handler
+
+            const el1 = se[2][0]['node'].nodeType === Node.TEXT_NODE  // this is a must
+            ? se[2][0]['node'].parentElement 
+            : se[2][0]['node'];
+            const row = parseInt(el1.getAttribute('idx1'), 10)
+            const col = parseInt(el1.getAttribute('idx2'), 10)
+            const ct = inputItems.value[row][col].content
+            inputItems.value[row][col].content = ct.slice(0, se[2][0].offset) + text + ct.slice(se[2][0].offset)
+            nextTick(()=>{
+                moveCursorToPosition(el1.firstChild, se[2][0].offset + text.length)
+            })
+            
+        }
+    }, 0)
+    
 
 }
 
@@ -409,8 +455,14 @@ const clickElement = (k, e) => {
 
 
 const handleKeydown = (e) => {
+
+    if (isComposing.value) {
+        // Don't handle keydown events during composition
+        return
+    }
+
     const se = detectSelectionSE()
-    // console.log(e.key, se)
+    console.log(e.key, se)
     if (e.key == 'Backspace') {
         // console.log('Backspace')
         if (!se[0] || se[2][0] == undefined) return
@@ -644,9 +696,18 @@ const handleKeydown = (e) => {
     else if (e.key.length === 1 && e.ctrlKey) {
         // console.log(e.key, '+ ctrl')
     }
+    else if (e.key === ' ') {
+        
+    }
+    else if (e.key === 'Process') {
+        console.log('hit Process IME')
+        e.preventDefault()
+    } 
     else {
 
     }
+
+
 }
 
 

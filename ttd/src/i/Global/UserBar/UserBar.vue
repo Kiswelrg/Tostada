@@ -53,8 +53,11 @@ onBeforeMount(async () => {
 })
 
 const userAvatarUrl = computed(() => {
-    if (UserInfo.value === undefined || UserInfo.value.avatar == '' || UserInfo.value.avatar == '#') return '/static/tool/main/user-solid.svg'
-    return UserInfo.value.avatar + '?size=128'
+    const urlString = import.meta.env.VITE_BACKEND_URL
+    const url = new URL(urlString)
+    const urlhead = `${window.location.protocol}//${url.host}`
+    if (UserInfo.value === undefined || UserInfo.value.avatar == '' || UserInfo.value.avatar == '#') return urlhead + '/static/tool/main/user-solid.svg'
+    return urlhead + UserInfo.value.avatar + '?size=128'
 })
 
 
