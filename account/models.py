@@ -46,7 +46,7 @@ class AUser(User):
     info = models.FileField(default=None,blank=True,null=True)
     additional = models.JSONField(default=None, blank=True, null=True)
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='', validators=[imagefile_validator], storage=MediaFileSystemStorage)
-    avatar = models.ImageField(upload_to=avatar_dir_path, blank=True, default='default/user/user.svg',validators=[imagefile_validator], storage=MediaFileSystemStorage)
+    avatar = models.ImageField(upload_to=avatar_dir_path, blank=True, default='',validators=[imagefile_validator], storage=MediaFileSystemStorage)
 
     def __str__(self) -> str:
         return f"{self.username}({self.urlCode})"

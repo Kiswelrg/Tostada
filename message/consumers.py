@@ -145,15 +145,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return list(channel.all_msgs.all()[:500])  # Use .all() before slicing
 
         msgs = await get_messages()
-
-        await self.channel_layer.group_send(
-            self.room_channel_name,
-            {
-                'type': 'history_message',
-                'messages': [{
+        msgs2sent = []
+        for msg in msgs:
+            avatar = await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar)()
+            msgs2sent.append({
                     'sender': {
                         'username': await database_sync_to_async(lambda: msg.sender.username)(),
-                        'avatar': await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar.url)()
+                        'avatar': '' if avatar is None or avatar.name == '' else avatar.url
                     },
                     'mentioned_user': {},
                     'tool_used': {},
@@ -168,8 +166,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'is_private': msg.is_private,
                     'contents': msg.contents, # load in frontend, save some performance for Django
                     'attachments': await self.getAttachments(msg)
-                } for msg in msgs]
-                
+                })
+        await self.channel_layer.group_send(
+            self.room_channel_name,
+            {
+                'type': 'history_message',
+                'messages': msgs2sent
             }
         )
 
@@ -248,31 +250,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # Send message to room group
         get_file_async = sync_to_async(MFile.get_file)
-
-
+        
+        avatar = await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar)()
+        msg2sent = {
+            'sender': {
+                'username': await database_sync_to_async(lambda: msg.sender.username)(),
+                'avatar': '' if avatar is None or avatar.name == '' else avatar.url
+            },
+            'mentioned_user': {},
+            'tool_used': {},
+            'time_sent': msg.time_sent.isoformat(),
+            'type': msg._type,
+            'cid': msg.urlCode,
+            'is_edited': {
+                'state': msg.is_edited,
+                'text': 'edited',
+                'last_edit':msg.last_edit.isoformat(),
+            },
+            'is_private': msg.is_private,
+            'contents': msg.contents, # parse in frontend, save some performance for Django
+            'attachments': await self.getAttachments(msg)
+        }
         await self.channel_layer.group_send(
             self.room_channel_name,
             {
                 'type': 'chat_message',
-                'messages': [{
-                    'sender': {
-                        'username': await database_sync_to_async(lambda: msg.sender.username)(),
-                        'avatar': await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar.url)()
-                    },
-                    'mentioned_user': {},
-                    'tool_used': {},
-                    'time_sent': msg.time_sent.isoformat(),
-                    'type': msg._type,
-                    'cid': msg.urlCode,
-                    'is_edited': {
-                        'state': msg.is_edited,
-                        'text': 'edited',
-                        'last_edit':msg.last_edit.isoformat(),
-                    },
-                    'is_private': msg.is_private,
-                    'contents': msg.contents, # parse in frontend, save some performance for Django
-                    'attachments': await self.getAttachments(msg)
-                }]
+                'messages': [msg2sent]
                 
             }
         )

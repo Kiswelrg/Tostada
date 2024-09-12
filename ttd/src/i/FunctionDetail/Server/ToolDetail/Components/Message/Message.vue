@@ -7,9 +7,11 @@
             <div class="message-contents static ml-0 pl-0 indent-0">
                 <img 
                     v-if="props.isGroupHead"
-                    :src="backend_url() + msg.sender.avatar + '?size=256'"
+                    :src="userAvatarUrl"
                     alt=""
-                    class="avatar pointer-events-auto [alt]:indent-[-9999px] absolute left-4 mt-[calc(4px-0.125rem)] w-10 h-10 rounded-[50%] overflow-hidden cursor-pointer select-none z-[1]">
+                    class="avatar pointer-events-auto [alt]:indent-[-9999px] absolute left-4 mt-[calc(4px-0.125rem)] w-10 h-10 rounded-[50%] overflow-hidden cursor-pointer select-none z-[1]"
+                    
+                    >
                 <h3
                     v-if="props.isGroupHead"
                     class="header overflow-hidden relative leading-[1.375rem] text-[hsl( 214 calc( 1 * 8.1%) 61.2% / 1)] whitespace-break-spaces">
@@ -93,6 +95,11 @@ const props = defineProps({
 const backend_url = () => {
     return import.meta.env.VITE_BACKEND_URL
 }
+
+const userAvatarUrl = computed(() => {
+    if (props.msg.sender === undefined || props.msg.sender.avatar == '' || props.msg.sender.avatar == '#') return '/static/tool/main/user-solid.svg'
+    return props.msg.sender.avatar + '?size=128'
+})
 
 const layerB = inject('layer-b')
 

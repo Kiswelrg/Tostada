@@ -272,6 +272,6 @@ def getOwnInfo(request):
     u = request.user
     res = {
         'username': u.username,
-        'avatar': u.auser.avatar.url
+        'avatar': '' if u.auser.avatar is None or u.auser.avatar.name == '' else u.auser.avatar.url
     }
     return JsonResponse(res)

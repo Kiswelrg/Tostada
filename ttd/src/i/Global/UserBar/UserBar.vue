@@ -3,7 +3,7 @@
 
     <div class="flex min-w-[120px] h-[42px] mr-2 pl-0.5 hover:bg-userbar-hoverbg rounded-md items-center">
         <div class="h-8 w-8 shrink-0 rounded-full bg-hui-800 cursor-pointer">
-            <img class="rounded-full h-full w-full" :src="UserInfo?.avatar + '?size=128'" alt="">
+            <img class="rounded-full h-full w-full" :src="userAvatarUrl" alt="">
         </div>
         <div class="h-[42px] grow mr-1 cursor-pointer py-1 pl-2 min-w-0 text-left">
             
@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 import { jsonWithBigInt } from '@/util/parse'
 
 const UserInfo = ref(undefined);
@@ -50,6 +50,11 @@ onBeforeMount(async () => {
     const fetchedInfo = await getOwnInfo()
     UserInfo.value = jsonWithBigInt(fetchedInfo)
 
+})
+
+const userAvatarUrl = computed(() => {
+    if (UserInfo.value === undefined || UserInfo.value.avatar == '' || UserInfo.value.avatar == '#') return '/static/tool/main/user-solid.svg'
+    return UserInfo.value.avatar + '?size=128'
 })
 
 
