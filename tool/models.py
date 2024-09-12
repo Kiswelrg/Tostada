@@ -5,7 +5,9 @@ from django.dispatch import receiver
 from project.snowflake import getToolServerSnowflakeID, getToolChannelSnowflakeID, getToolCategoryInServerSnowflakeID
 import os
 from django.conf import settings
-
+from hashlib import md5
+from UtilGlobal.validator.FieldFile import imagefile_validator
+from media.models import MediaFileSystemStorage
 from .util import model
 # Create your models here.
 
@@ -64,11 +66,16 @@ def getDefaultAdditional():
     return {"type": "ToolTypical", "subclass":"ChannelOfChat"}
 
 class Server(models.Model):
+    @staticmethod
+    def md5_filename(n):
+        s = os.path.splitext(n)
+        return md5(s[0].encode('utf-8')).hexdigest() + s[1]
+    
     def cover_dir_path(instance, filename):
-        return f'cover/server-{instance.urlCode}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
+        return f'cover/{instance.urlCode}/' + Server.md5_filename(filename)
 
     def logo_dir_path(instance, filename):
-        return f'logo/server-{instance.urlCode}/' + instance.date_created.strftime('%Y-%m-%d/' + filename)
+        return f'logo/{instance.urlCode}/' + Server.md5_filename(filename)
 
     ts_status = [
         ('0', 'destroyed'),
@@ -108,8 +115,8 @@ class Server(models.Model):
         choices=ts_status,
         default='1'
     )
-    cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
-    logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='')
+    cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='', validators=[imagefile_validator], storage=MediaFileSystemStorage)
+    logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='', validators=[imagefile_validator], storage=MediaFileSystemStorage)
     additional = models.JSONField(default=getDefaultAdditional, blank=True, null=True)
 
     def __str__(self) -> str:
@@ -309,7 +316,7 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
         old_file = old_files[i]
         new_file = new_files[i]
         if not old_file == new_file:
-            if os.path.isfile(old_file.path):
+            if old_file and os.path.isfile(old_file.path):
                 os.remove(old_file.path)
 
 

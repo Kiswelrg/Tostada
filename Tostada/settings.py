@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'message',
     'project',
     'attachment',
+    'media',
 ]
 
 MIDDLEWARE = [

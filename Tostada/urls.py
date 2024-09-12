@@ -30,6 +30,7 @@ urlpatterns = [
     re_path(r'^(?:api/)?i/', include('tool.urls', namespace = 'tool')),
     re_path(r'^(?:api/)?account/', include('account.urls', namespace = 'account')),
     re_path(r'^(?:api/)?attachment/', include('attachment.urls', namespace = 'attachment')),
+    re_path(r'^(?:api/)?media/', include('media.urls', namespace = 'media')),
     path('favicon.svg', lambda request: HttpResponseRedirect('/static/favicon.svg')),
     path('favicon.ico', lambda request: HttpResponseRedirect('/static/favicon.svg')),
 
@@ -37,9 +38,9 @@ urlpatterns = [
 # this is for dev only, change before going to production
 ]
 
-urlpatterns.extend(
-        static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    )
+# urlpatterns.extend(
+#     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# )
 
 if settings.DEBUG:
     urlpatterns.extend(
