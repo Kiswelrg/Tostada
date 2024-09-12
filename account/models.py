@@ -35,12 +35,9 @@ class AUser(User):
     #     ]
     # )
     urlCode = models.PositiveBigIntegerField(default=getAccountAUserSnowflakeID, unique=True, db_index=True, primary_key=True)
-    # password = models.CharField(max_length=64)
     # sex = models.CharField(default='2',max_length = 2,choices = {('0', '男'),('1', '女'),('2', '0b01')})
     age = models.PositiveSmallIntegerField(default=None,blank=True,null=True)
-    # date_add = models.DateTimeField(default=timezone.now)
     info = models.FileField(default=None,blank=True,null=True)
-    # email = models.EmailField(max_length = 25, null = True, blank = True)
     additional = models.JSONField(default=None, blank=True, null=True)
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
     avatar = models.ImageField(upload_to=avatar_dir_path, blank=True, default='default/user/user.svg')
