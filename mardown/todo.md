@@ -19,13 +19,14 @@
 |msg|images|show images preview(organized)||✅|
 |inputking|scroll|show jump to bottom when new msgs arrive||✅|
 |msg|files|show attachments as files||✅|
+|msg|input|input bug when typing Chinese||✅|
 
 
 ### InProgress
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
-|msg|input|input bug when typing Chinese|||
+|server|category|show empty category anyway|||
 |view|error|build a 403 page|||
 |inputking|scroll|show jump to bottom button when viewing old msgs|||
 |inputking|code|clean it up|||

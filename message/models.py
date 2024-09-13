@@ -51,5 +51,10 @@ class ChatMessage(models.Model):
 
     class Meta:
         ordering = ['urlCode']
+
     def __str__(self):
-        return ', '.join([c['content'] for c in json.loads(self.contents)])
+        if len(self.contents) <= 100:
+            return self.contents
+        else:
+            return self.contents[:97] + '...'
+        

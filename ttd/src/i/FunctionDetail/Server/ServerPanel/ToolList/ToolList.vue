@@ -28,8 +28,8 @@
             :key="sub.cid" 
             @click="selectSubSection(jsonWithBigInt(sub))" 
             class="toolbutton text-white flex ml-3 mr-2 p-1 mb-0.5 rounded" 
-            :class="{'bg-hui-700': selectedSubSection == sub.cid, 
-            'hover:bg-hui-500': selectedSubSection != sub.cid}"
+            :class="{'bg-hui-700': selectedCID == sub.cid, 
+            'hover:bg-hui-500': selectedCID != sub.cid}"
             @dragenter.prevent
             @dragover.prevent
             @drop.prevent="onDrop2Tool($event, -1, index+1 === orderedSD.length)">
@@ -57,15 +57,24 @@ import { getCookie } from '@/util/session'
 const server = inject('active-server')
 const hashtag_url = '/static/tool/main/chevron-down-solid.svg'
 const chevron_url = '/static/tool/main/hashtag-solid.svg'
-const emit = defineEmits([
-    'select-tool'
+const props = defineProps([
+    'selected-tool'
 ])
-let selectedSubSection = ref(-1)
+
+const emit = defineEmits([
+    'select-tool',
+])
 const server_detail = ref([])
+
+const selectedCID = computed(()=>{
+  if (props.selectedTool === undefined) return -1
+  return props.selectedTool.cid
+})
 
 
 function selectSubSection(obj) {
-  selectedSubSection.value = obj.cid;
+  // selectedCID.value = obj.cid;
+  // use provided ref instead
   emit('select-tool', obj);
 }
 

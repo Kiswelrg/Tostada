@@ -24,7 +24,7 @@
                              class="placeholder absolute pt-[11px] whitespace-nowrap text-ellipsis overflow-hidden text-[var(--channel-text-area-placeholder)] select-none pointer-events-none">
                             {{ curPlaceHolder }}</div>
                         <div 
-                            contenteditable
+                            v-bind:contenteditable="enableInputBar"
                             class="markup relative w-full outline-none break-words break-all right-[10px] left-0 whitespace-break-spaces caret-[var(--text-normal)] text-left text-[var(--text-normal))] break py-[11px] pr-[11px] cursor-default"
                             @mousedown.self="markupMouseDown"
                             @mousemove="()=>isDraggingText=true"
@@ -42,7 +42,9 @@
                             @click="clickElement(idx1, $event)"
                             @copy="copyContent"
                             @paste="pasteContent"
-                            class="element w-full text-md bg-transparent outline-none font-light cursor-text select-text">
+                            class="element w-full text-md bg-transparent outline-none font-light select-text"
+                            :class="{'cursor-text': enableInputBar, 'cursor-default': !enableInputBar}"
+                            >
                                 <span 
                                     v-for="(it, idx2) in item"
                                     :key="idx2"
@@ -112,8 +114,16 @@ import { jsonWithBigInt } from '@/util/parse'
 import { getCookie } from '@/util/session'
 const props = defineProps([
     'tool-detail',
-    'chat-socket'
+    'chat-socket',
+    'input-bar-info',
 ])
+
+const enableInputBar = computed(() => {
+    return props.inputBarInfo?.enable
+})
+const inputBarPlaceholder = computed(() => {
+    return props.inputBarInfo ? props.inputBarInfo.placeholder : 'Loading...'
+})
 
 const emit = defineEmits([
     'add-message',
@@ -364,7 +374,7 @@ const beforeInputChange = (e) => {
             console.log('before input cut, because of composing')
             return
         }
-
+        console.log(se)
         console.log('before input:', se, se[2][0]['node'].data, se[2][1]['node'].data)
         
         try {
@@ -863,8 +873,12 @@ const chooseMethod = (m) => {
 
 
 const curPlaceHolder = computed(() => {
-    if (curMethod.value.description === undefined || curMethod.value.description === '')
-        return 'Message Here...'
+    if (curMethod.value.description === undefined ||
+        curMethod.value.description === '' ||
+        curMethodCode.value === -1)
+    {
+        return inputBarPlaceholder.value
+    }
     return curMethod.value.description
 })
 
@@ -873,6 +887,19 @@ const methodsList = computed(() => {
     if (props.toolDetail)
         return props.toolDetail['methods']
     return undefined
+})
+
+const methodsDict = computed(() => {
+    if (props.toolDetail === undefined || props.toolDetail['methods'] === undefined || props.toolDetail['methods']['groups']?.length === 0) return {}
+    let res = {}
+    for (const g of props.toolDetail['methods']['groups']) {
+        if (g.methods === undefined) continue
+        for (const method of g.methods) {
+            res[method.code] = method
+            res[method.code]['groupIndex'] = g.index
+        }
+    }
+    return res
 })
 
 
@@ -893,6 +920,11 @@ watch(methodsList, (newV) => {
 
 
 const methodDetail = (c) => {
+    if (c in methodsDict.value)
+        return methodsDict.value[c]
+    else
+        return {}
+
     if (!methodsList.value) return {}
     for (const group of methodsList.value.groups) {
         for (const method of group.methods) {
