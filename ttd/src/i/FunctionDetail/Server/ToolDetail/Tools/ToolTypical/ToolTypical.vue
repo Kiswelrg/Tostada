@@ -250,8 +250,8 @@ const connect = (url, tool) => {
             const cur = data['messages'];
             console.log(cur.map(a => a['attachments'].length ? a['attachments'] : undefined));
             // messages.value.push.apply(messages.value, cur);
-            if (messages.value.includes(cur)) return
-            messages.value = [...messages.value, ...cur]
+            if (!messages.value.includes(cur)) 
+                messages.value = [...messages.value, ...cur]
             // if (scrollInfo.value !== undefined) {
             //     if (scrollInfo.value[0] === 2) {
             //         nextTick(()=>{
