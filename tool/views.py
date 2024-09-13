@@ -47,17 +47,21 @@ def fetch_user_tool_servers(request):
     # tool_servers = Server.objects.filter(user_server_auths__user__urlCode=request.user.auser.urlCode)
     u = request.user.auser
     u_s_role = UserServerRole.objects.filter(user__urlCode=u.urlCode)
-    data = [
-        {
+    data = {}
+    for us in u_s_role:
+        cur_code = us.role.server.urlCode
+        if cur_code in data:
+            continue
+        data[cur_code] = {
             "cid": str(us.role.server.urlCode),
             "name": us.role.server.name,
             "description": us.role.server.description,
             "logoSrc": '/media/default/server/logo/logo.svg' if us.role.server.logo == '' else us.role.server.logo.url,
             "order": us.order,
             "date_added": us.date_added.strftime("%Y-%m-%dT%H:%M:%SZ")
-        } for us in u_s_role
-    ]
-    return JsonResponse({"tool_servers": data, 'r': True})
+        }
+    
+    return JsonResponse({"tool_servers": [v for k,v in data.items()], 'r': True})
 
 
 @require_login
@@ -79,8 +83,8 @@ def reorderServers(request):
     # Search targetted servers
     r = UserServerRole.objects.filter(user__urlCode = u.urlCode, role__server__urlCode__in = change_list.keys())
     for u_s_r in r:
-        if u_s_r.order != change_list[u_s_r.role.server.urlCode]['old_order']:
-            raise Http404('Damn')
+        if u_s_r.order != 0 and u_s_r.order != change_list[u_s_r.role.server.urlCode]['old_order']:
+            raise Http404('Malicious Server Reorder')
         u_s_r.order = change_list[u_s_r.role.server.urlCode]['order']
         u_s_r.save()
     return JsonResponse({'msg': 'reorder success','r': True})
@@ -122,8 +126,8 @@ def reorderServerCategorys(request):
     r = CategoryInServer.objects.filter(server__owner__urlCode = u.urlCode, urlCode__in = change_list.keys())
     print(change_list)
     for c_in_s in r:
-        if c_in_s.order != change_list[c_in_s.urlCode]['old_order']:
-            raise Http404('Damn')
+        if c_in_s.order != 0 and c_in_s.order != change_list[c_in_s.urlCode]['old_order']:
+            raise Http404('Malicious Category Reorder')
         c_in_s.order = change_list[c_in_s.urlCode]['order']
         c_in_s.save()
     return JsonResponse({'msg': 'reorder success','r': True})

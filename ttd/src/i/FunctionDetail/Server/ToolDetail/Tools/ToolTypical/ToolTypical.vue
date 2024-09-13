@@ -39,7 +39,7 @@
             <div class="w-full h-1 block hidden"></div>
         </div>
         
-        <InputKing class="flex-none" :tool-detail="toolDetail" :chat-socket="chatSocket" @add-message="onAddMessage"/>
+        <InputKing class="flex-none" :tool-detail="toolDetail" :chat-socket="chatSocket" @add-message="onAddMessage" :input-bar-info="inputBarInfo"/>
     </div>
 
 </template>
@@ -295,7 +295,11 @@ const connect = (url, tool) => {
 
 
 const onToolDetailChange = watch(() => props.toolDetail, (newValue, old) => {
-    if (newValue.class !== 'ChannelOfChat') return
+    // clear messages if channel changes
+    messages.value = []
+    if (newValue.class !== 'ChannelOfChat') {
+        return
+    }
     if (newValue !== undefined && newValue.cid !== undefined) {
         const urlString = import.meta.env.VITE_BACKEND_URL
         const url = new URL(urlString)
@@ -303,6 +307,18 @@ const onToolDetailChange = watch(() => props.toolDetail, (newValue, old) => {
         return true
     }
     return false
+})
+
+
+const inputBarInfo = computed(() => {
+    const chat_allowed = [
+        'ChannelOfChat'
+    ]
+    const enable = props.toolDetail ? chat_allowed.includes(props.toolDetail.class) : false
+    return {
+        'enable': enable,
+        'placeholder': enable ? 'Message Here...' : 'This is a voice channel and currently under development.'
+    }
 })
 
 
