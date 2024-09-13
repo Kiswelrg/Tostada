@@ -165,6 +165,7 @@ watch(filtered_intro, (newV) => {
 
 const onAddMessage = (l) => {
     // scrollInfo.value = onBellyScroll();
+    if (messages.value.includes(l)) return
     messages.value = [...messages.value, l]
 }
 
@@ -249,6 +250,7 @@ const connect = (url, tool) => {
             const cur = data['messages'];
             console.log(cur.map(a => a['attachments'].length ? a['attachments'] : undefined));
             // messages.value.push.apply(messages.value, cur);
+            if (messages.value.includes(cur)) return
             messages.value = [...messages.value, ...cur]
             // if (scrollInfo.value !== undefined) {
             //     if (scrollInfo.value[0] === 2) {
