@@ -27,7 +27,7 @@ def dump2msg(contents, auser, avatar, channel_cid, dt = datetime.now(), is_edite
         'avatar': auser.avatar.url
     }
     r['time_sent'] = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-    r['cid'] = msg.urlCode
+    r['cid'] = str(msg.urlCode)
     r['attachments'] = []
     r['mentioned_user'] = {}
     r['tool_used'] = {'cid': channel_cid}

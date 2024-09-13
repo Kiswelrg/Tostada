@@ -32,7 +32,7 @@ const router = useRouter();
 const originalServers = ref([])
 const orderedServers = computed(() => {
   if (!originalServers.value || originalServers.value === undefined || originalServers.value.length === 0) return []
-  console.log('updated!')
+  // console.log('updated!')
   return originalServers.value.toSorted((a, b) => {
     if (a.order !== b.order) return a.order - b.order
     else {
