@@ -8,7 +8,10 @@
             <div class="h-full"></div>
 
         </div>
-        
+        <div class="w-full h-8 text-sm">
+            ICP备案号:<a href="https://beian.miit.gov.cn" target="_blank">蜀ICP备2024098545号-1</a>
+        </div>
+
     </div>
 </template>
 

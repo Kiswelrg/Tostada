@@ -33,7 +33,6 @@
                             @compositionstart="handleCompositionStart"
                             @compositionend="handleCompositionEnd"
                             @beforeinput="beforeInputChange"
-                            @input="inputChange"
                             ref="inputmarkup"
                             >
                             <div v-for="(item, idx1) in inputItems"
@@ -348,20 +347,6 @@ const handleCompositionEnd = (e) => {
     isComposing.value = false
     console.log('Composition ended, resetting isComposing');
 }
-
-
-// const inputChange = (e) => {
-//     e.preventDefault()
-//     // nextTick(()=>{
-//     setTimeout(() => {
-//         if (isComposing.value) {
-//             // Don't process the input while composing
-//             console.log('input cut, because of composing')
-//             return
-//         }
-//         console.log('input!!')
-//     })
-// }
 
 
 const beforeInputChange = (e) => {
@@ -960,6 +945,19 @@ function fileToBase64(file) {
 }
 
 
+const resetInputAndFiles = () => {
+    inputItems.value = [
+        [
+            {
+                'type': 'text',
+                'content': ''
+            },
+        ],
+    ];
+    chatFiles.value.value = null; // Resetting chatFiles to clear the input
+}
+
+
 const sendMessageInChannel = async () => {
     let msg2send = text2MsgContents.value
     let last_idx = msg2send.length-1
@@ -998,16 +996,7 @@ const sendMessageInChannel = async () => {
 
     try {
         props.chatSocket.send(JSON.stringify({ message: d }));
-        // mainInputText.value = '';
-        inputItems.value = [
-            [
-                {
-                    'type': 'text',
-                    'content': ''
-                },
-            ],
-        ];
-        chatFiles.value.value = null; // Resetting chatFiles to clear the input
+        resetInputAndFiles();
         updateFileCountMessage(0); // Reset file count message
     } catch (error) {
         console.error('Error sending message via WebSocket:', error);
@@ -1040,6 +1029,7 @@ async function runToolMethod() {
     for (let v in curArgs.value) {
         form_data.append(v, curArgs.value[v])
     }
+    resetInputAndFiles()
     const response = await fetch(
         `/api/i/runtool/${props.toolDetail.cid}/`,
         {

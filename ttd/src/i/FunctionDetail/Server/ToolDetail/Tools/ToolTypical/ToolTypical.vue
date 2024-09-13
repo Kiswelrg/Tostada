@@ -56,6 +56,7 @@ import { getCookie } from '@/util/session'
 const chatSocket = inject('chat-socket')
 const layerB = inject('layer-b')
 const belly = ref()
+const scrollInfo = ref({})
 const reconnectAttempts = ref(0)
 const props = defineProps([
     'tool-detail',
@@ -70,14 +71,15 @@ const onBellyScroll = () => {
         let opt = 1; // 0 top, 1 middle, 2 bottom
         // console.log('Scroll Top:', scrollTop, scrollHeight, clientHeight);
 
-        if (scrollTop === 0) {
-            // console.log('At the top of the div');
-            opt = 0;
-        }
+        
 
-        if (scrollTop + clientHeight === scrollHeight) {
+        const diff2bottom = Math.floor(scrollTop + clientHeight) - Math.ceil(scrollHeight)
+        if (diff2bottom >= -2 && diff2bottom <= 2) {
             // console.log('At the bottom of the div');
             opt = 2;
+        } else if (scrollTop === 0) {
+            // console.log('At the top of the div');
+            opt = 0;
         }
         return [opt, scrollTop, clientHeight, scrollHeight]
     }
@@ -116,7 +118,8 @@ const messagedIntro = computed(() => {
                     'state': false,
                     'text': 'edited'
                 },
-                'contents': {'type':'Text','content':ito.content.join('\n')},
+                // 'contents': {'type':'Text','content':ito.content.join('\n')},
+                'contents': ito.content.join('\n'),
                 'isGroupHead':  i == 0 ? true : false,
                 'avatar_src': '/static/@me/1F955.svg'
             })
@@ -161,7 +164,8 @@ watch(filtered_intro, (newV) => {
 
 
 const onAddMessage = (l) => {
-    messages.value.push(l)
+    // scrollInfo.value = onBellyScroll();
+    messages.value = [...messages.value, l]
 }
 
 const mergeLists = (newList) => {
@@ -241,22 +245,24 @@ const connect = (url, tool) => {
         const data = jsonWithBigInt(e.data)
         console.log('Got messages: ')
         if (data['type'] == 'chat_message') {
-            const scrollInfo = onBellyScroll();
+            // scrollInfo.value = onBellyScroll();
             const cur = data['messages'];
             console.log(cur.map(a => a['attachments'].length ? a['attachments'] : undefined));
-            messages.value.push.apply(messages.value, cur);
-            nextTick(()=>{
-                if (scrollInfo !== undefined) {
-                    if (scrollInfo[0] === 2) {
-                        belly.value.scrollTop = belly.value.scrollHeight - belly.value.clientHeight;
-                    }
-                }
-            })
+            // messages.value.push.apply(messages.value, cur);
+            messages.value = [...messages.value, ...cur]
+            // if (scrollInfo.value !== undefined) {
+            //     if (scrollInfo.value[0] === 2) {
+            //         nextTick(()=>{
+            //             // console.log('messages updated, now scroll', scrollInfo.value)
+            //             belly.value.scrollTop = belly.value.scrollHeight - belly.value.clientHeight;
+            //         })
+            //     }
+            // }
         }
         else if (data['type'] == 'message_deleted') {
             deleteMsg(data.cid);
         } else if (data['type'] == 'history_message') {
-            const scrollInfo = onBellyScroll();
+            // scrollInfo.value = onBellyScroll();
             console.log(data)
             messages.value = data['messages']
             let logs = [];
@@ -265,11 +271,13 @@ const connect = (url, tool) => {
                     logs.push.apply(logs,a['attachments']);
             })
             // console.log(logs);
-            if (scrollInfo !== undefined) {
-                nextTick(()=>{
-                    belly.value.scrollTop = belly.value.scrollHeight - belly.value.clientHeight;
-                })
-            }
+            
+            // if (scrollInfo.value !== undefined) {
+            //     nextTick(()=>{
+            //         // console.log('messages updated, now scroll')
+            //         belly.value.scrollTop = belly.value.scrollHeight - belly.value.clientHeight;
+            //     })
+            // }
         } else if (data['type'] == 'chat_message_delete') {
         }
     }
@@ -292,6 +300,22 @@ const connect = (url, tool) => {
         console.error('WebSocket Error: ', error)
     }
 }
+
+
+const onMessageChange = watch(messages, (newValue, old) => {
+    console.log('Messages changed', scrollInfo.value)
+    scrollInfo.value = onBellyScroll()
+    nextTick(()=>{
+        console.log('Messages changed2', scrollInfo.value)
+        if (scrollInfo.value !== undefined) {
+            if (scrollInfo.value == {} || scrollInfo.value[0] === 2) {
+                console.log('messages updated, now scroll', belly.value.scrollTop, belly.value.scrollHeight, belly.value.clientHeight)
+                belly.value.scrollTop = belly.value.scrollHeight - belly.value.clientHeight;
+            }
+        }
+    })
+
+})
 
 
 const onToolDetailChange = watch(() => props.toolDetail, (newValue, old) => {
