@@ -4,7 +4,7 @@
         <div class="toolbody flex flex-col flex-1 overflow-y-auto w-full">
             <ToolHead :title="toolDetail?.name" :intro="toolDetail?.description" class="flex-none"/>
             <div class="belly flex-1 flex flex-col justify-end w-full overflow-auto">
-                <div class="belly-detail w-full h-fit overflow-y-scroll"
+                <div class="belly-detail w-full h-fit overflow-y-scroll pb-3"
                     ref="belly"
                     @scroll="onBellyScroll"
                 >
@@ -131,6 +131,7 @@ const messagedIntro = computed(() => {
 
 
 const messages = ref([])
+const processedMessageIds = new Set()
 
 
 const sortedMessages = computed(() => {
@@ -235,6 +236,10 @@ const isMsgHead = (idx) => {
 const connect = (url, tool) => {
     const ws_url = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${url.host}/ws/chat/${tool.cid}/`
     // console.log('Vue Backend Host:', url.host, 'ws_url:', ws_url, import.meta.env)
+    if (chatSocket.value !== undefined) {
+        chatSocket.value.onclose = function(e) {}
+        chatSocket.value.close()
+    }
     chatSocket.value = new WebSocket(
         ws_url
     )
@@ -263,7 +268,8 @@ const connect = (url, tool) => {
         }
         else if (data['type'] == 'message_deleted') {
             deleteMsg(data.cid);
-        } else if (data['type'] == 'history_message') {
+        } 
+        else if (data['type'] == 'history_message') {
             // scrollInfo.value = onBellyScroll();
             console.log(data)
             messages.value = data['messages']
@@ -280,7 +286,8 @@ const connect = (url, tool) => {
             //         belly.value.scrollTop = belly.value.scrollHeight - belly.value.clientHeight;
             //     })
             // }
-        } else if (data['type'] == 'chat_message_delete') {
+        } 
+        else if (data['type'] == 'chat_message_delete') {
         }
     }
 
