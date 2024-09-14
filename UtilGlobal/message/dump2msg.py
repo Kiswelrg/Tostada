@@ -12,7 +12,8 @@ def dump2msg(contents, auser, avatar, channel_cid, dt = datetime.now(), is_edite
         is_private=False,
         channel=ChannelOfChat.objects.get(urlCode=channel_cid),
         _type='bot',
-        contents = '\n'.join([dumpDict(c['content']) if type(c['content']) == dict else str(c['content']) for c in contents])
+        contents = '\n'.join([dumpDict(c['content']) if type(c['content']) == dict else str(c['content']) for c in contents]),
+        state='1'
         # contents=dumpList(contents)
     )
     if isinstance(contents, list):

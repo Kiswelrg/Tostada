@@ -349,6 +349,20 @@ const handleCompositionEnd = (e) => {
 }
 
 
+// const inputChange = (e) => {
+//     e.preventDefault()
+//     // nextTick(()=>{
+//     setTimeout(() => {
+//         if (isComposing.value) {
+//             // Don't process the input while composing
+//             console.log('input cut, because of composing')
+//             return
+//         }
+//         console.log('input!!')
+//     })
+// }
+
+
 const beforeInputChange = (e) => {
     e.preventDefault()
     let se = detectSelectionSE()
@@ -979,18 +993,63 @@ const sendMessageInChannel = async () => {
     };
 
     const files = Array.from(chatFiles.value.files);
-    for (let file of files) {
+    // for (let file of files) {
+    //     try {
+    //         const fileData = await fileToBase64(file);
+    //         d.files.push({
+    //             name: file.name,
+    //             type: file.type,
+    //             size: file.size,
+    //             data: fileData
+    //         });
+    //     } catch (error) {
+    //         console.error('Error converting file to base64:', error);
+    //         // Handle error appropriately (e.g., show a user-friendly message)
+    //     }
+    // }
+
+    if (files.length > 0) {
+        // If there are files, upload them using the API
+        inputItems.value = [
+            [
+                {
+                    'type': 'text',
+                    'content': ''
+                },
+            ],
+        ];
+        chatFiles.value.value = null;
         try {
-            const fileData = await fileToBase64(file);
-            d.files.push({
-                name: file.name,
-                type: file.type,
-                size: file.size,
-                data: fileData
+            const formData = new FormData();
+            files.forEach((file, index) => {
+                formData.append(`files`, file);
             });
+
+            // Call your API to upload files
+            const response = await fetch(`/api/attachment/uploadmsgatm/chat/${props.toolDetail.cid}/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                "X-CSRFToken": getCookie("csrftoken")
+            }
+            });
+
+            if (!response.ok) {
+                // throw new Error('File upload failed');
+                console.log('Upload failed!')
+                return
+            }
+
+            let result = await response.text();
+            result = jsonWithBigInt(result);
+            
+            // Assuming the API returns a list of attachment IDs
+            d.files = result.file_ids;//.map(s=>BigInt(s));
+
         } catch (error) {
-            console.error('Error converting file to base64:', error);
-            // Handle error appropriately (e.g., show a user-friendly message)
+            console.error('Error uploading files:', error);
+            // Handle the file upload error (e.g., show a user-friendly message)
+            return;  // Exit if file upload fails
         }
     }
 

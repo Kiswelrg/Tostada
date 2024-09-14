@@ -8,6 +8,7 @@ from django.utils import timezone
 from asgiref.sync import sync_to_async
 from django.shortcuts import get_object_or_404
 from django.http.response import Http404
+from django.core.exceptions import PermissionDenied
 from .models import ChatMessage
 from attachment.models import MFile
 from tool.models import ChannelOfChat
@@ -51,19 +52,34 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
 
     @database_sync_to_async
-    def save_chatmessage(self, message, files, GM_type = 'normal'):
-        msg = ChatMessage.objects.create(
-            sender=AUser.objects.get(id=self.user.id),
-            is_private=message['is_private'],
-            channel=ChannelOfChat.objects.get(urlCode=self.channel_cid),
-            _type=GM_type,
-            contents=message['contents']
-        )
-        for f in files:
-            MFile.objects.create(
-                file=f,
-                message=msg
+    def save_chatmessage(self, message, file_ids, GM_type = 'normal'):
+        if len(file_ids) == 0:
+            msg = ChatMessage.objects.create(
+                sender=AUser.objects.get(urlCode=self.user.urlCode),
+                is_private=message['is_private'],
+                channel=ChannelOfChat.objects.get(urlCode=self.channel_cid),
+                _type=GM_type,
+                contents=message['contents'],
+                state='1'
             )
+        else:
+            attachments = MFile.objects.filter(urlCode__in=file_ids, state='0')
+            if not attachments.exists():
+                raise Http404
+            
+            message_id = attachments.first().message.urlCode
+            if attachments.exclude(message__urlCode=message_id).exists():
+                raise PermissionDenied
+            
+            msg = get_object_or_404(ChatMessage, urlCode=message_id, sender=self.user)
+            msg.contents = message['contents']
+            for f in file_ids:
+                file = get_object_or_404(MFile, urlCode=f)
+                file.message = msg
+                file.state='1'
+                file.save()
+            msg.state='1'
+            msg.save()
         return msg
 
     @require_login
@@ -73,7 +89,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.channel_cid = self.scope['url_route']['kwargs']['channel_cid']
         
         self.room_channel_name = f'chat_{self.channel_cid}'
-        self.user = self.scope['user']
+
+        @database_sync_to_async
+        def getAUser():
+            return get_object_or_404(AUser, id=self.scope['user'].id)
+        self.user = await getAUser()
         
         # Join room group
         await self.channel_layer.group_add(
@@ -83,8 +103,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         
         # Add user to active users
-        if await self.storage.is_user_in_channel(self.channel_cid, self.user.id):
-            await self.storage.add_active_user(self.channel_cid, self.user.id)
+        if await self.storage.is_user_in_channel(self.channel_cid, self.user.urlCode):
+            await self.storage.add_active_user(self.channel_cid, self.user.urlCode)
 
         await self.accept()
 
@@ -104,7 +124,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         # Remove user from active users
         try:
-            await self.storage.remove_user(self.channel_cid, self.user.id)
+            await self.storage.remove_user(self.channel_cid, self.user.urlCode)
         except AttributeError:
             print('User not found in this server\'s active list')
             return
@@ -142,7 +162,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             channel = get_object_or_404(ChannelOfChat, urlCode=self.channel_cid)
             # except Http404:
             #     return []
-            return list(channel.all_msgs.all()[:500])  # Use .all() before slicing
+            return list(channel.all_msgs.filter(state='1')[:500])  # Use .all() before slicing
 
         msgs = await get_messages()
         msgs2sent = []
@@ -209,6 +229,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @require_login
     async def receive(self, text_data=None, bytes_data=None):
+        MAX_FILES = 10
+        MAX_FILE_SIZE = 512 * 1024 * 1024  # 1024 MB in bytes for TOTAL
+
         text_data_json = json.loads(text_data)
 
         if text_data_json.get('command') == 'get_active_users':
@@ -218,35 +241,49 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.delete_message(text_data_json['cid'])
             return
         message = text_data_json['message']
-        msg_files = text_data_json['message']['files']
+        msg_file_ids = [int(id) for id in message['files']]
         
+        if len(msg_file_ids) > MAX_FILES:
+            await self.send(text_data=json.dumps({
+                'type': 'error',
+                'messages': 'Cannot upload more than 10 files.'
+            }))
+            return
+        
+        # files = []
+        # for file in msg_files:
+        #     if len(files) == 10:
+        #         await self.send(text_data=json.dumps({
+        #             'type': 'error_message',
+        #             'messages': 'permission denied',
+        #         }))
+        #         return
+        #     file_data_base64 = file['data']
+        #     file_type = file['type']
+        #     file_name = file['name']
 
-        files = []
-        for file in msg_files:
-            if len(files) == 10:
-                await self.send(text_data=json.dumps({
-                    'type': 'error_message',
-                    'messages': 'permission denied',
-                }))
-                return
-            file_data_base64 = file['data']
-            file_type = file['type']
-            file_name = file['name']
 
-
-            # Process the file based on its type
-            # processed_file = self.process_file(file_data, file_type, file_name)
-            try:
-                # Decode Base64 data
-                file_data = self.decode_base64(file_data_base64)
-                files.append(
-                    ContentFile(file_data, name = file_name)
-                )
-                print(f'File {file_name} ready to save.')
-            except ValueError as e:
-                print("Error processing file:", e)
-        # try:
-        msg = await self.save_chatmessage(message, files)
+        #     # Process the file based on its type
+        #     # processed_file = self.process_file(file_data, file_type, file_name)
+        #     try:
+        #         # Decode Base64 data
+        #         file_data = self.decode_base64(file_data_base64)
+        #         files.append(
+        #             ContentFile(file_data, name = file_name)
+        #         )
+        #         print(f'File {file_name} ready to save.')
+        #     except ValueError as e:
+        #         print("Error processing file:", e)
+        
+        msg = None
+        try:
+            msg = await self.save_chatmessage(message, msg_file_ids)
+        except Exception as e:
+            print(f'Error saving msg: {e}')
+            await self.send(text_data=json.dumps({
+                'error': 'Failed to save message'
+            }))
+            return
 
         # Send message to room group
         get_file_async = sync_to_async(MFile.get_file)
@@ -279,12 +316,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 
             }
         )
-        # except Exception as e:
-        #     raise e
-        #     await self.send(text_data=json.dumps({
-        #         'error': 'Failed to save message'
-        #     }))
-        #     print(f'Error saving msg: {e}')
+        
 
     
     @require_login
@@ -298,10 +330,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         u = self.user
         try:
             # sender = await database_sync_to_async(lambda: ChatMessage.objects.get(urlCode=message_cid).sender.id)()
-            sender = await database_sync_to_async(lambda: get_object_or_404(ChatMessage, urlCode = message_cid).sender.id)()
+            sender = await database_sync_to_async(lambda: get_object_or_404(ChatMessage, urlCode = message_cid).sender.urlCode)()
         
             # Check if the user is authorized to delete the message
-            if sender != u.id and not u.is_superuser:
+            if sender != u.urlCode and not u.is_superuser:
                 await self.send(text_data=json.dumps({
                     'type': 'error',
                     'error': 'Unauthorized: You cannot delete this message.'
