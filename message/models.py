@@ -47,7 +47,23 @@ class ChatMessage(models.Model):
     last_edit = models.DateTimeField(auto_now_add=True, null=True)
     _type = models.CharField(max_length=20, blank=True, null=True)
     urlCode = models.PositiveBigIntegerField(default=getMessageMessageSnowflakeID, unique=True, db_index=True, primary_key=True)
-
+    state = models.CharField(
+        default='0',
+        max_length=2,
+        choices=[
+            ('0', 'pending'),
+            ('1', 'active'),
+            ('2', 'archived')
+        ],
+        verbose_name = '''
+        type:
+        [
+            ('0', 'pending'),
+            ('1', 'active'),
+            ('2', 'archived')
+        ]
+        '''
+        )
 
     class Meta:
         ordering = ['urlCode']

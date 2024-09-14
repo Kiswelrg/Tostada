@@ -38,7 +38,7 @@ class AttachmentFileSystemStorage(FileSystemStorage):
 
 
 
-
+# M stands for message
 class MFile(models.Model):
     @staticmethod
     def validateURL(url, args = None):
@@ -127,6 +127,24 @@ class MFile(models.Model):
     message = models.ForeignKey(ChatMessage, on_delete=models.CASCADE, related_name='attachments')
     last_url = models.URLField(max_length=400, null=True, blank=True)
     sent_at = models.DateTimeField(default=timezone.now)
+    state = models.CharField(
+        default='0',
+        max_length=2,
+        choices=[
+            ('0', 'pending'),
+            ('1', 'active'),
+            ('2', 'archived')
+        ],
+        verbose_name = '''
+        type:
+        [
+            ('0', 'pending'),
+            ('1', 'active'),
+            ('2', 'archived')
+        ]
+        '''
+        )
+    
 
     def __str__(self):
         return f'{self.file.name}/{self.sent_at.isoformat()}'
