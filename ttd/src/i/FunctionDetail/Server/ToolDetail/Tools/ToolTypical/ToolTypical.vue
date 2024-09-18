@@ -4,7 +4,7 @@
         <div class="toolbody flex flex-col flex-1 overflow-y-auto w-full">
             <ToolHead :title="toolDetail?.name" :intro="toolDetail?.description" class="flex-none"/>
             <div class="belly flex-1 flex flex-col justify-end w-full overflow-auto">
-                <div class="belly-detail w-full h-fit overflow-y-scroll"
+                <div class="belly-detail w-full h-fit overflow-y-scroll pb-3"
                     ref="belly"
                     @scroll="onBellyScroll"
                 >
