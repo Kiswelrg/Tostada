@@ -3,6 +3,22 @@ import io
 from django.http import FileResponse
 
 
+
+
+
+def blur_image(input_path, blur_radius=100, resize_factor=0.5):
+    with Image.open(input_path) as img:
+        # Resize image to speed up the blur process
+        small_img = img.resize(
+            (int(img.width * resize_factor), int(img.height * resize_factor))
+        )
+        blurred_image = small_img.filter(ImageFilter.BoxBlur(blur_radius))
+        
+        # Optionally, resize back to original size if needed
+        blurred_image = blurred_image.resize(img.size)
+        # blurred_image.show()
+
+
 def resize_gif(file, requested_size):
     # Open the image file using Pillow
     with Image.open(file) as img:
