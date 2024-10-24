@@ -1,4 +1,4 @@
-### Archived
+### <div style="color:green;">Archived</div>
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
@@ -20,12 +20,14 @@
 |inputking|scroll|show jump to bottom when new msgs arrive||✅|
 |msg|files|show attachments as files||✅|
 |msg|input|input bug when typing Chinese||✅|
+|avatar|image|save blured(❎)/scaled(✅) image as a `field` to speed up static rendering|||
 
 
-### InProgress
+### <div style="color:#E6E600;">InProgress</div>
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
+|msg|attachment|delete single attachment in a msg|||
 |server|category|show empty category anyway|||
 |view|error|build a 403 page|||
 |inputking|scroll|show jump to bottom button when viewing old msgs|||
@@ -33,8 +35,14 @@
 |Auth|User|change site auth user to my custom AUser|||
 
 
+### <div style="color:#FF0000;">Bugs</div>
 
-### ToDo
+|Type|Detail|1|2|Finished|
+|---|---|---|---|---|
+|inputking|method|first time entering the site, automatically select a tool, which is not intended|||
+
+
+### <div style="color:#00E6E6;">ToDo</div>
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|

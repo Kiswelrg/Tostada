@@ -265,6 +265,8 @@ const connect = (url, tool) => {
             //         })
             //     }
             // }
+        }else if (data['type'] == 'attachment_deleted') {
+            console.log('attachment deletion:', data)
         }
         else if (data['type'] == 'message_deleted') {
             deleteMsg(data.cid);

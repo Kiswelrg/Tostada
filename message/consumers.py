@@ -36,6 +36,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
     storage = RedisChatStorage()
 
 
+    # @database_sync_to_async
+    async def getMessage(self, msg):
+        avatar =  await database_sync_to_async(lambda: msg.sender.avatar)()
+        msg2sent = {
+            'sender': {
+                'username': msg.sender.username,
+                'avatar': '' if avatar is None or avatar.name == '' else avatar.url
+            },
+            'mentioned_user': {},
+            'tool_used': {},
+            'time_sent': msg.time_sent.isoformat(),
+            'type': msg._type,
+            'cid': msg.urlCode,
+            'is_edited': {
+                'state': msg.is_edited,
+                'text': 'edited',
+                'last_edit':msg.last_edit.isoformat(),
+            },
+            'is_private': msg.is_private,
+            'contents': msg.contents, # parse in frontend, save some performance for Django
+            'attachments': await self.getAttachments(msg)
+        }
+        return msg2sent
+
+
     @database_sync_to_async
     def getAttachments(self, m, attrs=None):
         if attrs is None:
@@ -167,26 +192,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         msgs = await get_messages()
         msgs2sent = []
         for msg in msgs:
-            avatar = await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar)()
-            msgs2sent.append({
-                    'sender': {
-                        'username': await database_sync_to_async(lambda: msg.sender.username)(),
-                        'avatar': '' if avatar is None or avatar.name == '' else avatar.url
-                    },
-                    'mentioned_user': {},
-                    'tool_used': {},
-                    'time_sent': msg.time_sent.isoformat(),
-                    'type': msg._type,
-                    'cid': str(msg.urlCode),
-                    'is_edited': {
-                        'state': msg.is_edited,
-                        'text': 'edited',
-                        'last_edit':msg.last_edit.isoformat(),
-                    },
-                    'is_private': msg.is_private,
-                    'contents': msg.contents, # load in frontend, save some performance for Django
-                    'attachments': await self.getAttachments(msg)
-                })
+            # avatar = await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar)()
+            msgs2sent.append(await self.getMessage(msg))
         await self.channel_layer.group_send(
             self.room_channel_name,
             {
@@ -288,26 +295,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Send message to room group
         get_file_async = sync_to_async(MFile.get_file)
         
-        avatar = await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar)()
-        msg2sent = {
-            'sender': {
-                'username': await database_sync_to_async(lambda: msg.sender.username)(),
-                'avatar': '' if avatar is None or avatar.name == '' else avatar.url
-            },
-            'mentioned_user': {},
-            'tool_used': {},
-            'time_sent': msg.time_sent.isoformat(),
-            'type': msg._type,
-            'cid': msg.urlCode,
-            'is_edited': {
-                'state': msg.is_edited,
-                'text': 'edited',
-                'last_edit':msg.last_edit.isoformat(),
-            },
-            'is_private': msg.is_private,
-            'contents': msg.contents, # parse in frontend, save some performance for Django
-            'attachments': await self.getAttachments(msg)
-        }
+        # avatar = await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar)()
+        # msg2sent = {
+        #     'sender': {
+        #         'username': await database_sync_to_async(lambda: msg.sender.username)(),
+        #         'avatar': '' if avatar is None or avatar.name == '' else avatar.url
+        #     },
+        #     'mentioned_user': {},
+        #     'tool_used': {},
+        #     'time_sent': msg.time_sent.isoformat(),
+        #     'type': msg._type,
+        #     'cid': msg.urlCode,
+        #     'is_edited': {
+        #         'state': msg.is_edited,
+        #         'text': 'edited',
+        #         'last_edit':msg.last_edit.isoformat(),
+        #     },
+        #     'is_private': msg.is_private,
+        #     'contents': msg.contents, # parse in frontend, save some performance for Django
+        #     'attachments': await self.getAttachments(msg)
+        # }
+        msg2sent = await self.getMessage(msg)
         await self.channel_layer.group_send(
             self.room_channel_name,
             {
@@ -389,6 +397,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'message_deleted',
             'cid': event['cid'],
+        }))
+
+
+    @require_login
+    async def attachment_deleted(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'attachment_deleted',
+            'message': event['message'],
         }))
 
 

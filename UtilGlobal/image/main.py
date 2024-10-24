@@ -1,8 +1,7 @@
-from PIL import Image, ImageSequence
+from PIL import Image, ImageSequence, ImageFilter
 import io
 from django.http import FileResponse
-
-
+from django.core.files.base import ContentFile
 
 
 
@@ -19,7 +18,7 @@ def blur_image(input_path, blur_radius=100, resize_factor=0.5):
         # blurred_image.show()
 
 
-def resize_gif(file, requested_size):
+def resize_gif(file, requested_size, as_file=False):
     # Open the image file using Pillow
     with Image.open(file) as img:
         # Ensure the file is a GIF
@@ -42,16 +41,21 @@ def resize_gif(file, requested_size):
         frames[0].save(img_io, format='GIF', save_all=True, append_images=frames[1:], loop=0, duration=img.info['duration'], transparency=img.info.get('transparency', 255))
         img_io.seek(0)
 
-        # Return the resized GIF wrapped in a FileResponse
-        return FileResponse(img_io, content_type='image/gif')
+        if as_file:
+            image_file = ContentFile(img_io.getvalue(), name=file.name)
+            return image_file
+        else:
+            # Return the resized GIF wrapped in a FileResponse
+            return FileResponse(img_io, content_type='image/gif')
 
 
-def resize_image(file, requested_size):
+def resize_image(file, requested_size, as_file=False):
+    # Image.open(file.name).show()
     # Open the image file using Pillow
-    with Image.open(file) as img:
+    with Image.open(file.name) as img:
         img_format = img.format
         if img_format == 'GIF':
-            return resize_gif(file, requested_size)
+            return resize_gif(file, requested_size, as_file=as_file)
         
         # Calculate the aspect ratio to maintain it
         width_percent = (requested_size / float(img.width))
@@ -65,5 +69,11 @@ def resize_image(file, requested_size):
         img.save(img_io, format=img_format)  # Keep the original format
         img_io.seek(0)  # Seek to the beginning of the file for reading
         
-        # Return the resized image wrapped in a FileResponse
-        return FileResponse(img_io, content_type=f'image/{img_format.lower()}')
+        if as_file:
+            # Convert BytesIO to Django's ContentFile
+            image_file = ContentFile(img_io.getvalue(), name=file.name)
+            return image_file
+        else:
+            # Return the resized image wrapped in a FileResponse
+            return FileResponse(img_io, content_type=f'image/{img_format.lower()}')
+

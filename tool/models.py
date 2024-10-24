@@ -8,6 +8,7 @@ from django.conf import settings
 from hashlib import md5
 from UtilGlobal.validator.FieldFile import imagefile_validator
 from media.models import MediaFileSystemStorage
+from UtilGlobal.image.main import resize_image
 from .util import model
 # Create your models here.
 
@@ -77,6 +78,9 @@ class Server(models.Model):
     def logo_dir_path(instance, filename):
         return f'logo/{instance.urlCode}/' + Server.md5_filename(filename)
 
+    def scaled_logo_dir_path(instance, filename):
+        return f'logo/{instance.urlCode}/scaled/' + Server.md5_filename(filename)
+
     ts_status = [
         ('0', 'destroyed'),
         ('1', 'public'),
@@ -117,6 +121,7 @@ class Server(models.Model):
     )
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='', validators=[imagefile_validator], storage=MediaFileSystemStorage)
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='', validators=[imagefile_validator], storage=MediaFileSystemStorage)
+    scaled_logo = models.ImageField(upload_to=scaled_logo_dir_path, blank=True, default='', validators=[imagefile_validator], storage=MediaFileSystemStorage)
     additional = models.JSONField(default=getDefaultAdditional, blank=True, null=True)
 
     def __str__(self) -> str:
@@ -183,7 +188,14 @@ class Server(models.Model):
                                     ]
     def save(self, *args, **kwargs):
         isNew = self._state.adding
+        if isNew:
+            if self.logo and not self.scaled_logo:
+                resized_image = resize_image(self.logo, requested_size=256, as_file=True)
+                # Set the resized image to scaled_logo field
+                self.scaled_logo.save(self.logo.name, resized_image, save=False)
         super().save(*args, **kwargs)
+
+        # Create some initial roles/channels/categories
         if isNew:
             # Init a Default Role called 'everyone'
             save_list = []
