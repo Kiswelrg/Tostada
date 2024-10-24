@@ -148,7 +148,7 @@ def DoSignUp(request):
     else:
         if AUser.objects.filter(username = request.POST.get('username')).exists():
             msg = 3
-        elif request.POST.get('invitecode') != settings.SIGNUP_KEY:
+        elif not settings.DEBUG and request.POST.get('invitecode') != settings.SIGNUP_KEY:
             msg = 4
         else:
             #验证id pwd的规范性（用接口

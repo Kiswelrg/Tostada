@@ -9,6 +9,7 @@ from hashlib import md5
 import os
 from UtilGlobal.validator.FieldFile import imagefile_validator
 from media.models import MediaFileSystemStorage
+from UtilGlobal.image.main import resize_image
 
 # Create your models here.
     
@@ -24,6 +25,9 @@ class AUser(User):
 
     def avatar_dir_path(instance, filename):
         return f'avatar/{instance.urlCode}/' + AUser.md5_filename(filename)
+
+    def scaled_avatar_dir_path(instance, filename):
+        return f'avatar/{instance.urlCode}/scaled/' + AUser.md5_filename(filename)
     
     name = models.CharField(max_length=20,default='some_user')
     # username = models.CharField(  #只能包含_和数字 开头不能有数字或_ _不能2连 结尾不能_
@@ -47,6 +51,18 @@ class AUser(User):
     additional = models.JSONField(default=None, blank=True, null=True)
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='', validators=[imagefile_validator], storage=MediaFileSystemStorage)
     avatar = models.ImageField(upload_to=avatar_dir_path, blank=True, default='',validators=[imagefile_validator], storage=MediaFileSystemStorage)
+    scaled_avatar = models.ImageField(upload_to=scaled_avatar_dir_path, blank=True, default='',validators=[imagefile_validator], storage=MediaFileSystemStorage)
+
+    def save(self, *args, **kwargs):
+        isNew = self._state.adding
+        if isNew:
+            if self.avatar and not self.scaled_avatar:
+                resized_image = resize_image(self.avatar, requested_size=200, as_file=True)  # Assume 200 is the target width for scaling
+                
+                # Set the resized image to scaled_avatar field
+                self.scaled_avatar.save(self.avatar.name, resized_image, save=False)
+        super().save(*args, **kwargs)
+            
 
     def __str__(self) -> str:
         return f"{self.username}({self.urlCode})"

@@ -6,6 +6,8 @@ from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.http.response import Http404
 from django.core.exceptions import PermissionDenied
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from .models import MFile
 from message.models import ChatMessage
 from tool.models import ChannelOfChat, UserServerRole
@@ -85,3 +87,46 @@ def upload_msg_attachment(request, channel_cid):
         'message': 'Files uploaded successfully',
         'file_ids': uploaded_files_ids
     })
+
+
+def delete_msg_attachment(request, attach_cid):
+    atm = get_object_or_404(MFile, urlCode=attach_cid)
+    coc = atm.message.channel
+    u = request.user.auser
+    res = JsonResponse({
+            'message': 'Attachment deleted',
+            'r': True
+        })
+    channel_layer = get_channel_layer()
+    consumer_channel_msg = {
+        'type': 'attachment_deleted',
+        'message': {}
+    }
+    if atm.message.sender == u:
+        atm.delete()
+        async_to_sync(channel_layer.group_send)(
+            f'chat_{coc.urlCode}',  # Channel name/group
+            consumer_channel_msg  # Message data
+        )
+        return res
+
+    usrs = UserServerRole.objects.filter(role__server=coc.server, user=request.user.auser)
+    if not usrs.exists():
+        raise Http404
+    else:
+        hasAuth = False
+        for usr in usrs:
+            v = usr.role.auth_value
+            if (v & (0b1<<24 | 0b1<<44)) > 0:
+                hasAuth = True
+                break
+        if not hasAuth: raise PermissionDenied
+
+
+    # hasAuth is True
+    atm.delete()
+    async_to_sync(channel_layer.group_send)(
+        f'chat_{coc.urlCode}',  # Channel name/group
+        consumer_channel_msg  # Message data
+    )
+    return res

@@ -19,6 +19,7 @@
           <font-awesome-icon
             :icon="['fas', 'trash']"
             class="block h-4 w-4 object-contain"
+            @click="deleteAttachment"
           />
         </div>
       </div>
@@ -27,18 +28,60 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { computed, ref } from "vue"
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
+import { jsonWithBigInt } from '@/util/parse'
+import { getCookie } from '@/util/session'
 
-const props = defineProps(["item"]);
+const props = defineProps(["item"])
 
-const MosiacItemIcon = ref("/static/Message/Attachment/MosaicItem.svg");
+const MosiacItemIcon = ref("/static/Message/Attachment/MosaicItem.svg")
+
 
 const formatFileSize = (bytes) => {
     const sizes = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB', 'RB', 'QB'];
     if (bytes === 0) return '0 bytes';
     const i = Math.floor(Math.log(bytes) / Math.log(1000));
     return parseFloat((bytes / Math.pow(1000, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+
+const attachmentCID = computed(() => {
+  const match = props.item.url.match(/\/(\d+)\/(\d+)\//);
+
+  if (match) {
+    const extractedValue = match[2];
+    return extractedValue;
+  } else {
+    return '';
+  }
+})
+
+
+const deleteAttachment = async () => {
+  const currentCID = attachmentCID.value;
+  if (currentCID == '') {
+    console.log('Not a valid attachment');
+    return;
+  }
+  const response = await fetch(
+      `/api/attachment/deletemsgatm/${currentCID}/`,
+      {
+          method: "POST",
+          headers: {
+              "X-CSRFToken": getCookie("csrftoken")
+          }
+      }
+  )
+  if (response.ok) {
+      const text = await response.text()
+      const r = jsonWithBigInt(text)
+      console.log(`Delete ATM (fetch status: ${r.r}): ${r.message}`)
+      // delete message rendering...
+
+  } else {
+      console.log(response.status)
+  }
 }
 
 

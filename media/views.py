@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse
+from django.http import Http404
 from tool.models import Server, UserServerRole
 from account.models import AUser
 from UtilGlobal.image.main import resize_image
@@ -11,8 +12,21 @@ def logo(request, server_cid, logo_name):
     size = request.GET.get('size', None)
     if size is None:
         return FileResponse(s.logo.file)
+    size = int(size)
+    while size >= s.logo.width:
+        size//=2
+    if size < 16:
+        raise Http404('Asset unavailable!')
     else:
-        return resize_image(s.logo.file, int(size))
+        scaled = s.scaled_logo
+        try:
+            if scaled and scaled.file and scaled != '':
+                return FileResponse(scaled.file)
+        except (ValueError, FileNotFoundError) as e:
+            pass
+        resized_image = resize_image(s.logo.file, requested_size=size, as_file=True)
+        s.scaled_logo.save(s.logo.name, resized_image)
+        return FileResponse(s.scaled_logo.file)
 
 
 def cover(request, server_cid, cover_name):
@@ -29,8 +43,21 @@ def avatar(request, user_cid, avatar_name):
     size = request.GET.get('size', None)
     if size is None:
         return FileResponse(u.avatar.file)
+    size = int(size)
+    while size >= u.avatar.width:
+        size//=2
+    if size < 16:
+        raise Http404('Asset unavailable!')
     else:
-        return resize_image(u.avatar.file, int(size))
+        scaled = u.scaled_avatar
+        try:
+            if scaled and scaled.file and scaled != '':
+                return FileResponse(scaled.file)
+        except (ValueError, FileNotFoundError) as e:
+            pass
+        resized_image = resize_image(u.avatar.file, requested_size=size, as_file=True)
+        u.scaled_avatar.save(u.avatar.name, resized_image)
+        return FileResponse(u.scaled_avatar.file)
 
 
 def usercover(request, user_cid, usercover_name):
