@@ -61,6 +61,10 @@ tool_channel_snowflake_generator = SnowflakeIDGenerator()
 def getToolChannelSnowflakeID():
     return tool_channel_snowflake_generator.generate()
 
+tool_snowflake_generator = SnowflakeIDGenerator()
+def getToolSnowflakeID():
+    return tool_snowflake_generator.generate()
+
 # tool_channelofchat_snowflake_generator = SnowflakeIDGenerator()
 # def getToolChannelOfChatSnowflakeID():
 #     return tool_channelofchat_snowflake_generator.generate()

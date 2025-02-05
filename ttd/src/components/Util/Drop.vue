@@ -46,8 +46,8 @@
                 role="none">
                 <div
                     v-for="method in group.methods.toReversed()"
-                    :key="method.code"
-                    :class="{'pl-2': !props.hasIcon, 'pl-2': props.hasIcon, 'bg-white': isMethodActive(method.global_index), 'hover:bg-dark-interactive-normal': !isMethodActive(method.global_index)}"
+                    :key="method.cid"
+                    :class="{'pl-2': !props.hasIcon, 'pl-2': props.hasIcon, 'bg-white': isMethodActive(method.cid), 'hover:bg-dark-interactive-normal': !isMethodActive(method.cid)}"
                     class="menu-item flex items-center mx-1 hover:text-black rounded-sm">
                     <div :class="{'hidden': !props['hasIcon']}" class="item-icon px-0">
                         <div class="flex">
@@ -55,7 +55,7 @@
                         </div>
                     </div>
                     <a href="#"
-                        :class="{'pl-2': !props.hasIcon, 'pl-0.5': props.hasIcon, 'text-black': isMethodActive(method.global_index),'text-dark-interactive-normal': !isMethodActive(method.global_index)}"
+                        :class="{'pl-2': !props.hasIcon, 'pl-0.5': props.hasIcon, 'text-black': isMethodActive(method.cid),'text-dark-interactive-normal': !isMethodActive(method.cid)}"
                         @click="chooseMethod(method)"
                         class="inline-block break-words max-w-32 min-w-[57px] pr-4 py-0.5 text-[10px] hover:text-black"
                         role="menuitem"
@@ -86,12 +86,12 @@ const props = defineProps([
     'methods-list',
     'cur-method'
 ])
-const currentMethodIdx = ref(0)
+const currentMethodCid = ref(0)
 const isUsingDefault = ref(false)
 const isDropMenuOpen = ref(false)
 
-const isMethodActive = (g_idx) => {
-    return g_idx == currentMethodIdx.value
+const isMethodActive = (g_cid) => {
+    return g_cid == currentMethodCid.value
 }
 
 const methodsNum = computed(() => {
@@ -107,7 +107,7 @@ const methodsNum = computed(() => {
 });
 
 const chooseMethod = (m) => {
-    currentMethodIdx.value = m.global_index
+    currentMethodCid.value = m.cid
     emit('onChooseMethod', m)
 }
 
@@ -115,15 +115,13 @@ const methods = computed(() => {
     let res = [{
         index: 1,
         methods: [{
-            code: -1,
-            global_index: 0,
+            cid: 0,
             display_name: '聊天',
             input: [],
             output: []
         }]
     }]
     if (props.methodsList) {
-        let global_index = 1
         for (const i in props.methodsList['groups']) {
             const group = props.methodsList['groups'][i]
             if (!group) continue
@@ -133,14 +131,12 @@ const methods = computed(() => {
             }
             for (const m of group.methods) {
                 g.methods.push({
-                    code: m.code,
-                    global_index: global_index,
+                    cid: m.cid,
                     display_name: m.display_name,
                     description: m.description,
                     input: m.input,
                     output: m.output
                 })
-                global_index++
             }
             res.push(g)
         }
@@ -151,6 +147,7 @@ const methods = computed(() => {
 })
 
 watch(methods, (newl) => {
+    currentMethodCid.value = 0
     if (newl.length && props.curMethod === -1) isUsingDefault.value = true
     else isUsingDefault.value = false
 })

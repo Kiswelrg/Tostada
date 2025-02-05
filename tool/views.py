@@ -224,23 +224,57 @@ def fetch_tool(request, tool_class, tool_code):
         "additional": tool.additional,
         "class": Sub_Tool.__name__
     }
-    if 'sub_class' not in tool.additional:
+    if tool.additional is None or Sub_Tool.__name__ == 'ChannelOfChat':
+        # if no additional is presented, just treat it like ChannelOfChat
+        tool_specific = get_object_or_404(ChannelOfChat, pk = tool.pk).tools.all()
+        data['methods'] = {
+            "groups": [
+                {
+                    "methods": [
+                        {
+                            "display_name": tool.display_name,
+                            "cid": tool.urlCode,
+                            "input": tool.params['main'],
+                            "output": tool.res['main']
+                        } for tool in tool_specific
+                    ]
+                }
+            ]
+        }
+    elif 'sub_class' not in tool.additional:
         pass
-    elif Sub_Tool.__name__ == 'ChannelOfChat':
-        tool_specific = get_object_or_404(ChannelOfChat, pk = tool.pk)
-        data['methods'] = tool_specific.method_names
     elif Sub_Tool.__name__ == 'ChannelOfVoice':
         pass
+
+
     return JsonResponse({"tool": data, "r": True})
 
 
+def getMethodsFromTool(c):
+    return {
+        "groups": [
+            {
+                'methods': [
+                    {
+                        'function_name': tool.function_name,
+                        'cid': tool.urlCode,
+                        'data': tool.data
+                    } for tool in c.tools.all()
+                ]
+            }
+        ]
+    }
+
 # @require_POST
 # @require_login
-def run_tool(request, tool_code):
-    printc([request.POST, tool_code], isList=True, color=[255,255,0])
+def run_tool(request, channel_cid):
+    """
+    here tool means Channel
+    """
+    printc([request.POST, channel_cid], isList=True, color=[255,255,0])
     tool_class = request.POST['sub_class']
     tool_model = tool_class_full[tool_class]
-    tool = tool_model.objects.filter(urlCode=tool_code)
+    tool = tool_model.objects.filter(urlCode=channel_cid)
     u = request.user.auser
     if not tool.exists():
         raise PermissionDenied
@@ -258,11 +292,11 @@ def run_tool(request, tool_code):
         if not hasAuth: raise PermissionDenied
 
 
-    methods = (tool_model.objects.get(urlCode = tool_code).method_names)
+    methods = getMethodsFromTool(tool_model.objects.get(urlCode = channel_cid))
     method_detail = None
     for g in methods['groups']:
         for m in g['methods']:
-            if m['code'] == int(request.POST['method-code']):
+            if m['cid'] == int(request.POST['method-cid']):
                 method_detail = m
                 break
         if method_detail:
@@ -271,15 +305,16 @@ def run_tool(request, tool_code):
         raise Http404()
     name = method_detail.get('function_name')
     if name is None or len(name) == 0:
-        name = request.POST['method-code']
+        name = request.POST['method-cid']
     f_name = 'f_' + name
-    f = importFunction(f'tool.servers.{methods["tool"]}.main', f_name)
+    f = importFunction(f'tool.servers.{tool.server.urlCode}.{channel_cid}.main', f_name)
 
     # 不具备复用
-    r = f(method_detail, u, tool_code)
+    method_detail['input_values'] = dict(request.POST)
+    r = f(method_detail, u, channel_cid)
     return JsonResponse({
         'status': 200,
         'r': True,
-        'msg': f'{tool_code} got!',
+        'msg': f'{channel_cid} got!',
         'data': r
     })

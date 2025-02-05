@@ -91,14 +91,20 @@ const selectedToolId = computed(() => {
 })
 
 const intro = computed(() => {
-    if (props.toolDetail)
+    if (props.toolDetail && props.toolDetail['additional'] && props.toolDetail['additional']['intro'])
         return props.toolDetail['additional']['intro']
     return undefined
 })
 
 const filtered_intro = computed(() => {
-    if (props.toolDetail){
-        return props.toolDetail['additional']['intro']?.filter(obj => !obj.hasOwnProperty('type'))
+    try {
+        if (props.toolDetail){
+            return props.toolDetail['additional']['intro']?.filter(obj => !obj.hasOwnProperty('type'))
+        }
+
+    }
+    catch (e) {
+        return undefined
     }
     return undefined
 })
@@ -106,7 +112,7 @@ const filtered_intro = computed(() => {
 
 const messagedIntro = computed(() => {
     let r = []
-    if (props.toolDetail){
+    if (props.toolDetail && props.toolDetail['additional'] && props.toolDetail['additional']['intro']) {
         let intros = props.toolDetail['additional']['intro']?.filter(obj => !obj.hasOwnProperty('type'))
         for (const i in intros) {
             let ito = intros[i]

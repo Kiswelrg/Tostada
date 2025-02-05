@@ -93,6 +93,7 @@ function setFunctionList(ss) {
 }
 
 function onUpdateActiveServerTab(cid) {
+  if (cid == activeServerTab.value) return
   console.log('app.vue set active server to =>', cid)
   activeServerTab.value = cid
 }
