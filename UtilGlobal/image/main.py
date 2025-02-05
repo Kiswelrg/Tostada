@@ -20,7 +20,7 @@ def blur_image(input_path, blur_radius=100, resize_factor=0.5):
 
 def resize_gif(file, requested_size, as_file=False):
     # Open the image file using Pillow
-    with Image.open(file) as img:
+    with Image.open(file.name) as img:
         # Ensure the file is a GIF
         if img.format != 'GIF':
             raise ValueError("This function only supports GIF images.")

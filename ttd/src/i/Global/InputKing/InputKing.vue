@@ -49,7 +49,7 @@
                                     :key="idx2"
                                     :idx1="idx1"
                                     :idx2="idx2"
-                                    class="text-[var(--text-normal)] font-medium outline-none"
+                                    class="main-tool-input-span text-[var(--text-normal)] font-medium outline-none max-h-[300px] overflow-y-auto inline-block"
                                     v-html="parseMsgContent(it)"
                                     >
                                 </span>
@@ -863,10 +863,10 @@ const onUpdateArgs = (v, k) => {
 
 
 const chooseMethod = (m) => {
-    if (curMethodCode.value !== m.code) {
+    if (curMethodCode.value !== m.cid) {
         curMethod.value = m
         isRunningTool.value = false
-        curMethodCode.value = m.code
+        curMethodCode.value = m.cid
     }
 }
 
@@ -894,8 +894,8 @@ const methodsDict = computed(() => {
     for (const g of props.toolDetail['methods']['groups']) {
         if (g.methods === undefined) continue
         for (const method of g.methods) {
-            res[method.code] = method
-            res[method.code]['groupIndex'] = g.index
+            res[method.cid] = method
+            res[method.cid]['groupIndex'] = g.index
         }
     }
     return res
@@ -903,18 +903,25 @@ const methodsDict = computed(() => {
 
 
 watch(methodsList, (newV) => {
+    console.log('methods list change!')
+    curMethodCode.value = 0
     curArgs.value = {}
+    return;
     if (newV && newV.groups !== undefined) {
         for (const group of newV.groups) {
             for (const method of group.methods) {
                 if (curMethodCode.value != -1) break
-                curMethodCode.value = method.code
+                curMethodCode.value = method.cid
+                console.log(curMethodCode.value, '自动选择了这个method')
             }
             if (curMethodCode.value != -1) break
         }
     }
-    else
+    else {
         curMethodCode.value = -1
+        console.log('123456')
+
+    }
 })
 
 
@@ -927,7 +934,7 @@ const methodDetail = (c) => {
     if (!methodsList.value) return {}
     for (const group of methodsList.value.groups) {
         for (const method of group.methods) {
-            if (method?.code == c) {
+            if (method?.cid == c) {
                 return method
             }
         }
@@ -1082,9 +1089,9 @@ async function runToolMethod() {
     // set method
     let form_data = new FormData()
     curArgs.value['method-name'] = curMethodDetail.value.display_name
-    curArgs.value['method-code'] = curMethodCode.value
-    curArgs.value['sub_class'] = props.toolDetail['additional']['sub_class']
-
+    curArgs.value['method-cid'] = curMethodCode.value
+    curArgs.value['sub_class'] = props.toolDetail['additional']?props.toolDetail['additional']['sub_class']:'ChannelOfChat'
+    
     for (let v in curArgs.value) {
         form_data.append(v, curArgs.value[v])
     }
@@ -1102,7 +1109,7 @@ async function runToolMethod() {
     if (response.ok) {
         const text = await response.text()
         const r = jsonWithBigInt(text)
-        console.log(`RunTool (fetch status: ${r.r}): `)
+        console.log(`RunTool (fetch status: ${r.r}).`)
         const d = JSON.parse(r.data)
         emit('add-message', d)
 
@@ -1126,4 +1133,21 @@ async function runToolMethod() {
 </style>
 
 <style lang="scss"
-       scoped></style>
+       scoped>
+.main-tool-input-span {
+  
+  &::-webkit-scrollbar {
+      background-color: transparent;
+      width: 8px;
+      height: 100%;
+  }
+  &::-webkit-scrollbar-thumb {
+      background-color: #202226;
+      border: 2px solid rgba(0,0,0,0);
+      background-clip: padding-box;
+      border-radius: 4px;
+  }
+  
+}    
+    
+</style>

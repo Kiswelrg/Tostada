@@ -3,10 +3,11 @@ from django.contrib import admin
 # Register your models here.
 from .models import AuthorizationLevel, Server, ServerRole, UserServerRole
 from .models import UserChannelOfVoiceRole, UserChannelOfChatRole
-from .models import ChannelOfChat, ChannelOfVoice
+from .models import ChannelOfChat, ChannelOfVoice, ToolInChannelOfChat
 from .models import CategoryInServer
 
 admin.site.register(ChannelOfChat)
+admin.site.register(ToolInChannelOfChat)
 admin.site.register(ChannelOfVoice)
 admin.site.register(Server)
 admin.site.register(CategoryInServer)

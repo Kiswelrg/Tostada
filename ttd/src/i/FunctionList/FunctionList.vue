@@ -317,13 +317,13 @@ function GoHome(){
 function GoMe(){
   emit('go-tab', '/i/@me')
 }
-function GoTool(){
+function GoChannel(){
   emit('go-tab', '/i')
 }
 
 function clickFunctioner(e, cid){
   // If special do not go
-  GoTool()
+  GoChannel()
 
   // Emit
   emit('update-active-server-tab', cid)

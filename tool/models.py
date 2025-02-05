@@ -1,8 +1,9 @@
+import shutil
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.dispatch import receiver
-from project.snowflake import getToolServerSnowflakeID, getToolChannelSnowflakeID, getToolCategoryInServerSnowflakeID
+from project.snowflake import getToolServerSnowflakeID, getToolChannelSnowflakeID, getToolCategoryInServerSnowflakeID, getToolSnowflakeID
 import os
 from django.conf import settings
 from hashlib import md5
@@ -200,11 +201,11 @@ class Server(models.Model):
             # Init a Default Role called 'everyone'
             save_list = []
             role = self.initDefaultRole()
-            ids = AuthorizationLevel.objects.filter(title__in = [name[0] for name in self.default_permissions_for_everyone])
-            role.auth.set(ids)
+            ids = AuthorizationLevel.objects.filter(title__in = [name[0] for name in self.default_permissions_for_everyone]).values_list('id', flat=True)
+            for id in ids:
+                role.auth_value |= 1 << id
             user_server_role = UserServerRole.objects.create(
                 user = self.owner,
-                server = self,
                 role = role
             )
             save_list.append(user_server_role)
@@ -286,6 +287,45 @@ class Channel(models.Model):
         abstract = True
 
 
+
+@receiver(models.signals.post_delete, sender=Server)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `MyModel` object is deleted.
+    """
+    # Construct the path
+    dir_path = os.path.join(settings.BASE_DIR, 'tool', 'servers', str(instance.urlCode))
+    
+    # Check if directory exists before attempting to delete
+    if os.path.exists(dir_path):
+        try:
+            shutil.rmtree(dir_path)
+        except Exception as e:
+            # Handle or log any errors
+            print(f"Error deleting directory: {e}")
+
+@receiver(models.signals.post_delete, sender='tool.ChannelOfChat')
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `MyModel` object is deleted.
+    """
+    # Construct the path
+    try:
+        dir_path = os.path.join(settings.BASE_DIR, 'tool', 'servers', str(instance.server.urlCode), str(instance.urlCode))
+    except Exception as e:
+        return
+    
+    # Check if directory exists before attempting to delete
+    if os.path.exists(dir_path):
+        try:
+            shutil.rmtree(dir_path)
+        except Exception as e:
+            # Handle or log any errors
+            print(f"Error deleting directory: {e}")
+
+
 @receiver(models.signals.post_delete, sender=Server)
 @receiver(models.signals.post_delete, sender=Channel)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
@@ -352,6 +392,20 @@ class ChannelOfChat(Channel):
     class Meta:
         ordering = ['urlCode']
 
+
+class ToolInChannelOfChat(models.Model):
+    channel = models.ForeignKey(ChannelOfChat, on_delete=models.CASCADE, related_name='tools', to_field='urlCode')
+    display_name = models.CharField(max_length=64)
+    function_name = models.CharField(max_length=64)
+    description = models.TextField(blank = True)
+    urlCode = models.PositiveBigIntegerField(default=getToolSnowflakeID, unique=True, db_index=True, primary_key=True)
+    params = models.JSONField(default=EmptyJson)
+    res = models.JSONField(default=EmptyJson)
+    data = models.JSONField(default=EmptyJson, blank=True)
+    date_created = models.DateTimeField(default=timezone.now)
+
+    def __str__(self) -> str:
+        return f"{self.display_name.replace(' ', '_')} in {self.channel.name}"
 
 class ChannelOfVoice(Channel):
     urlCode = models.PositiveBigIntegerField(
