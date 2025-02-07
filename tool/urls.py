@@ -12,7 +12,8 @@ urlpatterns = [
     path('tool_server/<int:tool_server_code>/', views.fetch_tool_server, name='fetch_tool_server'),
     path('tool/<str:tool_class>/<int:tool_code>/', views.fetch_tool, name='fetch_tool'),
     re_path(r'^runtool/(?P<channel_cid>[0-9]{1,19})/$', views.run_tool, name='run_tool'),
+    path('toolapi/<int:user_cid>/<int:tool_cid>/<str:token>/', views.tool_api, name='tool_api'),
     path('reorderss/', views.reorderServers, name='reorder_server'),
     path('reordersc/', views.reorderServerCategorys, name='reorder_category'),
-	re_path(r'',views.Home, name = 'home'),
+	# re_path(r'',views.Home, name = 'home'),
 ]

@@ -4,6 +4,7 @@ import json
 from django.utils import timezone
 # from .util import getDirectMessageCode, getGroupMessageCode
 from project.snowflake import getMessageMessageSnowflakeID
+from django.core.exceptions import ValidationError
 
 
 class Message(models.Model):
@@ -68,9 +69,17 @@ class ChatMessage(models.Model):
     class Meta:
         ordering = ['urlCode']
 
+    def clean(self):
+        if not isinstance(self.contents, list):
+            raise ValidationError("Only lists are allowed in the JSONField of the message's contents.")
+
     def __str__(self):
-        if len(self.contents) <= 100:
-            return self.contents
+        result = ''
+        for c in self.contents:
+            result += c['content']
+        
+        if len(result) <= 100:
+            return result
         else:
-            return self.contents[:97] + '...'
+            return result[:97] + '...'
         

@@ -162,7 +162,7 @@ def DoSignUp(request):
                 additional = {}
             )
             try:
-                u.clean_fields()
+                u.full_clean()
             except ValidationError as e:
                 msg = 2
                 printc(e)

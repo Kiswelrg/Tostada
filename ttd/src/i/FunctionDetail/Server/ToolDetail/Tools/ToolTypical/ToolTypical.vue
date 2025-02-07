@@ -124,7 +124,7 @@ const messagedIntro = computed(() => {
                     'state': false,
                     'text': 'edited'
                 },
-                // 'contents': {'type':'Text','content':ito.content.join('\n')},
+                // 'contents': {'type':'text','content':ito.content.join('\n')},
                 'contents': ito.content.join('\n'),
                 'isGroupHead':  i == 0 ? true : false,
                 'avatar_src': '/static/@me/1F955.svg'
@@ -259,7 +259,7 @@ const connect = (url, tool) => {
         if (data['type'] == 'chat_message') {
             // scrollInfo.value = onBellyScroll();
             const cur = data['messages'];
-            console.log(cur.map(a => a['attachments'].length ? a['attachments'] : undefined));
+        console.log(cur.map(a => a['attachments'].length ? a['attachments'] : undefined));
             // messages.value.push.apply(messages.value, cur);
             if (!messages.value.includes(cur)) 
                 messages.value = [...messages.value, ...cur]

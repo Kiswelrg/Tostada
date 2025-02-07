@@ -65,7 +65,7 @@ def upload_msg_attachment(request, channel_cid):
     uploaded_files_ids = []
 
     # Process each file
-    msg = ChatMessage.objects.create(
+    msg = ChatMessage(
         sender=request.user.auser,
         is_private=False,
         channel=c,
@@ -73,6 +73,8 @@ def upload_msg_attachment(request, channel_cid):
         contents='',
         state='0'
     )
+    msg.full_clean()
+    msg.save()
     for file in files:
         # Create and save AFile object
         

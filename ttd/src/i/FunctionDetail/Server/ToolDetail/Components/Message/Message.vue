@@ -35,8 +35,7 @@
                 <div
                     class="message-content pl-[72px] -ml-[72px] select-text overflow-hidden relative indent-0 text-base leading-[1.375rem] whitespace-break-spaces break-words text-[color:hsl( 210 calc( 1 * 9.1%) 87.1% / 1)]  font-light">
                     
-                    <!-- <component v-for="(item, index) in msg['contents']" :key="index" :is="tabs[item['type']]" :msg-item="item" class="text-[color:var(--text-normal)] text-3s"></component> -->
-                    <component :is="tabs['Text']" :msg-item="{'type':'Text','content':msg.contents}" class="text-[color:var(--text-normal)] text-3s"></component>
+                    <component v-for="content in msg.contents" :is="tabs[content['type']]" :msg-item="{'type':content['type'],'content':content.content}" class="text-3s"></component>
 
                     <Edited v-if="msg['is_edited']['state']" :is-edited="msg['is_edited']"></Edited>
                 </div>
@@ -104,9 +103,9 @@ const userAvatarUrl = computed(() => {
 const layerB = inject('layer-b')
 
 const tabs = shallowRef({
-    'Text': Text,
-    'Link': Link,
-    'Edited': Edited
+    'text': Text,
+    'link': Link,
+    'edited': Edited
 })
 
 
