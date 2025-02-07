@@ -218,6 +218,7 @@ class Server(models.Model):
             for t in cs['tools']:
                 save_list.append(t)
             for item in save_list:
+                item.full_clean()
                 item.save()
 
     class Meta:

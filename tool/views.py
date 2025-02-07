@@ -13,6 +13,7 @@ from UtilGlobal.decorator.view_perm import require_login
 from .util.ImportTool import import_function_from_file, importFunction
 import json
 
+
 tool_classes = [
     ChannelOfChat,
     ChannelOfVoice
@@ -86,6 +87,7 @@ def reorderServers(request):
         if u_s_r.order != 0 and u_s_r.order != change_list[u_s_r.role.server.urlCode]['old_order']:
             raise Http404('Malicious Server Reorder')
         u_s_r.order = change_list[u_s_r.role.server.urlCode]['order']
+        u_s_r.full_clean()
         u_s_r.save()
     return JsonResponse({'msg': 'reorder success','r': True})
 
@@ -129,6 +131,7 @@ def reorderServerCategorys(request):
         if c_in_s.order != 0 and c_in_s.order != change_list[c_in_s.urlCode]['old_order']:
             raise Http404('Malicious Category Reorder')
         c_in_s.order = change_list[c_in_s.urlCode]['order']
+        c_in_s.full_clean()
         c_in_s.save()
     return JsonResponse({'msg': 'reorder success','r': True})
 
@@ -256,6 +259,7 @@ def getMethodsFromTool(c):
             {
                 'methods': [
                     {
+                        'display_name': tool.display_name,
                         'function_name': tool.function_name,
                         'cid': tool.urlCode,
                         'data': tool.data
@@ -264,6 +268,12 @@ def getMethodsFromTool(c):
             }
         ]
     }
+
+
+
+def fetch_TOOL_SECRET_KEY(user_cid):
+    return "1"
+
 
 # @require_POST
 # @require_login
@@ -274,13 +284,13 @@ def run_tool(request, channel_cid):
     printc([request.POST, channel_cid], isList=True, color=[255,255,0])
     tool_class = request.POST['sub_class']
     tool_model = tool_class_full[tool_class]
-    tool = tool_model.objects.filter(urlCode=channel_cid)
+    channel = tool_model.objects.filter(urlCode=channel_cid)
     u = request.user.auser
-    if not tool.exists():
+    if not channel.exists():
         raise PermissionDenied
     else:
-        tool = tool[0]
-        roles = ServerRole.objects.filter(user_server_auths__user=u, server=tool.server)
+        channel = channel[0]
+        roles = ServerRole.objects.filter(user_server_auths__user=u, server=channel.server)
         if not roles.exists():
             raise PermissionDenied
         hasAuth = False
@@ -307,14 +317,26 @@ def run_tool(request, channel_cid):
     if name is None or len(name) == 0:
         name = request.POST['method-cid']
     f_name = 'f_' + name
-    f = importFunction(f'tool.servers.{tool.server.urlCode}.{channel_cid}.main', f_name)
+    f = importFunction(f'tool.servers.{channel.server.urlCode}.{channel_cid}.main', f_name)
 
     # 不具备复用
-    method_detail['input_values'] = dict(request.POST)
-    r = f(method_detail, u, channel_cid)
+    from .util.toolAPI import generate_temp_link
+    method_detail['inputs'] = dict(request.POST)
+    r = f(method_detail, u, channel_cid, TOOL_SECRET_KEY=fetch_TOOL_SECRET_KEY(u.urlCode), generate_link_func=generate_temp_link)
     return JsonResponse({
         'status': 200,
         'r': True,
         'msg': f'{channel_cid} got!',
         'data': r
     })
+
+
+
+def tool_api(requests, user_cid, tool_cid, token):
+    TOOL_SECRET_KEY = fetch_TOOL_SECRET_KEY(user_cid)
+    if TOOL_SECRET_KEY == "":
+        raise PermissionDenied
+
+    from .util.toolAPI import verify_and_process_temp_link
+    from .util.toolAPI import generate_temp_link
+    return HttpResponse(verify_and_process_temp_link(user_cid, tool_cid, token, TOOL_SECRET_KEY, generate_link_func=generate_temp_link), content_type="text/plain; charset=utf-8")

@@ -951,7 +951,14 @@ const curMethodDetail = computed(() => {
 
 // for now, 
 const text2MsgContents = computed(()=>{
-    return inputItems.value.map(div => div.map(item => item.content).join('')).join('\n')
+    return inputItems.value.map((div) => {
+        return {
+            'type': 'text',
+            'content': div.map((span) => {
+                return span.content
+            }).join('')                         // for now it's just a string, change when needed
+        }
+    })
 
 })
 
@@ -980,11 +987,11 @@ const resetInputAndFiles = () => {
 
 
 const sendMessageInChannel = async () => {
-    let msg2send = text2MsgContents.value
-    let last_idx = msg2send.length-1
-    while(last_idx>0 && msg2send[last_idx] === '\n') last_idx--
-    msg2send = msg2send.slice(0, last_idx+1)
-    if (msg2send === '' && chatFiles.value.files.length === 0) {
+    let msgContents = text2MsgContents.value
+    const lastNonEmptyIndex = msgContents.findLastIndex(obj => obj.content !== "");
+    msgContents = msgContents.slice(0, lastNonEmptyIndex + 1);
+
+    if (msgContents.length === 0 && chatFiles.value.files.length === 0) {
         console.log('Nothing to send!')
         return
     }
@@ -992,7 +999,7 @@ const sendMessageInChannel = async () => {
     const d = {
         type: 'normal',
         channel_cid: props.toolDetail.cid.toString(),
-        contents: msg2send,
+        contents: msgContents,
         is_private: false,
         mentioned_user: undefined,
         tool_used: undefined,
@@ -1062,6 +1069,7 @@ const sendMessageInChannel = async () => {
 
     try {
         props.chatSocket.send(JSON.stringify({ message: d }));
+        console.log('about to send: ', d)
         resetInputAndFiles();
         updateFileCountMessage(0); // Reset file count message
     } catch (error) {

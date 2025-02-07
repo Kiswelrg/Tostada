@@ -3,11 +3,11 @@ import json
 from UtilGlobal.internet.test_proxy import check_port, get_url_via_proxy
 from UtilGlobal.message.dump2msg import dump2msg
 
-def f_availableIpPort(method_detail, auser, channel_cid):
+def f_availableIpPort(method_detail, auser, channel_cid, **kwargs):
     def geturl(pp):
         return f"http://{pp['ip']}:{pp['port']}"
     r = [{
-        'type': 'Text',
+        'type': 'text',
         'content': '🟢 means internet access, 🟡 means service is up but no internet or is too slow, ⚫ means service is down.',
         'display': 'block',
         'font-size': '',
@@ -19,7 +19,7 @@ def f_availableIpPort(method_detail, auser, channel_cid):
         if get_url_via_proxy('https://baidu.com', geturl(ipport)):
             ipport['status'] = '🟢'
         r.append({
-            'type': 'Text',
+            'type': 'text',
             'content': ipport,
             'display': 'block'
         })
@@ -30,7 +30,7 @@ def f_availableIpPort(method_detail, auser, channel_cid):
             '/static/@me/1F955.svg',
             channel_cid,
             is_edited=True,
-        ), 
+        ),
         ensure_ascii=False
     )
 

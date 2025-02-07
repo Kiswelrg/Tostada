@@ -9,9 +9,14 @@ class LoginRequireMiddleWare:
 
     def __call__(self,request):
         # Need to login
-        except_list1 = []
-        if request.path[:2] == '/i' and request.path not in except_list1:
-            if not request.session.has_key("isLoggedIn") or not request.session["isLoggedIn"]:
+        except_list1 = ['/i/toolapi/']
+        if request.path[:2] == '/i':
+            should_exclude = False
+            for item in except_list1:
+                if len(item) <= len(request.path) and item == request.path[:len(item)]:
+                    should_exclude = True
+                    break
+            if not should_exclude and (not request.session.has_key("isLoggedIn") or not request.session["isLoggedIn"]):
                 return HttpResponseRedirect(f"{reverse('account:sign-in')}?wish=" + quote_plus(request.path))
 
         # Need to be POST

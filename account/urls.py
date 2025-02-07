@@ -5,7 +5,7 @@ from . import views
 
 app_name = 'account'
 urlpatterns = [
-    re_path(r'^avatar/(?P<user_code>(10\d)\d{7})/$', views.avatar_view, name='user_avatar'),
+    re_path(r'^avatar/(?P<user_code>\d{1,9})/$', views.avatar_view, name='user_avatar'),
     
 	re_path(r'^(?:login/)?$',views.Login, name = 'login'),
 	# path('clearUserId/', views.clearStuId, name = 'clear-user-id'),

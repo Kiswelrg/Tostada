@@ -79,7 +79,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def save_chatmessage(self, message, file_ids, GM_type = 'normal'):
         if len(file_ids) == 0:
-            msg = ChatMessage.objects.create(
+            msg = ChatMessage(
                 sender=AUser.objects.get(urlCode=self.user.urlCode),
                 is_private=message['is_private'],
                 channel=ChannelOfChat.objects.get(urlCode=self.channel_cid),
@@ -87,6 +87,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 contents=message['contents'],
                 state='1'
             )
+            try:
+                msg.full_clean()
+                msg.save()
+            except Exception as e:
+                raise ValueError(f'Error validating message: {e}')
         else:
             attachments = MFile.objects.filter(urlCode__in=file_ids, state='0')
             if not attachments.exists():
@@ -104,6 +109,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 file.state='1'
                 file.save()
             msg.state='1'
+            msg.full_clean()
             msg.save()
         return msg
 
@@ -202,6 +208,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
+
     def decode_base64(self, data):
         try:
             file_bytes = base64.b64decode(data)
@@ -218,6 +225,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return f'/path/to/save/{file_name}'
         except IOError as e:
             raise ValueError("Error saving file: " + str(e))
+
+
     def process_image(self, file_data):
         try:
             image = Image.open(BytesIO(file_data))
@@ -227,6 +236,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return image
         except IOError as e:
             raise ValueError("Error constructing image from bytes: " + str(e))
+
+
     def process_file(self, file_data, file_type, file_name):
         # if file_type.startswith('image/'):
         #     return self.process_image(file_data)
@@ -257,31 +268,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }))
             return
         
-        # files = []
-        # for file in msg_files:
-        #     if len(files) == 10:
-        #         await self.send(text_data=json.dumps({
-        #             'type': 'error_message',
-        #             'messages': 'permission denied',
-        #         }))
-        #         return
-        #     file_data_base64 = file['data']
-        #     file_type = file['type']
-        #     file_name = file['name']
-
-
-        #     # Process the file based on its type
-        #     # processed_file = self.process_file(file_data, file_type, file_name)
-        #     try:
-        #         # Decode Base64 data
-        #         file_data = self.decode_base64(file_data_base64)
-        #         files.append(
-        #             ContentFile(file_data, name = file_name)
-        #         )
-        #         print(f'File {file_name} ready to save.')
-        #     except ValueError as e:
-        #         print("Error processing file:", e)
-        
         msg = None
         try:
             msg = await self.save_chatmessage(message, msg_file_ids)
@@ -295,26 +281,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Send message to room group
         get_file_async = sync_to_async(MFile.get_file)
         
-        # avatar = await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar)()
-        # msg2sent = {
-        #     'sender': {
-        #         'username': await database_sync_to_async(lambda: msg.sender.username)(),
-        #         'avatar': '' if avatar is None or avatar.name == '' else avatar.url
-        #     },
-        #     'mentioned_user': {},
-        #     'tool_used': {},
-        #     'time_sent': msg.time_sent.isoformat(),
-        #     'type': msg._type,
-        #     'cid': msg.urlCode,
-        #     'is_edited': {
-        #         'state': msg.is_edited,
-        #         'text': 'edited',
-        #         'last_edit':msg.last_edit.isoformat(),
-        #     },
-        #     'is_private': msg.is_private,
-        #     'contents': msg.contents, # parse in frontend, save some performance for Django
-        #     'attachments': await self.getAttachments(msg)
-        # }
         msg2sent = await self.getMessage(msg)
         await self.channel_layer.group_send(
             self.room_channel_name,

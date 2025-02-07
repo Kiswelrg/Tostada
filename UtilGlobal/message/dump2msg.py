@@ -3,21 +3,26 @@ import random
 from message.models import ChatMessage
 from tool.models import ChannelOfChat
 
+
 def dump2msg(contents, auser, avatar, channel_cid, dt = datetime.now(), is_edited = False) -> dict:
     r = {}
-    if isinstance(contents, dict):
-        contents = [contents]
+    if not isinstance(contents, list):
+        raise Exception('Message Contents must be a list, Generation Failed!')
+    for item in contents:
+        if 'type' not in item or 'content' not in item:
+            raise Exception('Message Contents must have a "type" field, Generation Failed!')
     msg = ChatMessage.objects.create(
         sender=auser,
         is_private=False,
         channel=ChannelOfChat.objects.get(urlCode=channel_cid),
         _type='bot',
-        contents = '\n'.join([dumpDict(c['content']) if type(c['content']) == dict else str(c['content']) for c in contents]),
+        contents=contents,
+        # contents = '\n'.join([dumpDict(c['content']) if type(c['content']) == dict else str(c['content']) for c in contents]),
         state='1'
         # contents=dumpList(contents)
     )
-    if isinstance(contents, list):
-        r['contents'] = msg.contents
+    msg.full_clean()
+    r['contents'] = msg.contents
     r['is_edited'] = {
         'state': msg.is_edited,
         'text': 'edited'
@@ -37,7 +42,7 @@ def dump2msg(contents, auser, avatar, channel_cid, dt = datetime.now(), is_edite
 
 def dumpList(contents: list) -> dict:
     content_names = {
-        'Text': 'content',
+        'text': 'content',
         'Link': 'display_name',
     }
     r = []

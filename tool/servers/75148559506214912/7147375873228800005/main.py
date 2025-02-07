@@ -1,6 +1,7 @@
 import yaml
 import subprocess
 from UtilGlobal.message.dump2msg import dump2msg
+from tool.util.toolAPI import TOOL_LINK_EXPIRY_HOURS
 
 def embedVmess2Clash(vmess_dict, clash_dict):
     # 调用函数加载配置文件
@@ -69,7 +70,7 @@ def vmess2clash(subconverter_executable):
 
 
 
-def f_subWithCustomRules(method_detail, u, channel_cid):
+def f_subWithCustomRules(method_detail, u, channel_cid, plaintext=False, **kwargs):
     import yaml,json
     import requests
     from urllib.parse import urlparse
@@ -109,13 +110,13 @@ def f_subWithCustomRules(method_detail, u, channel_cid):
             
             return yaml_data
         except Exception as _:
-            pass
+            return JsonResponse({"error": "Failed to fetch the YAML file"}, status=400)
 
 
     # Load the existing YAML file (assuming it's in the project directory)
     # with open("config.yaml", "r", encoding="utf-8") as file:
     #     data = yaml.safe_load(file)
-    yaml_url = method_detail['input_values']['url'][0].strip()
+    yaml_url = method_detail['inputs']['url'][0].strip()
     if not yaml_url.startswith(('http://', 'https://')):
         yaml_url = 'http://' + yaml_url
     data = fetch_yaml(yaml_url)
@@ -170,15 +171,38 @@ def f_subWithCustomRules(method_detail, u, channel_cid):
         # Insert modified rules at the beginning of the existing rules
         data["rules"] = modified_rules + data["rules"]
 
-        # Convert YAML data to a string
-        yaml_content = yaml.safe_dump(data, allow_unicode=True, default_flow_style=False)
-        res = yaml_content
-    except Exception as _:
-        res = f"Failed to process the clash config in {method_detail['input_values']['url'][0].strip()}. Make sure your url is correct and the file is valid."
+
+        if plaintext:
+            # Convert YAML data to a string
+            yaml_content = yaml.safe_dump(data, allow_unicode=True, default_flow_style=False)
+            res = yaml_content
+        else:
+            generate_link_func = kwargs['generate_link_func']
+            res = [{
+                    'type': 'text',
+                    'content': f"This is your link to the {method_detail['display_name']} result (expires in {TOOL_LINK_EXPIRY_HOURS} hour(s)): ",
+                    'display': 'block'
+                }, {
+                    'type': 'link',
+                    'content': generate_link_func(method_detail, u.urlCode, channel_cid, kwargs['TOOL_SECRET_KEY']),
+                    'display': 'inline'
+                }
+            ]
         
+
+    except Exception as e:
+        res = [{
+                'type': 'text',
+                'content': f"Failed to process the clash config in {method_detail['inputs']['url'][0].strip()}. Make sure your url is correct and the file is valid.",
+                'display': 'block'
+            }
+        ]
+    
+    if plaintext:
+        return res
     return json.dumps(
         dump2msg(
-            [{'type': 'Text', 'content': res, 'display': 'block'}],
+            res,
             u,
             '/static/@me/1F955.svg',
             channel_cid,
