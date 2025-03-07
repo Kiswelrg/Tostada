@@ -240,7 +240,18 @@ const isMsgHead = (idx) => {
 
 
 const connect = (url, tool) => {
-    const ws_url = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${url.host}/ws/chat/${tool.cid}/`
+    const getWsHost = (url) => {
+        const host = window.location.host; // new URL(url).host;
+        const port = url.port;
+        if (
+            host === "127.0.0.1" || 
+            /^192\.168\.\d{1,3}\.\d{1,3}$/.test(host)
+        ) {
+            return `${host}:${import.meta.env.VITE_LAN_PORT}`;
+        }
+        return import.meta.env.VITE_WS_HOST;
+    };
+    const ws_url = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${getWsHost(url)}/ws/chat/${tool.cid}/`
     // console.log('Vue Backend Host:', url.host, 'ws_url:', ws_url, import.meta.env)
     if (chatSocket.value !== undefined) {
         chatSocket.value.onclose = function(e) {}
