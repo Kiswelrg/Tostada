@@ -7,7 +7,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="main flex flex-col h-full w-full bg-teal-100">
+  <div class="main flex flex-col h-dvh w-dvw bg-teal-100">
     <div class="notification w-full" :class="{hidden: hideNotification}">
       <Notification></Notification>
     </div>
