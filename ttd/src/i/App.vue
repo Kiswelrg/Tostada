@@ -1,5 +1,5 @@
 <template>
-  <div class="main flex flex-row grow h-full w-full min-h-[250px]">
+  <div class="main flex flex-row grow h-dvh w-dvw min-h-[250px]">
     <FunctionList :functionList="functionList" 
     @updateServerList="fetchServers" 
     @updateServerListOffline="updateServersOrderOffline" 
