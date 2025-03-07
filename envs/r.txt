@@ -5,4 +5,4 @@ pillow==10.4.0
 daphne==4.1.2
 django-cors-headers==4.4.0
 requests==2.32.3
-standard-imghdr=3.13.0
+standard-imghdr==3.13.0
