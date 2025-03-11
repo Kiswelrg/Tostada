@@ -15,7 +15,7 @@
           <span class="icon inline-block relative w-12 h-12 bg-[#313338] rounded-full hover:rounded-2xl">
             <img :src="message.logoSrc"
                  alt="Direct Message"
-                 class="icon mx-auto w-full h-full z-10 transitionduration-300 ease-in-out rounded-full scale-[0.6]" @dragstart.prevent/>
+                 class="icon cursor-pointer mx-auto w-full h-full z-10 transitionduration-300 ease-in-out rounded-full scale-[0.6]" @dragstart.prevent/>
             <div class="absolute hidden z-0 w-full h-full top-0 left-0 bg-[#313338] rounded-full hover:rounded-2xl">
             </div>
           </span>
@@ -47,7 +47,7 @@
           <span class="icon inline-block w-12 h-12">
             <img :src="server.logoSrc + '?size=256'"
                  alt="Server"
-                 class="icon relative m-full h-full mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out"
+                 class="icon cursor-pointer relative m-full h-full mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out"
                  draggable="true"
                  @dragstart="startDragServer($event, server.cid)" />
           </span>
@@ -75,7 +75,7 @@
           <span class="icon inline-block w-12 h-12 bg-text-muted rounded-full">
             <img :src="server.logoSrc"
                  alt="Server"
-                 class="icon relative m-full h-full mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out"
+                 class="icon cursor-pointer relative m-full h-full mx-auto rounded-full hover:rounded-2xl transition duration-300 ease-in-out"
                  :style="serverScale(server)"
                  draggable="true"
                  @dragstart.prevent />
