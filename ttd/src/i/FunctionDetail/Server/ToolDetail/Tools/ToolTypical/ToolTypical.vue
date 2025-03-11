@@ -241,13 +241,13 @@ const isMsgHead = (idx) => {
 
 const connect = (url, tool) => {
     const getWsHost = (url) => {
-        const host = window.location.host; // new URL(url).host;
-        const port = url.port;
+        const host = window.location.hostname; // new URL(url).host;
         if (
-            host === "127.0.0.1" || 
+            host === "127.0.0.1" || host === "localhost" || 
             /^192\.168\.\d{1,3}\.\d{1,3}$/.test(host)
         ) {
-            return `${host}:${import.meta.env.VITE_LAN_PORT}`;
+            const port = import.meta.env.VITE_LAN_PORT ? import.meta.env.VITE_LAN_PORT : (new URL(import.meta.env.VITE_BACKEND_URL)).port;
+            return `${host}:${port}`;//
         }
         return import.meta.env.VITE_WS_HOST;
     };

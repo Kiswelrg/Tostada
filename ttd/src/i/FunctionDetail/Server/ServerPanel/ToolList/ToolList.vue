@@ -27,7 +27,7 @@
             v-for="sub in section.tools" 
             :key="sub.cid" 
             @click="selectSubSection(jsonWithBigInt(sub))" 
-            class="toolbutton text-white flex ml-3 mr-2 p-1 mb-0.5 rounded" 
+            class="toolbutton text-white flex ml-3 mr-1 p-1 mb-0.5 rounded" 
             :class="{'bg-hui-700': selectedCID == sub.cid, 
             'hover:bg-hui-500': selectedCID != sub.cid}"
             @dragenter.prevent
@@ -36,10 +36,21 @@
               <div class="h-2 w-2 my-auto mx-1">
                   <img class="hashsvg" :src="chevron_url" alt="" />
               </div>
-              <div class="uppercase text-[10px]">
+              
+              <div class="uppercase text-[10px] flex-grow text-left">
                   {{ sub.name }}
               </div>
-              <div class=""></div>
+
+              <div class="flex items-center" @click.stop>
+                <IconSystem 
+                  name="invite" 
+                  color="white" 
+                  :size="16"
+                  class="mr-1"
+                />
+                
+
+              </div>
               
           </div>
         </div>
@@ -57,6 +68,8 @@ import { getCookie } from '@/util/session'
 const server = inject('active-server')
 const hashtag_url = '/static/tool/main/chevron-down-solid.svg'
 const chevron_url = '/static/tool/main/hashtag-solid.svg'
+import IconSystem from '@/components/IconSystem.vue';
+
 const props = defineProps([
     'selected-tool'
 ])

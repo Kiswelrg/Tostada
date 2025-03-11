@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "backend": "json-server --watch db.json --port 5000"
+    "backend": "json-server --watch db.json --port 5000",
+    "convert-svg": "node src/utils/convertSvg.js",
+    "convert-all": "node src/utils/convertAllIcons.js",
+    "unregister-icon": "node src/utils/unregisterIcon.js"
   },
   "dependencies": {
     "'": "file:awesome.me/kit-c74918d6b2@latest'",
