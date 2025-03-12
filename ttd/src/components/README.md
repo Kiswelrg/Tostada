@@ -10,19 +10,8 @@ A reusable component for displaying SVG icons with customizable colors and sizes
 
 #### Usage
 
-```vue
-<template>
-  <SvgIcon 
-    icon="icons/example-icon" 
-    color="red" 
-    :size="32" 
-  />
-</template>
+2 usages examples at [README.md](./icons/README.md).
 
-<script setup>
-import SvgIcon from '@/components/SvgIcon.vue';
-</script>
-```
 
 #### Props
 

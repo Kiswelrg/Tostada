@@ -55,11 +55,25 @@ function updateIconSystem(componentName, iconName) {
     match => `${match}\nimport ${componentName} from '@/components/icons/${componentName}.vue';`
   );
   
-  // Add to iconMap
-  const iconMapRegex = /const iconMap = \{[\s\S]*?\/\/ Add more mappings as needed/;
+  // Add to iconMap - ensure proper comma placement
+  const iconMapRegex = /const iconMap = \{[\s\S]*?([\s\S]*?)\/\/ Add more mappings as needed/;
   iconSystemContent = iconSystemContent.replace(
     iconMapRegex,
-    match => `${match}\n  '${iconName}': ${componentName},`
+    (match, capturedContent) => {
+      // Find the last entry without a trailing comma
+      const lastEntry = capturedContent.trim().split('\n').pop().trim();
+      
+      // If the last entry doesn't end with a comma, add one
+      // if (!lastEntry.endsWith(',')) {
+      return match.replace(
+        lastEntry + '\n  // Add more mappings as needed',
+        lastEntry + `${lastEntry.endsWith(',') ? '' : ','}\n  \'${iconName}\': ${componentName},\n  // Add more mappings as needed`
+      );
+      // } else {
+      //   // If it already has a comma, just add the new entry
+      //   return `${match}\n  '${iconName}': ${componentName},`;
+      // }
+    }
   );
   
   // Write updated content back to file

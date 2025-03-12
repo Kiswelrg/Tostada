@@ -1,6 +1,5 @@
 <template>
   <svg 
-    ref="svg"
     xmlns="http://www.w3.org/2000/svg" 
     viewBox="0 0 24 24"
     width="100%"
@@ -11,17 +10,21 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed } from 'vue';
 
-const svg = ref(null);
-const fill = ref('currentColor');
-
-// Watch for changes to the SVG element
-watch(svg, (newValue) => {
-  if (newValue) {
-    // Get the computed color from the parent element
-    const computedStyle = window.getComputedStyle(newValue);
-    fill.value = computedStyle.color;
+const props = defineProps({
+  color: {
+    type: String,
+    default: 'currentColor'
   }
-}, { immediate: true });
+});
+
+const inheritedColor = ref('currentColor');
+
+// The fill color is either the explicitly provided color prop
+// or the inherited color from the parent element
+const fill = computed(() => {
+  return props.color !== 'currentColor' ? props.color : inheritedColor.value;
+});
+
 </script>

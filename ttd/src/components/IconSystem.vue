@@ -1,22 +1,28 @@
 <template>
-  <div class="icon-wrapper" :style="{ width: size + 'px', height: size + 'px' }">
+  <div 
+    ref="wrapper"
+    class="icon-wrapper" 
+    :class="colorClass" 
+    :style="{ width: size + 'px', height: size + 'px' }"
+  >
     <component 
       v-if="iconComponent" 
       :is="iconComponent" 
-      :color="color" 
+      :color="props.colorClass ? undefined : props.color"
       class="icon-content"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 
 // Import all icon components directly
 import PlusIcon from '@/components/icons/PlusIcon.vue';
 import CircleIcon from '@/components/icons/CircleIcon.vue';
-import InviteIcon from '@/components/icons/InviteIcon.vue';
 // Add more icons as needed
+import InviteIcon from '@/components/icons/InviteIcon.vue';
+const wrapper = ref(null);
 
 const props = defineProps({
   // Name of the icon to display
@@ -24,10 +30,15 @@ const props = defineProps({
     type: String,
     required: true
   },
-  // Color of the icon
+  // Color of the icon (direct color value)
   color: {
     type: String,
     default: 'currentColor'
+  },
+  // Tailwind CSS class for coloring (takes precedence over color prop)
+  colorClass: {
+    type: String,
+    default: ''
   },
   // Size of the icon in pixels
   size: {
@@ -48,6 +59,8 @@ const iconMap = {
 const iconComponent = computed(() => {
   return iconMap[props.name] || null;
 });
+
+
 </script>
 
 <style scoped>
