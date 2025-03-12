@@ -42,11 +42,17 @@
               </div>
 
               <div class="flex items-center" @click.stop>
-                <IconSystem 
-                  name="invite" 
-                  color="white" 
+                <!-- <IconSystem 
+                  name="invite"
+                  color="red"
                   :size="16"
                   class="mr-1"
+                /> -->
+                <IconSystem 
+                  name="invite"
+                  colorClass="text-interactive-normal"
+                  :size="16"
+                  class="cursor-pointer mr-1"
                 />
                 
 

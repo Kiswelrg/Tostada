@@ -3,10 +3,9 @@
  * This can be used to process SVG files and convert them to Vue components
  * 
  * @param {string} svgString - The SVG content as a string
- * @param {boolean} colorizable - Whether the SVG should be colorizable (adds ref and fill binding)
  * @returns {string} - Vue component template string
  */
-export function svgToVueComponent(svgString, colorizable = true) {
+export function svgToVueComponent(svgString) {
   // Extract the SVG content
   const svgContent = svgString.match(/<svg[^>]*>([\s\S]*?)<\/svg>/i);
   
@@ -21,7 +20,6 @@ export function svgToVueComponent(svgString, colorizable = true) {
   // Create the Vue component template
   let template = `<template>
   <svg 
-    ${colorizable ? 'ref="svg"' : ''}
     xmlns="http://www.w3.org/2000/svg" 
     viewBox="${viewBox}"
     width="100%"
@@ -33,7 +31,7 @@ export function svgToVueComponent(svgString, colorizable = true) {
   let innerContent = svgContent[1];
   
   // If colorizable, replace fill attributes with dynamic binding
-  if (colorizable) {
+  if (true) {
     // Replace fill attributes with dynamic binding
     innerContent = innerContent.replace(/fill=["'][^"']*["']/gi, ':fill="fill"');
     
@@ -46,24 +44,28 @@ export function svgToVueComponent(svgString, colorizable = true) {
   template += `    ${innerContent}\n  </svg>\n</template>`;
   
   // Add script section if colorizable
-  if (colorizable) {
+  
     template += `\n
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed } from 'vue';
 
-const svg = ref(null);
-const fill = ref('currentColor');
-
-// Watch for changes to the SVG element
-watch(svg, (newValue) => {
-  if (newValue) {
-    // Get the computed color from the parent element
-    const computedStyle = window.getComputedStyle(newValue);
-    fill.value = computedStyle.color;
+const props = defineProps({
+  color: {
+    type: String,
+    default: 'currentColor'
   }
-}, { immediate: true });
+});
+
+const inheritedColor = ref('currentColor');
+
+// The fill color is either the explicitly provided color prop
+// or the inherited color from the parent element
+const fill = computed(() => {
+  return props.color !== 'currentColor' ? props.color : inheritedColor.value;
+});
+
 </script>`;
-  }
+  
   
   return template;
 }
