@@ -2,3 +2,4 @@
 myenv
 .vscode/launch.json
 **/.DS_Store
+**/openmoji-svg-color/
