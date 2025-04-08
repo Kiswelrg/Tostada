@@ -76,10 +76,10 @@ class ChatMessage(models.Model):
     def __str__(self):
         result = ''
         for c in self.contents:
-            result += c['content']
+            result += str(c['content'])
         
         if len(result) <= 100:
-            return result
+            return result if len(result) > 0 else f'Message {self.urlCode}'
         else:
             return result[:97] + '...'
         
