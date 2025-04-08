@@ -70,7 +70,7 @@ def upload_msg_attachment(request, channel_cid):
         is_private=False,
         channel=c,
         _type='normal',
-        contents='',
+        contents=[],
         state='0'
     )
     msg.full_clean()
