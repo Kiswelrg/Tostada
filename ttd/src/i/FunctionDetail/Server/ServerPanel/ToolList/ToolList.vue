@@ -42,25 +42,24 @@
               </div>
 
               <div class="flex items-center" @click.stop>
-                <!-- <IconSystem 
-                  name="invite"
-                  color="red"
-                  :size="16"
-                  class="mr-1"
-                /> -->
                 <IconSystem 
                   name="invite"
                   colorClass="text-interactive-normal"
                   :size="16"
                   class="cursor-pointer mr-1"
+                  @click="showInviteModal = true"
                 />
-                
-
               </div>
               
           </div>
         </div>
     </div>
+    <InviteModal 
+      :is-open="showInviteModal"
+      @close="showInviteModal = false"
+      :server-name="server?.value?.name || 'kiswelrg'"
+      :channel-name="'sff'"
+    />
     </div>
 </template>
 
@@ -71,10 +70,12 @@ import { watch } from 'vue'
 import { useWatchOnce } from '@/util/watcher'
 import { jsonWithBigInt } from '@/util/parse'
 import { getCookie } from '@/util/session'
+import InviteModal from '@/components/InviteModal.vue'
+import IconSystem from '@/components/IconSystem.vue';
+
 const server = inject('active-server')
 const hashtag_url = '/static/tool/main/chevron-down-solid.svg'
 const chevron_url = '/static/tool/main/hashtag-solid.svg'
-import IconSystem from '@/components/IconSystem.vue';
 
 const props = defineProps([
     'selected-tool'
@@ -309,6 +310,8 @@ const submitOrderChange = async (r) => {
     document.close();
   }
 }
+
+const showInviteModal = ref(false)
 
 </script>
 
