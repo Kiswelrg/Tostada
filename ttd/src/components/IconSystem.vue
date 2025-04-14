@@ -22,6 +22,9 @@ import PlusIcon from '@/components/icons/PlusIcon.vue';
 import CircleIcon from '@/components/icons/CircleIcon.vue';
 // Add more icons as needed
 import InviteIcon from '@/components/icons/InviteIcon.vue';
+import SearchIcon from '@/components/icons/SearchIcon.vue';
+import CloseIcon from '@/components/icons/CloseIcon.vue';
+import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue';
 const wrapper = ref(null);
 
 const props = defineProps({
@@ -51,7 +54,10 @@ const props = defineProps({
 const iconMap = {
   'plus': PlusIcon,
   'circle': CircleIcon,
-  'invite': InviteIcon
+  'invite': InviteIcon,
+  'search': SearchIcon,
+  'close': CloseIcon,
+  'chevron-down': ChevronDownIcon
   // Add more mappings as needed
 };
 
