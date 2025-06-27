@@ -58,6 +58,8 @@ const attachmentCID = computed(() => {
 })
 
 
+const emit = defineEmits(['attachment-deleted'])
+
 const deleteAttachment = async () => {
   const currentCID = attachmentCID.value;
   if (currentCID == '') {
@@ -77,8 +79,8 @@ const deleteAttachment = async () => {
       const text = await response.text()
       const r = jsonWithBigInt(text)
       console.log(`Delete ATM (fetch status: ${r.r}): ${r.message}`)
-      // delete message rendering...
-
+      // Emit event to parent to remove this attachment from UI
+      emit('attachment-deleted', currentCID)
   } else {
       console.log(response.status)
   }

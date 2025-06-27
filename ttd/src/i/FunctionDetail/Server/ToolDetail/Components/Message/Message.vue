@@ -42,7 +42,7 @@
             </div>
 
             <!-- Reactions / Attachments -->
-            <Accessories :attachments="msg.attachments"></Accessories>
+            <Accessories :attachments="msg.attachments" @attachment-deleted="handleAttachmentDeleted"></Accessories>
 
             <!-- Actions -->
             <div class="buttonContainer absolute top-0 right-0">
@@ -90,6 +90,12 @@ const props = defineProps({
   msg: Object,
   isGroupHead: Boolean
 })
+
+const emit = defineEmits(['attachment-deleted'])
+
+const handleAttachmentDeleted = (attachmentCID) => {
+    emit('attachment-deleted', attachmentCID, props.msg.cid)
+}
 
 const backend_url = () => {
     return import.meta.env.VITE_BACKEND_URL

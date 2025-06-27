@@ -29,9 +29,9 @@
                                 <div class="scroller-content">
                                     <ol class="messages-container">
 
-                                        <Message v-for="m in messagedIntro" v-bind:key="m.id" :msg="m"></Message>
+                                        <Message v-for="m in messagedIntro" v-bind:key="m.id" :msg="m" @attachment-deleted="handleAttachmentDeleted"></Message>
                                         <Message v-for="(m, idx) in sortedMessages" :is-group-head="isMsgHead(idx)"
-                                            v-bind:key="m.id" :msg="m"></Message>
+                                            v-bind:key="m.id" :msg="m" @attachment-deleted="handleAttachmentDeleted"></Message>
                                     </ol>
                                 </div>
                             </div>
@@ -209,18 +209,30 @@ const trimMessages = (direction) => {
 }
 
 const deleteMsg = (cid) => {
-    let l = 0;
-    let r = messages.value.length - 1;
-    while (l <= r) {
-        const m = (l + r) >> 1;
-        const id = sortedMessages.value[m].cid
-        if (cid > id) l = m + 1;
-        else if (cid < id) r = m - 1;
-        else {
-            messages.value.splice(m, 1);
-            return;
-        }
+    const index = messages.value.findIndex(msg => msg.cid === cid);
+    if (index !== -1) {
+        messages.value.splice(index, 1);
     }
+}
+
+const handleAttachmentDeleted = (attachmentCID, messageCID) => {
+    // Find the message and remove the attachment from its attachments array
+    const message = messages.value.find(msg => msg.cid === messageCID)
+    if (message && message.attachments) {
+        message.attachments = message.attachments.filter(attachment => {
+            const match = attachment.url.match(/\/(\d+)\/(\d+)\//)
+            if (match) {
+                const extractedCID = match[2]
+                return extractedCID !== attachmentCID
+            }
+            return true
+        })
+    }
+}
+
+const handleAttachmentDeletedWS = (attachmentCID, messageCID) => {
+    // Handle WebSocket-based attachment deletion (for real-time updates from other users)
+    handleAttachmentDeleted(attachmentCID, messageCID)
 }
 
 
@@ -343,6 +355,8 @@ const connect = (url, tool) => {
             // }
         } else if (data['type'] == 'attachment_deleted') {
             console.log('attachment deletion:', data)
+            // Handle WebSocket attachment deletion
+            handleAttachmentDeletedWS(data.attachment_cid, data.message_cid)
         }
         else if (data['type'] == 'message_deleted') {
             deleteMsg(data.cid);

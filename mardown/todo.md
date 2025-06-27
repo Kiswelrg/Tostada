@@ -27,7 +27,7 @@
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
-|msg|attachment|delete single attachment in a msg|||
+|msg|attachment|delete single attachment in a msg||✅|
 |server|category|show empty category anyway|||
 |view|error|build a 403 page|||
 |inputking|scroll|show jump to bottom button when viewing old msgs|||
@@ -46,10 +46,11 @@
 
 |Type|Detail|1|2|Finished|
 |---|---|---|---|---|
-|msg|socket|change socket to handle multiple channels||🤺|
+|msg|socket|change socket to handle multiple channels|||
+|msg|pagination|implement message pagination in channels||✅|
 |django|database PK|change some models to use compound PK||
 |msg|database msg|before ws connection, check channel/server permission||
-|channel|create invite|invite user to `Channel`||
+|channel|create invite|invite user to `Channel`|||
 |msg|mention|create `mention` in msg||
 |msg|reaction part|   |   ||
 |FunctionList|Default Button|Find Servers functionality|||
