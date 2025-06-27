@@ -10,6 +10,12 @@ from django.shortcuts import get_object_or_404
 from django.http.response import Http404
 from django.core.exceptions import PermissionDenied
 from .models import ChatMessage
+from .config import (
+    INITIAL_MESSAGE_LIMIT, 
+    PAGINATION_MESSAGE_LIMIT, 
+    MAX_FILES_PER_MESSAGE, 
+    MAX_FILE_SIZE_TOTAL
+)
 from attachment.models import MFile
 from tool.models import ChannelOfChat
 from account.models import AUser
@@ -149,7 +155,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 ]
             }
         )
-        await self.fetch_messages()
+        # Initial fetch with limited messages
+        await self.fetch_messages(limit=INITIAL_MESSAGE_LIMIT, direction='initial')
 
 
     async def disconnect(self, close_code):
@@ -178,7 +185,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     @require_login
-    async def fetch_messages(self):
+    async def fetch_messages(self, oldest_cid=None, newest_cid=None, limit=INITIAL_MESSAGE_LIMIT, direction='initial'):
         
         if not self.storage.is_channel_exist(self.channel_cid):
             await self.send(text_data=json.dumps({
@@ -189,22 +196,34 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         @database_sync_to_async
         def get_messages():
-            # try:
             channel = get_object_or_404(ChannelOfChat, urlCode=self.channel_cid)
-            # except Http404:
-            #     return []
-            return list(channel.all_msgs.filter(state='1')[:500])  # Use .all() before slicing
+            queryset = channel.all_msgs.filter(state='1')
+            
+            if direction == 'older' and oldest_cid:
+                # Get messages older than oldest_cid
+                queryset = queryset.filter(urlCode__lt=oldest_cid).order_by('-urlCode')
+            elif direction == 'newer' and newest_cid:
+                # Get messages newer than newest_cid
+                queryset = queryset.filter(urlCode__gt=newest_cid).order_by('urlCode')
+            else:
+                # Initial load - get most recent messages
+                queryset = queryset.order_by('-urlCode')
+            
+            return list(queryset[:limit])
 
         msgs = await get_messages()
         msgs2sent = []
         for msg in msgs:
-            # avatar = await database_sync_to_async(lambda: get_object_or_404(AUser, id=msg.sender.id).avatar)()
             msgs2sent.append(await self.getMessage(msg))
+        
+        # Send appropriate message type based on direction
+        message_type = 'history_message' if direction == 'initial' else 'paginated_messages'
         await self.channel_layer.group_send(
             self.room_channel_name,
             {
-                'type': 'history_message',
-                'messages': msgs2sent
+                'type': message_type,
+                'messages': msgs2sent,
+                'direction': direction
             }
         )
 
@@ -247,8 +266,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @require_login
     async def receive(self, text_data=None, bytes_data=None):
-        MAX_FILES = 10
-        MAX_FILE_SIZE = 512 * 1024 * 1024  # 1024 MB in bytes for TOTAL
 
         text_data_json = json.loads(text_data)
 
@@ -258,10 +275,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if text_data_json.get('command') == 'delete_message':
             await self.delete_message(text_data_json['cid'])
             return
+        if text_data_json.get('command') == 'fetch_more_messages':
+            oldest_cid = text_data_json.get('oldest_cid')
+            newest_cid = text_data_json.get('newest_cid')
+            limit = text_data_json.get('limit', PAGINATION_MESSAGE_LIMIT)
+            direction = text_data_json.get('direction', 'older')
+            await self.fetch_messages(oldest_cid, newest_cid, limit, direction)
+            return
         message = text_data_json['message']
         msg_file_ids = [int(id) for id in message['files']]
         
-        if len(msg_file_ids) > MAX_FILES:
+        if len(msg_file_ids) > MAX_FILES_PER_MESSAGE:
             await self.send(text_data=json.dumps({
                 'type': 'error',
                 'messages': 'Cannot upload more than 10 files.'
@@ -356,6 +380,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'history_message',
             'messages': msgs,
+        }))
+
+    @require_login
+    async def paginated_messages(self, event):
+        msgs = event['messages']
+        direction = event.get('direction', 'older')
+        
+        await self.send(text_data=json.dumps({
+            'type': 'paginated_messages',
+            'messages': msgs,
+            'direction': direction,
         }))
 
     @require_login

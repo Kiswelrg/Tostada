@@ -57,7 +57,7 @@ class ChatMessage(models.Model):
             ('2', 'archived')
         ],
         verbose_name = '''
-        type:
+        state:
         [
             ('0', 'pending'),
             ('1', 'active'),

@@ -1132,7 +1132,7 @@ async function runToolMethod() {
 
 
 <style lang="scss">
-@import "@/styles/global.scss";
+@use "@/styles/global.scss";
 
 :root {
     --m-inputking-height: 53px;
