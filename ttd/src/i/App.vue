@@ -150,7 +150,7 @@ const updateServersOrderOffline = (r, use_old) => {
 
 
 <style lang="scss">
-@import "@/styles/global.scss";
+@use "@/styles/global.scss";
 
 :root {
   --background-floating: color-mix(in oklab, var(--primary-800) 100%, var(--theme-base-color, black) var(--theme-base-color-amount, 0%));

@@ -1,7 +1,7 @@
 <template>
     <div class="message-accessories grid empty:hidden h-fit indent-0 min-h-0 min-w-0 py-[0.125rem] relative">
         <VisualMediaContainer :media-items="visualMedias" v-if="hasImageObject"></VisualMediaContainer>
-        <NonVisualMediaContainer :media-items="nonVisualMedias" v-if="hasNonImageObject"></NonVisualMediaContainer>
+        <NonVisualMediaContainer :media-items="nonVisualMedias" v-if="hasNonImageObject" @attachment-deleted="handleAttachmentDeleted"></NonVisualMediaContainer>
     </div>
 </template>
 
@@ -13,6 +13,12 @@ import { computed } from 'vue'
 const props = defineProps([
     'attachments'
 ])
+
+const emit = defineEmits(['attachment-deleted'])
+
+const handleAttachmentDeleted = (attachmentCID) => {
+    emit('attachment-deleted', attachmentCID)
+}
 
 
 const allowedImgExts = [
