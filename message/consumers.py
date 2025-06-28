@@ -44,12 +44,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # @database_sync_to_async
     async def getMessage(self, msg):
-        avatar =  await database_sync_to_async(lambda: msg.sender.avatar)()
-        msg2sent = {
-            'sender': {
-                'username': msg.sender.username,
+        # Handle deleted users gracefully - must check sender asynchronously
+        sender = await database_sync_to_async(lambda: msg.sender)()
+        if sender is None:
+            sender_info = {
+                'username': 'Account Deleted',
+                'avatar': ''
+            }
+        else:
+            avatar = await database_sync_to_async(lambda: sender.avatar)()
+            sender_info = {
+                'username': sender.username,
                 'avatar': '' if avatar is None or avatar.name == '' else avatar.url
-            },
+            }
+        
+        msg2sent = {
+            'sender': sender_info,
             'mentioned_user': {},
             'tool_used': {},
             'time_sent': msg.time_sent.isoformat(),
@@ -328,7 +338,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         u = self.user
         try:
             # sender = await database_sync_to_async(lambda: ChatMessage.objects.get(urlCode=message_cid).sender.id)()
-            sender = await database_sync_to_async(lambda: get_object_or_404(ChatMessage, urlCode = message_cid).sender.urlCode)()
+            message_obj = await database_sync_to_async(lambda: get_object_or_404(ChatMessage, urlCode = message_cid))()
+            sender = message_obj.sender.urlCode if message_obj.sender else None
         
             # Check if the user is authorized to delete the message
             if sender != u.urlCode and not u.is_superuser:

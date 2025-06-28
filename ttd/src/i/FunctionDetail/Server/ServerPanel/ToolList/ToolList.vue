@@ -47,18 +47,20 @@
                   colorClass="text-interactive-normal"
                   :size="16"
                   class="cursor-pointer mr-1"
-                  @click="showInviteModal = true"
+                  @click="openInviteModal(sub)"
                 />
               </div>
+
+              
               
           </div>
         </div>
     </div>
+    
     <InviteModal 
       :is-open="showInviteModal"
       @close="showInviteModal = false"
-      :server-name="server?.value?.name || 'kiswelrg'"
-      :channel-name="'sff'"
+      :channel-name="currentInviteChannel"
     />
     </div>
 </template>
@@ -71,7 +73,7 @@ import { useWatchOnce } from '@/util/watcher'
 import { jsonWithBigInt } from '@/util/parse'
 import { getCookie } from '@/util/session'
 import InviteModal from '@/components/InviteModal.vue'
-import IconSystem from '@/components/IconSystem.vue';
+import IconSystem from '@/components/IconSystem.vue'
 
 const server = inject('active-server')
 const hashtag_url = '/static/tool/main/chevron-down-solid.svg'
@@ -312,6 +314,13 @@ const submitOrderChange = async (r) => {
 }
 
 const showInviteModal = ref(false)
+const currentInviteChannel = ref('')
+
+// Function to open the invite modal with the selected subsection
+const openInviteModal = (sub) => {
+  currentInviteChannel.value = sub.name
+  showInviteModal.value = true
+}
 
 </script>
 

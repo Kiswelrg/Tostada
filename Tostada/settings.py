@@ -73,7 +73,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'tool.middleware.main.LoginRequireMiddleWare',
 ]
 
 ROOT_URLCONF = 'Tostada.urls'
@@ -183,3 +182,7 @@ ATTACHMENT_KEY = ATTACHMENT_KEY1
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Email Configuration
+EMAIL_SENDER = "3146977024@qq.com"
+EMAIL_AUTH_CODE = "xgnlkkhmjknpdeaf"  # QQ email authorization code

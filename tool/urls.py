@@ -16,4 +16,10 @@ urlpatterns = [
     path('reorderss/', views.reorderServers, name='reorder_server'),
     path('reordersc/', views.reorderServerCategorys, name='reorder_category'),
 	# re_path(r'',views.Home, name = 'home'),
+    
+    # Invitation URLs
+    path('server/<int:server_id>/invitations/', views.get_server_invitations, name='get_server_invitations'),
+    path('server/<int:server_id>/create_invitation/', views.create_invitation, name='create_invitation'),
+    path('invitation/<str:invitation_code>/use/', views.use_invitation, name='use_invitation'),
+    path('invitation/<str:invitation_code>/check/', views.check_invitation, name='check_invitation'),
 ]

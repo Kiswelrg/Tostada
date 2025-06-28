@@ -302,7 +302,9 @@ const isTimeClose = (oldT, newT) => {
 
 
 const isMsgsClose = (oldM, newM) => {
-    return oldM['sender']['username'] === newM['sender']['username'] && isTimeClose(oldM['time_sent'], newM['time_sent'])
+    const oldSender = oldM['sender']?.username || 'Account Deleted'
+    const newSender = newM['sender']?.username || 'Account Deleted'
+    return oldSender === newSender && isTimeClose(oldM['time_sent'], newM['time_sent'])
 }
 
 const isMsgHead = (idx) => {

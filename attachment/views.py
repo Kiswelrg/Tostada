@@ -104,7 +104,7 @@ def delete_msg_attachment(request, attach_cid):
         'type': 'attachment_deleted',
         'message': {}
     }
-    if atm.message.sender == u:
+    if atm.message.sender is not None and atm.message.sender == u:
         atm.delete()
         async_to_sync(channel_layer.group_send)(
             f'chat_{coc.urlCode}',  # Channel name/group

@@ -10,6 +10,7 @@ import os
 from UtilGlobal.validator.FieldFile import imagefile_validator
 from media.models import MediaFileSystemStorage
 from UtilGlobal.image.main import resize_image
+from datetime import timedelta
 
 # Create your models here.
     
@@ -112,3 +113,84 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
         if not old_file == new_file:
             if old_file and os.path.isfile(old_file.path):
                 os.remove(old_file.path)
+
+
+class EmailVerificationCode(models.Model):
+    """Model to store email verification codes"""
+    email = models.EmailField(db_index=True)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+    used_date = models.DateTimeField(null=True, blank=True)
+    
+    @property
+    def is_expired(self):
+        """Check if the verification code has expired (10 minutes)"""
+        return timezone.now() > self.created_at + timedelta(minutes=10)
+    
+    @property
+    def is_valid(self):
+        """Check if the verification code is valid (not used and not expired)"""
+        return not self.is_used and not self.is_expired
+    
+    @classmethod
+    def create_code(cls, email, code):
+        """Create a new verification code with timing restrictions"""
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        now = timezone.now()
+        
+        # Check for existing codes and enforce timing restrictions
+        existing_codes = cls.objects.filter(email=email).order_by('-created_at')
+        
+        if existing_codes.exists():
+            latest_code = existing_codes.first()
+            
+            if latest_code.is_used and latest_code.used_date:
+                # If latest code was used, must wait 1 minute after use
+                time_since_used = now - latest_code.used_date
+                if time_since_used < timedelta(minutes=1):
+                    remaining_seconds = 60 - time_since_used.total_seconds()
+                    raise ValueError(f"请等待 {int(remaining_seconds)} 秒后再发送新验证码")
+            elif not latest_code.is_used:
+                # If latest code is unused, must wait 10 minutes after creation
+                time_since_created = now - latest_code.created_at
+                if time_since_created < timedelta(minutes=10):
+                    remaining_seconds = 600 - time_since_created.total_seconds()
+                    remaining_minutes = int(remaining_seconds / 60)
+                    remaining_secs = int(remaining_seconds % 60)
+                    raise ValueError(f"请等待 {remaining_minutes} 分 {remaining_secs} 秒后再发送新验证码")
+        
+        # Mark any existing unused codes as used (cleanup old codes)
+        cls.objects.filter(email=email, is_used=False).update(is_used=True)
+        
+        # Create new code
+        return cls.objects.create(email=email, code=code)
+    
+    @classmethod
+    def verify_code(cls, email, code):
+        """Verify a code and mark it as used if valid"""
+        from django.utils import timezone
+        
+        try:
+            verification = cls.objects.get(
+                email=email, 
+                code=code, 
+                is_used=False
+            )
+            
+            if verification.is_valid:
+                verification.is_used = True
+                verification.used_date = timezone.now()
+                verification.save()
+                return True
+            return False
+        except cls.DoesNotExist:
+            return False
+    
+    def __str__(self):
+        return f"{self.email} - {self.code}"
+    
+    class Meta:
+        ordering = ['-created_at']

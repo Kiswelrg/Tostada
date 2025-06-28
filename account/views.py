@@ -10,19 +10,20 @@ from django.urls import reverse
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
 
 from UtilGlobal.print import printc
 from UtilGlobal.decorator.view_perm import require_login
-import hashlib
 import json
 import random
 import os
 
 
-from account.models import AUser
+from account.models import AUser, EmailVerificationCode
+from UtilGlobal.email_utils import send_verification_email, generate_verification_code
 # Create your views here.
 
 
@@ -113,7 +114,6 @@ def DoSignIn(request):
         if u and user is not None:
             state = True
             msg = 11
-            request.session['isLoggedIn'] = True
             # request.session['username'] = username
             login(request, user)
         else:
@@ -171,7 +171,6 @@ def DoSignUp(request):
             u.save()
             state = True
             msg = 11
-            request.session['isLoggedIn'] = True
             # request.session['username'] = request.POST['username']
             return HttpResponse(json.dumps({'state': state, 'msg': msg}))
     '''
@@ -190,14 +189,194 @@ def getToken(request):
 
 
 def isLoggedIn(request):
-    if not request.session.has_key('isLoggedIn') or not request.session['isLoggedIn'] or not request.user.is_authenticated:
+    if not request.user.is_authenticated:
         return JsonResponse({'r': 0})
     return JsonResponse({'r': 1})
 
 
+def check_auth(request):
+    """Check if user is authenticated for invitation system"""
+    logged_in = request.user.is_authenticated
+    return JsonResponse({
+        'r': 1 if logged_in else 0,
+        'logged_in': logged_in
+    })
+
+
+def get_csrf_token(request):
+    """Get CSRF token for unauthenticated users"""
+    return JsonResponse({
+        'csrfToken': get_token(request),
+        'r': True
+    })
+
+
+@require_POST
+def simple_login(request):
+    """Simple login endpoint for invitation system"""
+    try:
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        
+        if not username or not password:
+            return JsonResponse({'r': 0, 'error': '用户名和密码不能为空'})
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({'r': 1, 'success': True})
+        else:
+            return JsonResponse({'r': 0, 'error': '用户名或密码不正确'})
+    except Exception as e:
+        return JsonResponse({'r': 0, 'error': '登录时发生错误'})
+
+
+@require_POST
+def send_verification_code(request):
+    """Send email verification code"""
+    try:
+        data = json.loads(request.body)
+        email = data.get('email', '').strip()
+        
+        if not email:
+            return JsonResponse({'success': False, 'error': '请输入邮箱地址'})
+        
+        # Basic email validation
+        if '@' not in email or '.' not in email.split('@')[1]:
+            return JsonResponse({'success': False, 'error': '请输入有效的邮箱地址'})
+        
+        # Check if email is already registered
+        if AUser.objects.filter(email=email).exists():
+            return JsonResponse({'success': False, 'error': '该邮箱已被注册'})
+        
+        # Generate verification code
+        verification_code = generate_verification_code()
+        
+        try:
+            # Save to database with timing restrictions
+            EmailVerificationCode.create_code(email, verification_code)
+        except ValueError as ve:
+            # Timing restriction error
+            return JsonResponse({'success': False, 'error': str(ve)})
+        
+        # Send email
+        if send_verification_email(email, verification_code):
+            return JsonResponse({'success': True, 'message': '验证码已发送到您的邮箱'})
+        else:
+            return JsonResponse({'success': False, 'error': '邮件发送失败，请稍后重试'})
+            
+    except Exception as e:
+        print(f"Send verification code error: {e}")
+        return JsonResponse({'success': False, 'error': '发送验证码时发生错误'})
+
+
+@require_POST
+def register_with_verification(request):
+    """Register user with email verification"""
+    try:
+        data = json.loads(request.body)
+        
+        email = data.get('email', '').strip()
+        password = data.get('password', '')
+        nickname = data.get('nickname', '').strip()
+        verification_code = data.get('verification_code', '')
+        invitation_code = data.get('invitation_code', '').strip()  # Get invitation code
+        
+        if not all([email, password, nickname, verification_code]):
+            return JsonResponse({'success': False, 'error': '请填写所有必填字段'})
+        
+        # Verify email code
+        if not EmailVerificationCode.verify_code(email, verification_code):
+            return JsonResponse({'success': False, 'error': '验证码无效或已过期'})
+        
+        # Check if email is already registered
+        if AUser.objects.filter(email=email).exists():
+            return JsonResponse({'success': False, 'error': '该邮箱已被注册'})
+        
+        # Validate password
+        if len(password) < 6:
+            return JsonResponse({'success': False, 'error': '密码长度至少为6位'})
+        
+        # Validate invitation code if provided
+        invitation = None
+        if invitation_code:
+            from tool.models import InvitationCode
+            try:
+                invitation = InvitationCode.objects.get(code=invitation_code)
+                if invitation.is_expired:
+                    return JsonResponse({'success': False, 'error': '邀请码已过期'})
+                if invitation.max_uses > 0 and invitation.remain_uses <= 0:
+                    return JsonResponse({'success': False, 'error': '邀请码使用次数已用完'})
+            except InvitationCode.DoesNotExist:
+                return JsonResponse({'success': False, 'error': '邀请码无效'})
+        
+        from django.db import transaction
+        
+        try:
+            with transaction.atomic():
+                # Create the user
+                user = AUser.objects.create_user(
+                    username=email,
+                    email=email,
+                    password=password,
+                    first_name=nickname
+                )
+                
+                # If there's a valid invitation, add user to the server
+                if invitation:
+                    from tool.models import UserServerRole, ServerRole
+                    
+                    # Check if user is already a member
+                    if not UserServerRole.objects.filter(user=user.auser, role__server=invitation.server).exists():
+                        # Get the default role (usually "everyone" role)
+                        default_role = ServerRole.objects.filter(
+                            server=invitation.server,
+                            name__iexact="everyone"
+                        ).first()
+                        
+                        if not default_role:
+                            # If no "everyone" role, get the first available role
+                            default_role = ServerRole.objects.filter(server=invitation.server).first()
+                        
+                        if default_role:
+                            # Create membership through UserServerRole
+                            UserServerRole.objects.create(
+                                user=user.auser,
+                                role=default_role
+                            )
+                            
+                            # Update invitation usage
+                            if invitation.max_uses > 0 and invitation.remain_uses > 0:
+                                invitation.remain_uses -= 1
+                                invitation.save()
+                        else:
+                            # No role found for server
+                            raise ValueError(f"No default role found for server {invitation.server.name}")
+                
+                # Log the user in
+                authenticated_user = authenticate(request, username=email, password=password)
+                login(request, authenticated_user)
+                
+                return JsonResponse({'success': True})
+                
+        except Exception as e:
+            print(f"User creation/server join error: {e}")
+            # More specific error handling
+            if 'UNIQUE constraint failed' in str(e) or 'already exists' in str(e).lower():
+                return JsonResponse({'success': False, 'error': '该邮箱已被注册'})
+            elif 'CHECK constraint failed: remain_uses' in str(e):
+                return JsonResponse({'success': False, 'error': '邀请链接使用次数已用完'})
+            elif 'role' in str(e).lower() or 'server' in str(e).lower():
+                return JsonResponse({'success': False, 'error': '加入服务器失败，请稍后重试'})
+            else:
+                return JsonResponse({'success': False, 'error': '创建账户失败，请稍后重试'})
+            
+    except Exception as e:
+        print(f"Registration error: {e}")
+        return JsonResponse({'success': False, 'error': '注册时发生错误'})
+
+
 def DoLogOut(request):
-    if request.session.has_key('isLoggedIn'):
-        del request.session['isLoggedIn']
     if request.session.has_key('username'):
         del request.session['username']
     logout(request)
@@ -205,8 +384,6 @@ def DoLogOut(request):
 
 
 def LogOut(request):
-    if request.session.has_key('isLoggedIn'):
-        del request.session['isLoggedIn']
     if request.session.has_key('username'):
         del request.session['username']
     logout(request)

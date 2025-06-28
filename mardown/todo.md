@@ -57,6 +57,15 @@
 |user|`timeout` user|||
 |user|`ban` user|||
 |user|`kick` user|||
+|server|invite management|create/delete/track invite codes usage||✅|
+|msg|edit message|allow users to edit their own messages||
+|msg|search|search messages within channels/servers||
+|server|settings|server settings management UI||
+|channel|settings|channel settings and permissions UI||
+|user|profile|user profile customization and bio||
+|notification|system|real-time notifications for mentions/DMs||
+|server|discovery|public server browsing/discovery feature||
+|role|management|role creation and permission management UI||
 
 
 

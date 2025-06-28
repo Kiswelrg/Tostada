@@ -17,7 +17,7 @@
                     class="header overflow-hidden relative leading-[1.375rem] text-[hsl( 214 calc( 1 * 8.1%) 61.2% / 1)] whitespace-break-spaces">
                     <span class="messageUsername mr-1">
                         <span
-                              class="username text-base leading-[1.375rem] font-medium text-[hsl( 220 calc( 1 * 13%) 95.5% / 1)] inline align-baseline relative overflow-hidden">{{ props.msg.sender.username }}
+                              class="username text-base leading-[1.375rem] font-medium text-[hsl( 220 calc( 1 * 13%) 95.5% / 1)] inline align-baseline relative overflow-hidden">{{ props.msg.sender?.username || 'Account Deleted' }}
                         </span>
                     </span>
                     <div
@@ -102,7 +102,7 @@ const backend_url = () => {
 }
 
 const userAvatarUrl = computed(() => {
-    if (props.msg.sender === undefined || props.msg.sender.avatar == '' || props.msg.sender.avatar == '#') return '/static/tool/main/user-solid.svg'
+    if (!props.msg.sender || props.msg.sender.avatar == '' || props.msg.sender.avatar == '#') return '/static/tool/main/user-solid.svg'
     return props.msg.sender.avatar + '?size=128'
 })
 

@@ -21,6 +21,8 @@ import { ref, computed } from 'vue';
 import PlusIcon from '@/components/icons/PlusIcon.vue';
 import CircleIcon from '@/components/icons/CircleIcon.vue';
 // Add more icons as needed
+import ToggleCrossIcon from '@/components/icons/ToggleCrossIcon.vue';
+import ToggleCheckIcon from '@/components/icons/ToggleCheckIcon.vue';
 import InviteIcon from '@/components/icons/InviteIcon.vue';
 import SearchIcon from '@/components/icons/SearchIcon.vue';
 import CloseIcon from '@/components/icons/CloseIcon.vue';
@@ -57,7 +59,9 @@ const iconMap = {
   'invite': InviteIcon,
   'search': SearchIcon,
   'close': CloseIcon,
-  'chevron-down': ChevronDownIcon
+  'chevron-down': ChevronDownIcon,
+  'toggle-check': ToggleCheckIcon,
+  'toggle-cross': ToggleCrossIcon,
   // Add more mappings as needed
 };
 

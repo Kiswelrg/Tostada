@@ -26,6 +26,12 @@ const routes = [
     children: toolRoutes
   },
   {
+    path: "/invitation/:code", // 邀请链接
+    name: "invitation",
+    component: () => import("@/components/Invitation/InvitationLanding.vue"),
+    props: true
+  },
+  {
     path: "/:unknownPath(.*)", // 未知路径
     name: "404",
     component: NotFound

@@ -408,6 +408,7 @@ class ToolInChannelOfChat(models.Model):
     def __str__(self) -> str:
         return f"{self.display_name.replace(' ', '_')} in {self.channel.name}"
 
+
 class ChannelOfVoice(Channel):
     urlCode = models.PositiveBigIntegerField(
         default=getToolChannelSnowflakeID, unique=True, db_index=True, primary_key=True)
@@ -538,5 +539,100 @@ class UserChannelOfVoiceRole(models.Model):
     def __str__(self) -> str:
         return f"{self.user} in .. 服务器: {self.tool.server} .. 工具: {self.tool.name} .. 角色: {self.role.name}"
     
+
+class InvitationCode(models.Model):
+    server = models.ForeignKey(
+        Server,
+        on_delete=models.CASCADE,
+        related_name='invitation_codes',
+        to_field='urlCode'
+    )
+    user_created = models.ForeignKey(
+        'account.AUser',
+        on_delete=models.CASCADE,
+        related_name='created_invitations'
+    )
+    created_at = models.DateTimeField(default=timezone.now)
+    valid_duration_minutes = models.PositiveIntegerField(default=10080)  # Default 24*7 hours, 0 means never expires
+    max_uses = models.PositiveIntegerField(default=0)  # Default 0 means unlimited uses
+    remain_uses = models.PositiveIntegerField(default=0)  # Default 0 means unlimited uses
+    code = models.CharField(max_length=32, unique=True, db_index=True)
+    
+    def __str__(self) -> str:
+        max_uses_display = "∞" if self.max_uses == 0 else str(self.max_uses)
+        remain_uses_display = "∞" if self.remain_uses == 0 else str(self.remain_uses)
+        return f"Invitation to {self.server.name} by {self.user_created} ({remain_uses_display}/{max_uses_display})"
+    
+    @property
+    def is_expired(self):
+        # If remain_uses is 0 (unlimited) or greater than 0, not expired due to uses
+        if self.remain_uses == 0 or self.remain_uses > 0:
+            # If valid_duration_minutes is 0, it never expires
+            if self.valid_duration_minutes == 0:
+                return False
+            # Otherwise check if it's expired due to time
+            expiry_time = self.created_at + timezone.timedelta(minutes=self.valid_duration_minutes)
+            return timezone.now() > expiry_time
+        # If remain_uses is less than 0, it's expired (though this shouldn't happen)
+        return True
+    
+    @property
+    def expiry_time(self):
+        if self.valid_duration_minutes == 0:
+            return None  # Never expires
+        return self.created_at + timezone.timedelta(minutes=self.valid_duration_minutes)
+
+    @property
+    def is_permanent(self):
+        """Check if this is a permanent invitation (never expires and unlimited uses)"""
+        return self.valid_duration_minutes == 0 and self.max_uses == 0
+    
+    @classmethod
+    def create_invitation(cls, server, user, duration_minutes=10080, max_uses=0):
+        """
+        Create a new invitation code for a server.
+        
+        Args:
+            server (Server): The server to create an invitation for
+            user (AUser): The user creating the invitation
+            duration_minutes (int): Duration in minutes the invitation will be valid, 0 means never expires
+            max_uses (int): Maximum number of times the invitation can be used, 0 means unlimited
+            
+        Returns:
+            InvitationCode: The created invitation code object
+        """
+        from .util.model import generate_invitation_code
+        
+        # Check if user has permission to create invites
+        user_roles = UserServerRole.objects.filter(user=user, role__server=server)
+        if not user_roles.exists():
+            raise PermissionError("User does not have permission to create invitations for this server")
+            
+        has_permission = False
+        for user_role in user_roles:
+            if user_role.role.auth_value & AuthBits['Create Invite'] > 0 or user_role.role.auth_value & AuthBits['Administrator'] > 0:
+                has_permission = True
+                break
+                
+        if not has_permission and server.owner != user:
+            raise PermissionError("User does not have permission to create invitations for this server")
+        
+        # Determine if this is a permanent invitation (never expires and unlimited uses)
+        is_permanent = duration_minutes == 0 and max_uses == 0
+        
+        # Create the invitation code with appropriate length and complexity
+        code = generate_invitation_code(length=10 if is_permanent else 8, require_complex=True)
+        
+        invitation = cls(
+            server=server,
+            user_created=user,
+            valid_duration_minutes=duration_minutes,
+            max_uses=max_uses,
+            remain_uses=max_uses,
+            code=code
+        )
+        invitation.save()
+        return invitation
+
 
 

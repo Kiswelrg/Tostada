@@ -140,7 +140,7 @@
                     <label
                       for="exampleFormControlInput4"
                       class="form-label inline-block mb-2 text-gray-700 text-sm"
-                      >账号</label
+                      >账号/邮箱</label
                     >
                     <div class="relative">
                       <input
@@ -167,8 +167,7 @@
                         type="text"
                         id="username"
                         name="username"
-                        pattern="[a-zA-Z0-9 ]+"
-                        placeholder="账号"
+                        placeholder="账号或邮箱"
                         autocomplete="nope"
                         v-model="username"
                       />
@@ -370,7 +369,7 @@ async function signIn() {
       varification_correct.value = true;
       pwd_validity.value = true;
       console.log("登陆成功");
-      router.push({name: 'tool-root'});
+      router.push({name: 'tool'});
     } else {
       console.log(r);
       switch (r["msg"]) {
