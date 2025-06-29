@@ -2,14 +2,14 @@ import fs from 'fs';
 import path from 'path';
 
 /**
- * Unregisters an icon from IconSystem and removes the component file
- * @param {string} iconName - Name of the icon in IconSystem (kebab-case)
+ * Unregisters an icon from iconRegistry and removes the component file
+ * @param {string} iconName - Name of the icon in iconRegistry (kebab-case)
  * @param {string} componentName - Name of the component (PascalCase)
  * @returns {Object} Result of the operation
  */
 export function unregisterIcon(iconName, componentName) {
   try {
-    const iconSystemPath = path.resolve('./src/components/IconSystem.vue');
+    const iconRegistryPath = path.resolve('./src/components/icons/iconRegistry.js');
     const componentPath = path.resolve('./src/components/icons', `${componentName}.vue`);
     
     // Check if the component file exists
@@ -18,35 +18,35 @@ export function unregisterIcon(iconName, componentName) {
       return { success: false, error: 'Component file not found' };
     }
     
-    // Read IconSystem.vue content
-    let iconSystemContent = fs.readFileSync(iconSystemPath, 'utf8');
+    // Read iconRegistry.js content
+    let iconRegistryContent = fs.readFileSync(iconRegistryPath, 'utf8');
     
     // Check if the icon is registered in iconMap
     const iconMapRegex = new RegExp(`'${iconName}':\\s*${componentName},?`);
-    if (!iconMapRegex.test(iconSystemContent)) {
-      console.error(`❌ Icon '${iconName}' is not registered in IconSystem`);
-      return { success: false, error: 'Icon not registered in IconSystem' };
+    if (!iconMapRegex.test(iconRegistryContent)) {
+      console.error(`❌ Icon '${iconName}' is not registered in icon registry`);
+      return { success: false, error: 'Icon not registered in icon registry' };
     }
     
     // Remove from iconMap
-    iconSystemContent = iconSystemContent.replace(
+    iconRegistryContent = iconRegistryContent.replace(
       new RegExp(`\\s*'${iconName}':\\s*${componentName},?`), 
       ''
     );
     
     // Clean up trailing commas in iconMap if needed
-    iconSystemContent = iconSystemContent.replace(
+    iconRegistryContent = iconRegistryContent.replace(
       /,(\s*\/\/ Add more mappings as needed)/g, 
       '$1'
     );
     
     // Remove import statement
-    const importRegex = new RegExp(`\\s*import\\s+${componentName}\\s+from\\s+['"]@/components/icons/${componentName}\\.vue['"];?`);
-    iconSystemContent = iconSystemContent.replace(importRegex, '');
+    const importRegex = new RegExp(`\\s*import\\s+${componentName}\\s+from\\s+['"]\\./${componentName}\\.vue['"];?`);
+    iconRegistryContent = iconRegistryContent.replace(importRegex, '');
     
     // Write updated content back to file
-    fs.writeFileSync(iconSystemPath, iconSystemContent);
-    console.log(`✅ Unregistered icon '${iconName}' from IconSystem`);
+    fs.writeFileSync(iconRegistryPath, iconRegistryContent);
+    console.log(`✅ Unregistered icon '${iconName}' from icon registry`);
     
     // Delete the component file
     fs.unlinkSync(componentPath);

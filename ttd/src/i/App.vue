@@ -1,13 +1,14 @@
 <template>
   <div class="main flex flex-row grow h-full w-full min-h-[250px]">
-    <FunctionList :functionList="functionList" 
+    <FunctionList v-if="!isDevRoute" :functionList="functionList" 
     @updateServerList="fetchServers" 
     @updateServerListOffline="updateServersOrderOffline" 
     @update-active-server-tab="onUpdateActiveServerTab" 
     @go-tab="onGoTab"></FunctionList>
-    <MeVue v-if="isMeActive"></MeVue>
+    <router-view v-if="isDevRoute" class="flex-1 overflow-auto"></router-view>
+    <MeVue v-else-if="isMeActive"></MeVue>
     <ServerVue v-else :server="activeServer"></ServerVue>
-    <LayerB ref="layerB"></LayerB>
+    <LayerB v-if="!isDevRoute" ref="layerB"></LayerB>
   </div>
 </template>
 
@@ -29,6 +30,10 @@ const activeServerTab = ref(BigInt(-1));
 const isMeActive = ref(true);
 const route = useRoute();
 const router = useRouter();
+
+const isDevRoute = computed(() => {
+  return route.path && route.path.includes('/dev/');
+});
 const originalServers = ref([])
 const orderedServers = computed(() => {
   if (!originalServers.value || originalServers.value === undefined || originalServers.value.length === 0) return []

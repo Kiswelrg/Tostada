@@ -1,12 +1,12 @@
 # SVG Conversion Utilities
 
-This directory contains utilities for converting SVG files to Vue components and registering them in the IconSystem.
+This directory contains utilities for converting SVG files to Vue components and registering them in the icon registry system.
 
 ## Available Scripts
 
 ### `npm run convert-svg <path> [componentName] [iconName]`
 
-Converts a single SVG file to a Vue component and registers it in the IconSystem.
+Converts a single SVG file to a Vue component and registers it in the icon registry.
 
 ```bash
 # Example: Convert an SVG file
@@ -15,7 +15,7 @@ npm run convert-svg ./public/static/tool/ToolList/Invite.svg InviteIcon invite
 
 ### `npm run convert-invite`
 
-Converts the Invite.svg file to a Vue component and registers it in the IconSystem.
+Converts the Invite.svg file to a Vue component and registers it in the icon registry.
 
 ```bash
 # Example: Convert the Invite.svg file
@@ -24,7 +24,7 @@ npm run convert-invite
 
 ### `npm run convert-all`
 
-Converts all SVG files in the public/static/tool directory to Vue components and registers them in the IconSystem.
+Converts all SVG files in the public/static/tool directory to Vue components and registers them in the icon registry.
 
 ```bash
 # Example: Convert all SVG files
@@ -34,7 +34,7 @@ npm run convert-all
 ## How It Works
 
 1. The `svgToComponent.js` utility converts an SVG string to a Vue component template.
-2. The `convertSvg.js` utility reads an SVG file, converts it to a Vue component, and registers it in the IconSystem.
+2. The `convertSvg.js` utility reads an SVG file, converts it to a Vue component, and registers it in the icon registry.
 3. The `convertInviteIcon.js` utility is a specific script for converting the Invite.svg file.
 4. The `convertAllIcons.js` utility recursively finds all SVG files in a directory and converts them to Vue components.
 
@@ -45,7 +45,7 @@ If you prefer to manually convert an SVG file:
 1. Open the SVG file in a text editor
 2. Create a new Vue component in the `src/components/icons` directory
 3. Copy the SVG path data into the component
-4. Update the IconSystem.vue file to import and register the new icon
+4. Update the `src/components/icons/iconRegistry.js` file to import and register the new icon
 
 ## Example
 
@@ -74,14 +74,14 @@ defineProps({
 </script>
 ```
 
-Then update the IconSystem.vue file:
+Then update the `iconRegistry.js` file:
 
 ```js
-// In IconSystem.vue
-import MyIcon from '@/components/icons/MyIcon.vue';
+// In src/components/icons/iconRegistry.js
+import MyIcon from './MyIcon.vue';
 
 // Add to iconMap
-const iconMap = {
+export const iconMap = {
   // existing icons...
   'my-icon': MyIcon,
 };

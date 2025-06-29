@@ -21,9 +21,9 @@ export async function convertAndRegisterSvg(svgPath, componentName, iconName) {
     fs.writeFileSync(outputPath, vueComponent);
     console.log(`✅ Created Vue component: ${outputPath}`);
     
-    // 4. Update IconSystem.vue to register the new icon
-    updateIconSystem(componentName, iconName);
-    console.log(`✅ Registered icon '${iconName}' in IconSystem`);
+    // 4. Update iconRegistry.js to register the new icon
+    updateIconRegistry(componentName, iconName);
+    console.log(`✅ Registered icon '${iconName}' in icon registry`);
     
     return { success: true, componentPath: outputPath };
   } catch (error) {
@@ -33,51 +33,50 @@ export async function convertAndRegisterSvg(svgPath, componentName, iconName) {
 }
 
 /**
- * Updates IconSystem.vue to register a new icon
+ * Updates iconRegistry.js to register a new icon
  * @param {string} componentName - Name of the component (PascalCase)
- * @param {string} iconName - Name for the icon in IconSystem (kebab-case)
+ * @param {string} iconName - Name for the icon in iconRegistry (kebab-case)
  */
-function updateIconSystem(componentName, iconName) {
-  const iconSystemPath = path.resolve('./src/components/IconSystem.vue');
-  let iconSystemContent = fs.readFileSync(iconSystemPath, 'utf8');
+function updateIconRegistry(componentName, iconName) {
+  const iconRegistryPath = path.resolve('./src/components/icons/iconRegistry.js');
+  let iconRegistryContent = fs.readFileSync(iconRegistryPath, 'utf8');
   
   // Check if the icon is already registered
-  if (iconSystemContent.includes(`'${iconName}':`)) {
-    console.log(`⚠️ Icon '${iconName}' is already registered in IconSystem`);
+  if (iconRegistryContent.includes(`'${iconName}':`)) {
+    console.log(`⚠️ Icon '${iconName}' is already registered in icon registry`);
     return;
   }
   
-  // Add import statement
-  const importStatement = `import ${componentName} from '@/components/icons/${componentName}.vue';`;
-  const importRegex = /\/\/ Import all icon components directly[\s\S]*?\/\/ Add more icons as needed/;
-  iconSystemContent = iconSystemContent.replace(
-    importRegex, 
-    match => `${match}\nimport ${componentName} from '@/components/icons/${componentName}.vue';`
-  );
+  // Add import statement at the top
+  const importStatement = `import ${componentName} from './${componentName}.vue';`;
+  const importSection = iconRegistryContent.match(/(\/\/ Import all icon components[\s\S]*?)(?=\n\n|\/\/ Central icon registry)/);
   
-  // Add to iconMap - ensure proper comma placement
-  const iconMapRegex = /const iconMap = \{[\s\S]*?([\s\S]*?)\/\/ Add more mappings as needed/;
-  iconSystemContent = iconSystemContent.replace(
-    iconMapRegex,
-    (match, capturedContent) => {
-      // Find the last entry without a trailing comma
-      const lastEntry = capturedContent.trim().split('\n').pop().trim();
-      
-      // If the last entry doesn't end with a comma, add one
-      // if (!lastEntry.endsWith(',')) {
-      return match.replace(
-        lastEntry + '\n  // Add more mappings as needed',
-        lastEntry + `${lastEntry.endsWith(',') ? '' : ','}\n  \'${iconName}\': ${componentName},\n  // Add more mappings as needed`
+  if (importSection) {
+    iconRegistryContent = iconRegistryContent.replace(
+      importSection[1],
+      `${importSection[1]}\n${importStatement}`
+    );
+  } else {
+    // Add import after the last import statement
+    const lastImportMatch = iconRegistryContent.match(/import\s+\w+\s+from\s+['"]\.\/.+\.vue['"];/g);
+    if (lastImportMatch) {
+      const lastImport = lastImportMatch[lastImportMatch.length - 1];
+      iconRegistryContent = iconRegistryContent.replace(
+        lastImport,
+        `${lastImport}\n${importStatement}`
       );
-      // } else {
-      //   // If it already has a comma, just add the new entry
-      //   return `${match}\n  '${iconName}': ${componentName},`;
-      // }
     }
+  }
+  
+  // Add to iconMap - find the position just before the closing brace and comment
+  const iconMapRegex = /(export const iconMap = \{[\s\S]*?)(  \/\/ Add more mappings as needed[\s\S]*?\};)/;
+  iconRegistryContent = iconRegistryContent.replace(
+    iconMapRegex,
+    `$1  '${iconName}': ${componentName},\n$2`
   );
   
   // Write updated content back to file
-  fs.writeFileSync(iconSystemPath, iconSystemContent);
+  fs.writeFileSync(iconRegistryPath, iconRegistryContent);
 }
 
 /**

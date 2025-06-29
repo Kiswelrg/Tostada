@@ -17,16 +17,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 
-// Import all icon components directly
-import PlusIcon from '@/components/icons/PlusIcon.vue';
-import CircleIcon from '@/components/icons/CircleIcon.vue';
-// Add more icons as needed
-import ToggleCrossIcon from '@/components/icons/ToggleCrossIcon.vue';
-import ToggleCheckIcon from '@/components/icons/ToggleCheckIcon.vue';
-import InviteIcon from '@/components/icons/InviteIcon.vue';
-import SearchIcon from '@/components/icons/SearchIcon.vue';
-import CloseIcon from '@/components/icons/CloseIcon.vue';
-import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue';
+// Import icon registry
+import { iconMap } from '@/components/icons/iconRegistry.js';
 const wrapper = ref(null);
 
 const props = defineProps({
@@ -52,23 +44,14 @@ const props = defineProps({
   }
 });
 
-// Map of icon names to components
-const iconMap = {
-  'plus': PlusIcon,
-  'circle': CircleIcon,
-  'invite': InviteIcon,
-  'search': SearchIcon,
-  'close': CloseIcon,
-  'chevron-down': ChevronDownIcon,
-  'toggle-check': ToggleCheckIcon,
-  'toggle-cross': ToggleCrossIcon,
-  // Add more mappings as needed
-};
+// iconMap is imported from iconRegistry.js
 
 // Get the icon component based on the name
 const iconComponent = computed(() => {
   return iconMap[props.name] || null;
 });
+
+// Note: iconMap is available for internal use only
 
 
 </script>

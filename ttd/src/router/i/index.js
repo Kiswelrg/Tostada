@@ -16,4 +16,14 @@ const toolRoutes = [
   },
 ];
 
+// Add dev-only routes in development mode
+if (import.meta.env.DEV) {
+  toolRoutes.push({
+    path: "dev/icon-gallery",
+    name: "dev-icon-gallery", 
+    meta: {isMeActive: false},
+    component: () => import("@/i/DevTools/IconGallery.vue")
+  });
+}
+
 export default toolRoutes;

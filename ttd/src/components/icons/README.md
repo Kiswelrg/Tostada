@@ -70,12 +70,19 @@ const iconMap = {
 };
 ```
 
+```bash
+# Automatic Registration:
+npm run convert-svg path/to/icon.svg IconName icon-name ✅
+npm run convert-all ✅
+npm run unregister-icon icon-name ComponentName ✅
+```
+
 ## Using the Conversion Utility
 
 Alternatively, you can use the conversion utility to automatically create and register a new icon:
 
 ```bash
-node src/utils/convertSvg.js path/to/icon.svg icon-name
+node src/utils/convertSvg.js path/to/icon.svg IconName
 ```
 
 5. Import and register the new icon in `IconSystem.vue`
