@@ -15,12 +15,18 @@ const msgDisplay = computed(() => {
 })
 
 const msgText = computed(() => {
+    if (!props.msgItem) return ''
+    
     let res = ''
-    if (!props.msgItem || !props.msgItem['text_display']) 
-        res = props.msgItem['content'].slice(0,30) + (props.msgItem['content'].length > 30 ? '...' : '')
-    else
+    if (!props.msgItem['text_display'] && props.msgItem['url']) {
+        res = props.msgItem['url'].slice(0,30) + (props.msgItem['url'].length > 30 ? '...' : '')
+    } else if (props.msgItem['text_display']) {
         res = props.msgItem['text_display']
-    return `${import.meta.env.VITE_BACKEND_URL}${res}`
+    } else if (props.msgItem['content']) {
+        // Fallback to content if url/text_display not available
+        res = props.msgItem['content']
+    }
+    return res.startsWith('http') ? res : `${import.meta.env.VITE_BACKEND_URL}${res}`
 })
 
 const msgFSize = computed(() => {
@@ -29,8 +35,10 @@ const msgFSize = computed(() => {
 })
 
 const msgURL = computed(() => {
-    if (!props.msgItem || !('content' in props.msgItem)) return '#'
-    return `${import.meta.env.VITE_BACKEND_URL}${props.msgItem['content']}`
+    if (!props.msgItem) return '#'
+    
+    const url = props.msgItem['url'] || props.msgItem['content'] || '#'
+    return url.startsWith('http') ? url : `${import.meta.env.VITE_BACKEND_URL}${url}`
 })
 
 </script>

@@ -21,7 +21,12 @@
             </div>
         </div>
 
-        <ToolBarTR />
+        <ToolBarTR 
+            ref="toolBarTRRef"
+            :tool-detail="toolDetail"
+            @search-results="handleSearchResults"
+            @search-cleared="handleSearchCleared"
+            @search-focused="handleSearchFocused" />
     </div>
 </template>
 
@@ -29,9 +34,43 @@
 import { ref } from 'vue'
 import ToolBarTR from '@/i/Global/ToolBarTR/ToolBarTR.vue'
 const hashtag_url = '/static/tool/main/hashtag-solid.svg'
+const toolBarTRRef = ref(null)
 const props = defineProps({
     title: String,
-    intro: String
+    intro: String,
+    toolDetail: Object
+})
+
+const emit = defineEmits(['search-results', 'search-cleared', 'search-focused'])
+
+const handleSearchResults = (searchData) => {
+    emit('search-results', searchData)
+}
+
+const handleSearchCleared = () => {
+    emit('search-cleared')
+}
+
+const handleSearchFocused = () => {
+    emit('search-focused')
+}
+
+// Expose the performSearch method to parent components
+const performSearch = async (query, page = 1) => {
+    if (toolBarTRRef.value && toolBarTRRef.value.performSearch) {
+        await toolBarTRRef.value.performSearch(query, page)
+    }
+}
+
+const setPreventClearOnBlur = () => {
+    if (toolBarTRRef.value && toolBarTRRef.value.setPreventClearOnBlur) {
+        toolBarTRRef.value.setPreventClearOnBlur()
+    }
+}
+
+defineExpose({
+    performSearch,
+    setPreventClearOnBlur
 })
 
 </script>

@@ -49,7 +49,7 @@ class AUser(User):
     # sex = models.CharField(default='2',max_length = 2,choices = {('0', '男'),('1', '女'),('2', '0b01')})
     age = models.PositiveSmallIntegerField(default=None,blank=True,null=True)
     info = models.FileField(default=None,blank=True,null=True)
-    additional = models.JSONField(default=None, blank=True, null=True)
+    additional = models.JSONField(default=dict, null=False)
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='', validators=[imagefile_validator], storage=MediaFileSystemStorage)
     avatar = models.ImageField(upload_to=avatar_dir_path, blank=True, default='',validators=[imagefile_validator], storage=MediaFileSystemStorage)
     scaled_avatar = models.ImageField(upload_to=scaled_avatar_dir_path, blank=True, default='',validators=[imagefile_validator], storage=MediaFileSystemStorage)

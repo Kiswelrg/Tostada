@@ -35,7 +35,7 @@
                 <div
                     class="message-content pl-[72px] -ml-[72px] select-text overflow-hidden relative indent-0 text-base leading-[1.375rem] whitespace-break-spaces break-words text-[color:hsl( 210 calc( 1 * 9.1%) 87.1% / 1)]  font-light">
                     
-                    <component v-for="content in msg.contents" :is="tabs[content['type']]" :msg-item="{'type':content['type'],'content':content.content}" class="text-3s"></component>
+                    <component v-for="content in getContentsBlock(msg.contents)" :is="tabs[content['type']]" :msg-item="content" class="text-3s"></component>
 
                     <Edited v-if="msg['is_edited']['state']" :is-edited="msg['is_edited']"></Edited>
                 </div>
@@ -167,6 +167,11 @@ const openMsgMenu = (e, cid) => {
 
 const temp_attach = (msg) => {
     return msg.attachments.map(a => `name: ${a.name}, url: ${import.meta.env.VITE_BACKEND_URL}${a.url}`)
+}
+
+const getContentsBlock = (contents) => {
+    // Only handle new format with version and block structure
+    return contents?.block || []
 }
 
 </script>

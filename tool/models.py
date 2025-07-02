@@ -123,7 +123,7 @@ class Server(models.Model):
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='', validators=[imagefile_validator], storage=MediaFileSystemStorage)
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='', validators=[imagefile_validator], storage=MediaFileSystemStorage)
     scaled_logo = models.ImageField(upload_to=scaled_logo_dir_path, blank=True, default='', validators=[imagefile_validator], storage=MediaFileSystemStorage)
-    additional = models.JSONField(default=getDefaultAdditional, blank=True, null=True)
+    additional = models.JSONField(default=getDefaultAdditional, null=False)
 
     def __str__(self) -> str:
         return self.name
@@ -278,7 +278,7 @@ class Channel(models.Model):
     )
     cover = models.ImageField(upload_to=cover_dir_path, blank=True, default='')
     logo = models.ImageField(upload_to=logo_dir_path, blank=True, default='')
-    additional = models.JSONField(default=getDefaultAdditional, null=True, blank = True)
+    additional = models.JSONField(default=getDefaultAdditional, null=False)
 
     def __str__(self) -> str:
         return f"{self.name} in {self.server}"
@@ -386,9 +386,9 @@ class ChannelOfChat(Channel):
     server = models.ForeignKey(
         Server, on_delete=models.CASCADE, related_name='channelofchats', to_field='urlCode', null=True)
     is_dm = models.BooleanField(default=False)
-    method_names = models.JSONField(default=EmptyJson, blank = True)
-    inputs = models.JSONField(default=EmptyJson, null=True, blank = True)
-    outputs = models.JSONField(default=EmptyJson, null=True, blank = True)
+    method_names = models.JSONField(default=EmptyJson, null=False)
+    inputs = models.JSONField(default=EmptyJson, null=False)
+    outputs = models.JSONField(default=EmptyJson, null=False)
 
     class Meta:
         ordering = ['urlCode']
@@ -400,9 +400,9 @@ class ToolInChannelOfChat(models.Model):
     function_name = models.CharField(max_length=64)
     description = models.TextField(blank = True)
     urlCode = models.PositiveBigIntegerField(default=getToolSnowflakeID, unique=True, db_index=True, primary_key=True)
-    params = models.JSONField(default=EmptyJson)
-    res = models.JSONField(default=EmptyJson)
-    data = models.JSONField(default=EmptyJson, blank=True)
+    params = models.JSONField(default=EmptyJson, null=False)
+    res = models.JSONField(default=EmptyJson, null=False)
+    data = models.JSONField(default=EmptyJson, null=False)
     date_created = models.DateTimeField(default=timezone.now)
 
     def __str__(self) -> str:
@@ -421,8 +421,8 @@ class ChannelOfVoice(Channel):
     )
     server = models.ForeignKey(
         Server, on_delete=models.CASCADE, related_name='channelofvoices', to_field='urlCode', null=True)
-    method_names = models.JSONField(default=EmptyJson, blank = True)
-    bots = models.JSONField(default=EmptyJson, null=True, blank = True)
+    method_names = models.JSONField(default=EmptyJson, null=False)
+    bots = models.JSONField(default=EmptyJson, null=False)
 
 
 class AuthorizationLevel(models.Model):

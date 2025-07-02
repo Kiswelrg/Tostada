@@ -31,6 +31,7 @@ urlpatterns = [
     re_path(r'^(?:api/)?account/', include('account.urls', namespace = 'account')),
     re_path(r'^(?:api/)?attachment/', include('attachment.urls', namespace = 'attachment')),
     re_path(r'^(?:api/)?media/', include('media.urls', namespace = 'media')),
+    re_path(r'^(?:api/)?messages/', include('message.urls', namespace = 'message')),
     path('favicon.svg', lambda request: HttpResponseRedirect('/static/favicon.svg')),
     path('favicon.ico', lambda request: HttpResponseRedirect('/static/favicon.svg')),
 

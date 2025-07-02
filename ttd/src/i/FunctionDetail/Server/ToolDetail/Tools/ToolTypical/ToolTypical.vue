@@ -1,50 +1,73 @@
 <template>
     <div class="tooltypical z-[2] flex flex-col justify-between h-full w-full text-white">
 
-        <div class="toolbody flex flex-col flex-1 overflow-y-auto w-full">
-            <ToolHead :title="toolDetail?.name" :intro="toolDetail?.description" class="flex-none" />
-            <div class="belly flex-1 flex flex-col justify-end w-full overflow-auto">
-                <div class="belly-detail w-full h-fit overflow-y-scroll pb-3" ref="belly" @scroll="onBellyScroll">
-                    <Welcome :tool-detail="props.toolDetail"></Welcome>
-                    <div class="introduction hidden">
-                        <div class="introwrapper flex flex-col items-left text-left">
-                            <div v-if="!intro?.length"
-                                class="paragraph px-2 py-1 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
-                                Another option you have is choosing the number of syllables in the words you speak. You
-                                probably have never considered this option before, but you have it every time you open
-                                your mouth and speak. You make so many choices like this that you never even think
-                                about, but you have the choice with each one. What are you going to do with this
-                                knowledge?
-                            </div>
-                            <div v-for="ito in filtered_intro" :key="ito"
-                                class="paragraph px-4 py-4 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
-                                <div v-for="content in ito.content" :key="content">{{ content }}</div>
+        <div>
+            <ToolHead 
+                ref="toolHeadRef"
+                :title="toolDetail?.name" 
+                :intro="toolDetail?.description" 
+                :tool-detail="toolDetail"
+                @search-results="handleSearchResults"
+                @search-cleared="handleSearchCleared"
+                @search-focused="handleSearchFocused"
+                class="flex-none" />
+        </div>
+
+        <div class="toolbody flex flex-1 overflow-hidden w-full">
+            <!-- Main chat area -->
+            <div class="chat-area flex flex-col flex-1 overflow-y-auto w-full">
+                <div class="belly flex-1 flex flex-col justify-end w-full overflow-auto">
+                    <div class="belly-detail w-full h-fit overflow-y-scroll pb-3" ref="belly" @scroll="onBellyScroll">
+                        <Welcome :tool-detail="props.toolDetail"></Welcome>
+                        <div class="introduction hidden">
+                            <div class="introwrapper flex flex-col items-left text-left">
+                                <div v-if="!intro?.length"
+                                    class="paragraph px-2 py-1 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
+                                    Another option you have is choosing the number of syllables in the words you speak. You
+                                    probably have never considered this option before, but you have it every time you open
+                                    your mouth and speak. You make so many choices like this that you never even think
+                                    about, but you have the choice with each one. What are you going to do with this
+                                    knowledge?
+                                </div>
+                                <div v-for="ito in filtered_intro" :key="ito"
+                                    class="paragraph px-4 py-4 bg-[#2d2d2d] rounded-md mx-2 text-1s my-1">
+                                    <div v-for="content in ito.content" :key="content">{{ content }}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="toolmenu"></div>
-                    <div class="chat">
-                        <div class="chat-wrapper text-left">
-                            <div class="scroller">
-                                <div class="scroller-content">
-                                    <ol class="messages-container">
+                        <div class="toolmenu"></div>
+                        <div class="chat">
+                            <div class="chat-wrapper text-left">
+                                <div class="scroller">
+                                    <div class="scroller-content">
+                                        <ol class="messages-container">
 
-                                        <Message v-for="m in messagedIntro" v-bind:key="m.id" :msg="m" @attachment-deleted="handleAttachmentDeleted"></Message>
-                                        <Message v-for="(m, idx) in sortedMessages" :is-group-head="isMsgHead(idx)"
-                                            v-bind:key="m.id" :msg="m" @attachment-deleted="handleAttachmentDeleted"></Message>
-                                    </ol>
+                                            <Message v-for="m in messagedIntro" v-bind:key="m.id" :msg="m" @attachment-deleted="handleAttachmentDeleted"></Message>
+                                            <Message v-for="(m, idx) in sortedMessages" :is-group-head="isMsgHead(idx)"
+                                                v-bind:key="m.id" :msg="m" @attachment-deleted="handleAttachmentDeleted"></Message>
+                                        </ol>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="w-full h-1 block hidden"></div>
+
+                <InputKing class="flex-none" :tool-detail="toolDetail" :chat-socket="chatSocket" @add-message="onAddMessage"
+                    :input-bar-info="inputBarInfo" />
             </div>
 
-            <div class="w-full h-1 block hidden"></div>
+            <!-- Search results area -->
+            <div v-if="showSearchResults" class="search-area w-96 flex-shrink-0 border-l border-[#404249]">
+                <SearchResults 
+                    :search-data="searchData"
+                    :tool-detail="toolDetail"
+                    @jump-to-message="handleJumpToMessage"
+                    @page-change="handlePageChange" />
+            </div>
         </div>
-
-        <InputKing class="flex-none" :tool-detail="toolDetail" :chat-socket="chatSocket" @add-message="onAddMessage"
-            :input-bar-info="inputBarInfo" />
     </div>
 
 </template>
@@ -53,6 +76,7 @@
 import InputKing from '@/i/Global/InputKing/InputKing.vue'
 import ToolHead from '../../ToolHead/ToolHead.vue'
 import Welcome from '../../Welcome/Welcome.vue'
+import SearchResults from './SearchResults.vue'
 import { ref, computed, watch, inject, nextTick } from 'vue'
 import Message from '../../Components/Message/Message.vue'
 import { useWatchOnce } from '@/util/watcher'
@@ -62,6 +86,15 @@ const chatSocket = inject('chat-socket')
 const layerB = inject('layer-b')
 const belly = ref()
 const scrollInfo = ref({})
+const showSearchResults = ref(false)
+const searchData = ref({
+    query: '',
+    results: [],
+    totalCount: 0,
+    currentPage: 1,
+    totalPages: 0
+})
+const toolHeadRef = ref(null)
 const reconnectAttempts = ref(0)
 const props = defineProps([
     'tool-detail',
@@ -135,8 +168,10 @@ const messagedIntro = computed(() => {
                     'state': false,
                     'text': 'edited'
                 },
-                // 'contents': {'type':'text','content':ito.content.join('\n')},
-                'contents': ito.content.join('\n'),
+                'contents': {
+                    'version': '0.10.0',
+                    'block': [{'type': 'text', 'content': ito.content.join('\n')}]
+                },
                 'isGroupHead': i == 0 ? true : false,
                 'avatar_src': '/static/@me/1F955.svg'
             })
@@ -233,6 +268,53 @@ const handleAttachmentDeleted = (attachmentCID, messageCID) => {
 const handleAttachmentDeletedWS = (attachmentCID, messageCID) => {
     // Handle WebSocket-based attachment deletion (for real-time updates from other users)
     handleAttachmentDeleted(attachmentCID, messageCID)
+}
+
+const handleSearchResults = (data) => {
+    searchData.value = data
+    // Show search results area when we have search data
+    showSearchResults.value = true
+}
+
+const handleSearchCleared = () => {
+    showSearchResults.value = false
+    searchData.value = {
+        query: '',
+        results: [],
+        totalCount: 0,
+        currentPage: 1,
+        totalPages: 0
+    }
+}
+
+const handleSearchFocused = () => {
+    // Show search area with previous results if we have any
+    if (searchData.value.results.length > 0) {
+        showSearchResults.value = true
+    }
+}
+
+const handlePageChange = async (page) => {
+    // Use the proper component reference to trigger search for specific page
+    if (toolHeadRef.value && toolHeadRef.value.performSearch) {
+        await toolHeadRef.value.performSearch(searchData.value.query, page)
+    }
+}
+
+const handleJumpToMessage = (messageResult) => {
+    // Find the message in the current messages array and scroll to it
+    const messageElement = document.querySelector(`[data-message-id="${messageResult.id}"]`)
+    if (messageElement) {
+        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        // Optionally highlight the message
+        messageElement.classList.add('highlight-message')
+        setTimeout(() => {
+            messageElement.classList.remove('highlight-message')
+        }, 3000)
+    } else {
+        // If message is not in current view, we might need to load it
+        console.log('Message not found in current view, might need to load:', messageResult)
+    }
 }
 
 
@@ -347,14 +429,6 @@ const connect = (url, tool) => {
             // messages.value.push.apply(messages.value, cur);
             if (!messages.value.includes(cur))
                 messages.value = [...messages.value, ...cur]
-            // if (scrollInfo.value !== undefined) {
-            //     if (scrollInfo.value[0] === 2) {
-            //         nextTick(()=>{
-            //             // console.log('messages updated, now scroll', scrollInfo.value)
-            //             belly.value.scrollTop = belly.value.scrollHeight - belly.value.clientHeight;
-            //         })
-            //     }
-            // }
         } else if (data['type'] == 'attachment_deleted') {
             console.log('attachment deletion:', data)
             // Handle WebSocket attachment deletion
@@ -504,5 +578,9 @@ const inputBarInfo = computed(() => {
 .buttonlist-shadow {
     --elevation-stroke: 0 0 0 1px hsl(0 calc(1 * 0%) 0.8% / 0.15);
     box-shadow: var(--elevation-stroke);
+}
+
+.highlight-message {
+    @apply bg-yellow-400 bg-opacity-20 transition-colors duration-300;
 }
 </style>
