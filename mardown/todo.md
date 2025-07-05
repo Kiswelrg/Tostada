@@ -66,6 +66,7 @@
 |notification|system|real-time notifications for mentions/DMs||
 |server|discovery|public server browsing/discovery feature||
 |role|management|role creation and permission management UI||
+|msg|attachment cleanup|check single attachment/image deletion - delete whole message if attachment is only content||
 
 
 
